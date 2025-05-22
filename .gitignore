@@ -1,0 +1,9 @@
+*.agdai
+*.aux
+*.out
+*.ptb
+*.log
+*.bbl
+*.blg
+*.toc
+*.sty

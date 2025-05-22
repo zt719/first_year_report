@@ -1,0 +1,21 @@
+\documentclass{report}
+
+\input{preamble}
+
+\begin{document}
+
+\tableofcontents
+
+\input{latex/cover}
+\input{latex/introduction}
+
+% Include sections modularly
+%\input{sections/01_introduction}
+%\input{sections/02_methods}
+
+% Bibliography
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliographystyle{acm}
+\bibliography{references/bibliography}
+
+\end{document}
