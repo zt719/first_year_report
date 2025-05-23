@@ -3,11 +3,20 @@
 \usepackage{amssymb}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage[colorlinks=true, citecolor=blue]{hyperref}
+\usepackage{xcolor}
+\usepackage{fullpage}
+\usepackage{hyperref}
 
-% Images Path
-\graphicspath{ {./images/} }
+% Graphics Path
+\graphicspath{ {./graphics/} }
 
 % Declaring Unicode Symbols
 \DeclareUnicodeCharacter{2115}{\ensuremath{\mathbb{N}}}
 \DeclareUnicodeCharacter{2261}{\ensuremath{\equiv}}
+
+% Customizing Hyperlink Color
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    citecolor=black,
+}

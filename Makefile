@@ -1,9 +1,6 @@
-AGDA_DIR := agda
-AGDA_TEX := introduction.tex prerequisites.tex
-
 .PHONY: all clean
 
-main: $(AGDA_TEX)
+all:
 	pdflatex main.tex
 	bibtex main.aux
 	pdflatex main.tex

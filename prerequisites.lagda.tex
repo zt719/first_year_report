@@ -1,7 +1,16 @@
 \chapter{Prerequisites}
 
 \begin{code}
-  module Prerequisites where
+module Prerequisites where
+
+open import Relation.Binary.PropositionalEquality
+
+data ℕ : Set where
+  zero : ℕ
+  suc  : ℕ → ℕ
+
+proof : zero ≡ zero
+proof = refl
 \end{code}
 
 \section{Type Theory}

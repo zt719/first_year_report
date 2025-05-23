@@ -1,71 +1,7 @@
 \chapter{Introduction}
 
-\begin{code}%
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Relation.Binary.PropositionalEquality}\<%
-\end{code}
+\section{Background and Motivation}
 
-\section{Natural Numbers}
-First, we define the type of natural numbers inductively:
+\section{Aims and Objectives}
 
-\begin{code}%
-\>[0]\AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaInductiveConstructor{zero}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-%
-\>[2]\AgdaInductiveConstructor{suc}%
-\>[7]\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\end{code}
-
-Here, \AgdaDatatype{ℕ} is the type of natural numbers, with two constructors:
-\begin{itemize}
-  \item \AgdaInductiveConstructor{zero} represents 0.
-  \item \AgdaInductiveConstructor{suc} represents the successor function (i.e., $n+1$).
-\end{itemize}
-
-\section{Addition}
-Next, we define addition recursively:
-
-\begin{code}%
-\>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}+\AgdaUnderscore{}}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaInductiveConstructor{zero}%
-\>[6]\AgdaOperator{\AgdaFunction{+}}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{n}\<%
-\\
-\>[0]\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaBound{m}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{+}}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{m}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{+}}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSymbol{)}\<%
-\end{code}
-
-This definition states:
-\begin{itemize}
-  \item \AgdaSymbol{0 + n = n} (base case).
-  \item \AgdaSymbol{(m + 1) + n = (m + n) + 1} (recursive case).
-\end{itemize}
+\section{Overwiew of the Report}

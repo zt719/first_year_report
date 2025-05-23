@@ -1,35 +1,7 @@
 \chapter{Introduction}
 
-\begin{code}
-open import Relation.Binary.PropositionalEquality  
-\end{code}
+\section{Background and Motivation}
 
-\section{Natural Numbers}
-First, we define the type of natural numbers inductively:
+\section{Aims and Objectives}
 
-\begin{code}
-data ℕ : Set where
-  zero : ℕ
-  suc  : ℕ → ℕ
-\end{code}
-
-Here, \AgdaDatatype{ℕ} is the type of natural numbers, with two constructors:
-\begin{itemize}
-  \item \AgdaInductiveConstructor{zero} represents 0.
-  \item \AgdaInductiveConstructor{suc} represents the successor function (i.e., $n+1$).
-\end{itemize}
-
-\section{Addition}
-Next, we define addition recursively:
-
-\begin{code}
-_+_ : ℕ → ℕ → ℕ
-zero  + n = n
-suc m + n = suc (m + n)
-\end{code}
-
-This definition states:
-\begin{itemize}
-  \item \AgdaSymbol{0 + n = n} (base case).
-  \item \AgdaSymbol{(m + 1) + n = (m + n) + 1} (recursive case).
-\end{itemize}
+\section{Overwiew of the Report}
