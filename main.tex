@@ -1,17 +1,45 @@
 \documentclass{report}
 
+% Preamble
 \input{preamble}
 
 \begin{document}
 
+% Title Page
+\begin{titlepage}
+    \centering
+    
+    \includegraphics[width=0.5\textwidth]{nottingham-logo.png} \\[1.5cm]
+    
+    {\huge \textbf{My Report!}} \\[0.5cm]
+    {\huge First year review report} \\[2cm]
+    
+    {\huge \textbf{Zhili Tian}} \\[0.3cm]
+    {\large Supervised by Prof. Thorsten Altenkich} \\ [0.3cm]
+    {\large \& Prof. Ulrik Buchholtz} \\[1.5cm]
+
+    {\large Funtional Programming Lab} \\[0.3cm]    
+    {\large School of Computer Science} \\[0.3cm]
+    {\large University of Nottingham} \\[2cm]
+    
+    {\large \today}
+    
+    \vfill
+\end{titlepage}
+
+% Abstract
+\input{abstract}
+
+% Contents Table
 \tableofcontents
 
-\input{latex/cover}
+% Main Body
 \input{latex/introduction}
-
-% Include sections modularly
-%\input{sections/01_introduction}
-%\input{sections/02_methods}
+\input{latex/prerequisites}
+\input{latex/research}
+\input{latex/conclusions}
+\input{latex/workplan}
+\input{latex/appendix}
 
 % Bibliography
 \addcontentsline{toc}{chapter}{Bibliography}

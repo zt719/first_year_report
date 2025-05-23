@@ -1,12 +1,4 @@
-% Abstract
-
-\addcontentsline{toc}{chapter}{Abstract}
-
-\begin{abstract}
-
-Giving a short overview of the work in your project.\cite{ABBOTT20053}
-
-\end{abstract}
+\chapter{Introduction}
 
 \begin{code}%
 \>[0]\AgdaKeyword{open}\AgdaSpace{}%
@@ -77,53 +69,3 @@ This definition states:
   \item \AgdaSymbol{0 + n = n} (base case).
   \item \AgdaSymbol{(m + 1) + n = (m + n) + 1} (recursive case).
 \end{itemize}
-
-\section{A Simple Proof}
-We now prove that \AgdaSymbol{2 + 2 = 4}. First, we define the numbers:
-
-\begin{code}%
-\>[0]\AgdaFunction{two}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaFunction{two}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{four}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaFunction{four}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSymbol{)))}\<%
-\end{code}
-
-Now, the proof reduces by computation:
-
-\begin{code}%
-\>[0]\AgdaFunction{proof}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{two}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{+}}\AgdaSpace{}%
-\AgdaFunction{two}\AgdaSpace{}%
-\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
-\AgdaFunction{four}\<%
-\\
-\>[0]\AgdaFunction{proof}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{refl}\<%
-\end{code}
-
-Since Agda's definitional equality handles reduction, \AgdaFunction{refl} suffices.
-
-\section{Conclusion}
-This example shows how Agda and LaTeX can be combined for formal proofs in papers. The full output is rendered with syntax highlighting.

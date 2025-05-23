@@ -1,6 +1,9 @@
+AGDA_DIR := agda
+AGDA_TEX := introduction.tex prerequisites.tex
+
 .PHONY: all clean
 
-main: *.tex
+main: $(AGDA_TEX)
 	pdflatex main.tex
 	bibtex main.aux
 	pdflatex main.tex
@@ -10,4 +13,4 @@ main: *.tex
 	agda --latex $<
 
 clean:
-	rm *.agdai *.aux *.log *.ptb *.out
+	rm *.aux *.out *.log *.ptb *.bbl *.blg *.toc *dvi
