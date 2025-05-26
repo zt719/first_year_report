@@ -7,19 +7,21 @@ One fundamental feature of programming languages is their type system, which all
 Here is a piece of agda code:
 
 \begin{code}[hide]%
+\>[0]\AgdaKeyword{module}\AgdaSpace{}%
+\AgdaModule{Introduction}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
 \>[0]\AgdaKeyword{open}\AgdaSpace{}%
 \AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Data.Nat}\<%
+\AgdaModule{Data.Nat}\AgdaSpace{}%
+\AgdaKeyword{public}\<%
 \end{code}
+
+\texttt{This is code}
 
 \AgdaTarget{List}
 \AgdaTarget{[]}
 \AgdaTarget{∷, \_∷\_}
-\AgdaTarget{++, \_++\_}
-\AgdaTarget{BTree}
-\AgdaTarget{leaf}
-\AgdaTarget{node}
-\AgdaTarget{flatten}
 \begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{List}\AgdaSpace{}%
@@ -46,9 +48,10 @@ Here is a piece of agda code:
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{List}\AgdaSpace{}%
 \AgdaBound{X}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+\AgdaTarget{++, \_++\_}
+\begin{code}%
 \>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}++\AgdaUnderscore{}}}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
@@ -81,9 +84,12 @@ Here is a piece of agda code:
 \AgdaSymbol{(}\AgdaBound{xs}\AgdaSpace{}%
 \AgdaOperator{\AgdaFunction{++}}\AgdaSpace{}%
 \AgdaBound{ys}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+\AgdaTarget{BTree}
+\AgdaTarget{leaf}
+\AgdaTarget{node}
+\begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{BTree}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
@@ -112,9 +118,10 @@ Here is a piece of agda code:
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{BTree}\AgdaSpace{}%
 \AgdaBound{X}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+\AgdaTarget{flatten}
+\begin{code}%
 \>[0]\AgdaFunction{flatten}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%

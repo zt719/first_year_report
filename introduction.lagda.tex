@@ -8,31 +8,37 @@ Here is a piece of agda code:
 
 \begin{code}[hide]
 module Introduction where
-
+  
 open import Data.Nat public
 \end{code}
 
 \AgdaTarget{List}
 \AgdaTarget{[]}
 \AgdaTarget{∷, \_∷\_}
-\AgdaTarget{++, \_++\_}
-\AgdaTarget{BTree}
-\AgdaTarget{leaf}
-\AgdaTarget{node}
-\AgdaTarget{flatten}
 \begin{code}
 data List (X : Set) : Set where
   []  : List X
   _∷_ : X → List X → List X  
+\end{code}
 
+\AgdaTarget{++, \_++\_}
+\begin{code}
 _++_ : {X : Set} → List X → List X → List X
 [] ++ ys = ys
 (x ∷ xs) ++ ys = x ∷ (xs ++ ys)
+\end{code}
 
+\AgdaTarget{BTree}
+\AgdaTarget{leaf}
+\AgdaTarget{node}
+\begin{code}
 data BTree (X : Set) : Set where
   leaf : BTree X
   node : BTree X → X → BTree X → BTree X
+\end{code}
 
+\AgdaTarget{flatten}
+\begin{code}
 flatten : {X : Set} → BTree X → List X
 flatten leaf = []
 flatten (node lt x rt) = flatten lt ++ (x ∷ flatten rt)
