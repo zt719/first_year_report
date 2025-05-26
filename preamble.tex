@@ -1,22 +1,17 @@
-\usepackage{agda}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage[utf8]{inputenc}
+\usepackage{unicode-math}
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{fullpage}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
+\usepackage[links]{agda}
+
+% Font
+\setmathfont{XITS Math}
 
 % Graphics Path
 \graphicspath{ {./graphics/} }
 
 % Declaring Unicode Symbols
-\DeclareUnicodeCharacter{2115}{\ensuremath{\mathbb{N}}}
-\DeclareUnicodeCharacter{2261}{\ensuremath{\equiv}}
-
-% Customizing Hyperlink Color
-\hypersetup{
-    colorlinks=true,
-    linkcolor=black,
-    citecolor=black,
-}
+\usepackage{newunicodechar}
+\newunicodechar{∷}{\ensuremath{\mathrel{\symbol{"2237}}}}
+\newunicodechar{ℕ}{\ensuremath{\mathrel{\symbol{"2115}}}}
+\newunicodechar{≡}{\ensuremath{\mathrel{\symbol{"2261}}}}

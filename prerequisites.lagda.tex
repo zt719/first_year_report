@@ -1,14 +1,13 @@
 \chapter{Prerequisites}
 
-\begin{code}
+\begin{code}[hide]
 module Prerequisites where
 
+open import Introduction
 open import Relation.Binary.PropositionalEquality
+\end{code}
 
-data ℕ : Set where
-  zero : ℕ
-  suc  : ℕ → ℕ
-
+\begin{code}
 proof : zero ≡ zero
 proof = refl
 \end{code}

@@ -2,6 +2,43 @@
 
 \section{Background and Motivation}
 
+One fundamental feature of programming languages is their type system, which allows classification of values and prevents potential type errors. Concrete examples of types include \textit{unit}, \textit{boolean}, \textit{natural number}, etc. Additionally, there is bigger class of types which enable the construction of higher-kinded types by parameterizing over other types, such as \textit{list}, \textit{binary tree}, \textit{maybe}, etc.
+
+Here is a piece of agda code:
+
+\begin{code}[hide]
+module Introduction where
+
+open import Data.Nat public
+\end{code}
+
+\AgdaTarget{List}
+\AgdaTarget{[]}
+\AgdaTarget{∷, \_∷\_}
+\AgdaTarget{++, \_++\_}
+\AgdaTarget{BTree}
+\AgdaTarget{leaf}
+\AgdaTarget{node}
+\AgdaTarget{flatten}
+\begin{code}
+data List (X : Set) : Set where
+  []  : List X
+  _∷_ : X → List X → List X  
+
+_++_ : {X : Set} → List X → List X → List X
+[] ++ ys = ys
+(x ∷ xs) ++ ys = x ∷ (xs ++ ys)
+
+data BTree (X : Set) : Set where
+  leaf : BTree X
+  node : BTree X → X → BTree X → BTree X
+
+flatten : {X : Set} → BTree X → List X
+flatten leaf = []
+flatten (node lt x rt) = flatten lt ++ (x ∷ flatten rt)
+\end{code}
+
 \section{Aims and Objectives}
 
-\section{Overwiew of the Report}
+\section{Overview of the Report}
+

@@ -1,10 +1,9 @@
 .PHONY: all clean
 
 all:
-	pdflatex main.tex
+	lualatex main.tex
 	bibtex main.aux
-	pdflatex main.tex
-	pdflatex main.tex
+	lualatex main.tex
 
 %.tex: %.lagda.tex
 	agda --latex $<
