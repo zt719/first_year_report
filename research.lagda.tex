@@ -4,14 +4,50 @@
 
 \section{Topics Studied}
 
+\section{Type Theory}
+
 \subsection{Inductive Types}
+
+We now give a definition of inductive types. An inductive type \AgdaDatatype{T} is given by a finite number of constructors \AgdaInductiveConstructor{cᵢ}:
+
+\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{T}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set}\AgdaSpace{}%
+\AgdaKeyword{where}%
+
+\AgdaIndent{0}%
+\AgdaInductiveConstructor{c₀}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{A₀}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{A₁}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+...
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{T}%
+
+\AgdaIndent{0}%
+\AgdaInductiveConstructor{c₁}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{A₀}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{A₁}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+...
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{T}%
+
+such that there should also be corresponding elimination rule and computation rule.
+
+It means \AgdaDatatype{Bool}, \AgdaDatatype{ℕ}, \AgdaDatatype{List}, \AgdaDatatype{BTree} are all inductive types.
+
+\subsection{Category Theory}
 
 \subsection{Containers}
 
 \subsection{Higher Functoriality}
 
 \subsection{Higher Containers}
-
-\subsection{Category with Family}
 
 \section{Questions}

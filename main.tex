@@ -1,43 +1,21 @@
 \documentclass{report}
 
 % Preamble
-\input{preamble}
+\input{latex/preamble}
 
 \begin{document}
 
 % Title Page
-\begin{titlepage}
-    \centering
-    
-    \includegraphics[width=0.7\textwidth]{nottingham-logo.png} \\[1.5cm]
-    
-    {\huge \textbf{My Report!}} \\[0.5cm]
-    {\large First year review report} \\[1.0cm]
-    
-    {\large \textbf{Zhili Tian}} \\[0.2cm]
-    {\large Supervised by Prof. Thorsten Altenkirch} \\ [0.2cm]
-    {\large \& Prof. Ulrik Buchholtz} \\[2.0cm]
-
-    \includegraphics[width=0.7\textwidth]{fplab-title7.png} \\[0.5cm]
-
-    {\large Functional Programming Lab} \\[0.2cm]    
-    {\large School of Computer Science} \\[0.2cm]
-    {\large University of Nottingham} \\[1.0cm]
-    
-    {\large \today}
-    
-    \vfill
-\end{titlepage}
+\input{latex/titlepage}
 
 % Abstract
-\input{abstract}
+\input{latex/abstract}
 
 % Contents Table
 \tableofcontents
 
 % Main Body
 \input{latex/introduction}
-\input{latex/prerequisites}
 \input{latex/research}
 \input{latex/future}
 \input{latex/conclusions}
