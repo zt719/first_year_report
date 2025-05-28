@@ -2,49 +2,75 @@
 
 \section{Background and Motivation}
 
-One fundamental feature of programming languages is their type system, which allows classification of values and prevents potential type errors. Concrete examples of types include \textit{unit}, \textit{boolean}, \textit{natural number}, etc. Additionally, there is bigger class of types which enable the construction of higher-kinded types by parameterizing over other types, such as \textit{list}, \textit{binary tree}, \textit{maybe}, etc.
+The concept of types is one of the most important features in most modern programming languages. It is introduced to classify variables and functions, enabling more meaningful and readable codes as well as ensuring type correctness. Types such as \textit{boolean}, \textit{natural number}, \textit{list}, \textit{binary tree}, etc. are massively used in everyday programming.
 
-Here is a piece of agda code:
+We can even classify types according to their "types", aka the \textbf{kind}. To continue the previous example, Boolean and integer are stand-alone types and we say \textit{'true' is term of boolean} directly. In contrast, list and binary tree are higher-kinded types (or parameterized datatypes as they need to be parameterized by other types), and we say \textit{'[1,2,3]' is a term of list of natural numbers}.
 
-\begin{code}[hide]
-module Introduction where
-  
-open import Data.Nat public
-\end{code}
+It is usually more interesting to work on higher-kinded types parameterized by an arbitrary type X instead of a concrete type, which has led to the emergence of \textbf{(parametric) polymorphism}. The \AgdaFunction{flatten} function, as the last step of tree sorting algorthm, which converts binary tree to list is a typical example such polymorphic functions, cause there is no special constraints upon the internal type X.
 
-\AgdaTarget{List}
-\AgdaTarget{[]}
-\AgdaTarget{∷, \_∷\_}
+We use \textbf{Agda}, a dependently typed functional programming language, in the rest of the report. Here is a piece of agda code that illustrates all the concepts - simple types, higher-kinded types, and polymorphic functions as discussed before:
+
 \begin{code}
+data Bool : Set where
+  false true : Bool
+
+data ℕ : Set where
+  zero : ℕ
+  suc  : ℕ → ℕ
+
 data List (X : Set) : Set where
   []  : List X
-  _∷_ : X → List X → List X  
-\end{code}
+  _∷_ : X → List X → List X
 
-\AgdaTarget{++, \_++\_}
-\begin{code}
 _++_ : {X : Set} → List X → List X → List X
 [] ++ ys = ys
 (x ∷ xs) ++ ys = x ∷ (xs ++ ys)
-\end{code}
 
-\AgdaTarget{BTree}
-\AgdaTarget{leaf}
-\AgdaTarget{node}
-\begin{code}
 data BTree (X : Set) : Set where
   leaf : BTree X
   node : BTree X → X → BTree X → BTree X
-\end{code}
 
-\AgdaTarget{flatten}
-\begin{code}
 flatten : {X : Set} → BTree X → List X
 flatten leaf = []
 flatten (node lt x rt) = flatten lt ++ (x ∷ flatten rt)
 \end{code}
 
+However, not all types are well-behaved in our language. Here is a typical counterexample:
+
+\begin{code}
+{-# NO_POSITIVITY_CHECK #-}
+data Λ : Set where
+  lam : (Λ → Λ) → Λ
+
+app : Λ → Λ → Λ
+app (lam f) x = f x
+
+self-app : Λ
+self-app = lam (λ x → app x x)
+
+Ω : Λ
+Ω = app self-app self-app
+\end{code}
+
+The \AgdaFunction{Ω} represents the famous non-terminating λ-term \texttt{(λx.x x)(λx.x x)} which reduces to itself infinitely. It is valid in untyped λ-calculus but not typable in simply-typed λ-calculus. 
+
 \section{Aims and Objectives}
 
+Using the language of \textbf{Type Theory} and adopting the semantics of \textbf{Category Theory}, we wish to achieve the following objectives:
+
+\begin{itemize}
+  \item{To develop the syntax and semantics of \textbf{Higher(-Kinded) Functors} and their natural transformations, which capture the definition of higher types and higher polymorphic functions}
+  \item{To develop the syntax and semantics of \textbf{Higher(-Kinded) Containers} and their morphisms, which should give rise higher functors and their natural transformations}
+  \item{To show higher container model is simply-typed category with family}
+  \item{...}
+\end{itemize}
+
 \section{Overview of the Report}
+
+In the rest of report, I will cover:
+\begin{itemize}
+  \item{Section 2 - Prerequisites: General background knowleagde of this report. We introduce type theory, category theory.}
+  \item{Section 3 - Conducted Research: Literature review, and topics studied. We introduce inductive types, containers, category with families, hereditary substitution.}
+  \item{Section 4 - Future Work Plan: Our future plan!}
+\end{itemize}
 

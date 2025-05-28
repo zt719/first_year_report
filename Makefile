@@ -2,8 +2,8 @@
 
 all:
 	lualatex main.tex
-	bibtex main.aux
-	lualatex main.tex
+	# bibtex main.aux
+	# lualatex main.tex
 
 %.tex: %.lagda.tex
 	agda --latex $<

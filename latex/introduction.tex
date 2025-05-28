@@ -2,27 +2,49 @@
 
 \section{Background and Motivation}
 
-One fundamental feature of programming languages is their type system, which allows classification of values and prevents potential type errors. Concrete examples of types include \textit{unit}, \textit{boolean}, \textit{natural number}, etc. Additionally, there is bigger class of types which enable the construction of higher-kinded types by parameterizing over other types, such as \textit{list}, \textit{binary tree}, \textit{maybe}, etc.
+The concept of types is one of the most important features in most modern programming languages. It is introduced to classify variables and functions, enabling more meaningful and readable codes as well as ensuring type correctness. Types such as \textit{boolean}, \textit{natural number}, \textit{list}, \textit{binary tree}, etc. are massively used in everyday programming.
 
-Here is a piece of agda code:
+We can even classify types according to their "types", aka the \textbf{kind}. To continue the previous example, Boolean and integer are stand-alone types and we say \textit{'true' is term of boolean} directly. In contrast, list and binary tree are higher-kinded types (or parameterized datatypes as they need to be parameterized by other types), and we say \textit{'[1,2,3]' is a term of list of natural numbers}.
 
-\begin{code}[hide]%
-\>[0]\AgdaKeyword{module}\AgdaSpace{}%
-\AgdaModule{Introduction}\AgdaSpace{}%
+It is usually more interesting to work on higher-kinded types parameterized by an arbitrary type X instead of a concrete type, which has led to the emergence of \textbf{(parametric) polymorphism}. The \AgdaFunction{flatten} function, as the last step of tree sorting algorthm, which converts binary tree to list is a typical example such polymorphic functions, cause there is no special constraints upon the internal type X.
+
+We use \textbf{Agda}, a dependently typed functional programming language, in the rest of the report. Here is a piece of agda code that illustrates all the concepts - simple types, higher-kinded types, and polymorphic functions as discussed before:
+
+\begin{code}%
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{Bool}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set}\AgdaSpace{}%
 \AgdaKeyword{where}\<%
 \\
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Data.Nat}\AgdaSpace{}%
-\AgdaKeyword{public}\<%
-\end{code}
-
-\texttt{This is code}
-
-\AgdaTarget{List}
-\AgdaTarget{[]}
-\AgdaTarget{∷, \_∷\_}
-\begin{code}%
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaInductiveConstructor{false}\AgdaSpace{}%
+\AgdaInductiveConstructor{true}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{Bool}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\<%
+\\
+%
+\>[2]\AgdaInductiveConstructor{suc}%
+\>[7]\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{List}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
@@ -48,10 +70,9 @@ Here is a piece of agda code:
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{List}\AgdaSpace{}%
 \AgdaBound{X}\<%
-\end{code}
-
-\AgdaTarget{++, \_++\_}
-\begin{code}%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}++\AgdaUnderscore{}}}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
@@ -84,12 +105,9 @@ Here is a piece of agda code:
 \AgdaSymbol{(}\AgdaBound{xs}\AgdaSpace{}%
 \AgdaOperator{\AgdaFunction{++}}\AgdaSpace{}%
 \AgdaBound{ys}\AgdaSymbol{)}\<%
-\end{code}
-
-\AgdaTarget{BTree}
-\AgdaTarget{leaf}
-\AgdaTarget{node}
-\begin{code}%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{BTree}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
@@ -118,10 +136,9 @@ Here is a piece of agda code:
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{BTree}\AgdaSpace{}%
 \AgdaBound{X}\<%
-\end{code}
-
-\AgdaTarget{flatten}
-\begin{code}%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaFunction{flatten}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
@@ -154,7 +171,94 @@ Here is a piece of agda code:
 \AgdaBound{rt}\AgdaSymbol{)}\<%
 \end{code}
 
+However, not all types are well-behaved in our language. Here is a typical counterexample:
+
+\begin{code}%
+\>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
+\AgdaKeyword{NO\AgdaUnderscore{}POSITIVITY\AgdaUnderscore{}CHECK}\AgdaSpace{}%
+\AgdaSymbol{\#-\}}\<%
+\\
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{Λ}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaInductiveConstructor{lam}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaDatatype{Λ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Λ}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Λ}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaFunction{app}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{Λ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Λ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Λ}\<%
+\\
+\>[0]\AgdaFunction{app}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{lam}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaBound{x}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaFunction{self-app}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{Λ}\<%
+\\
+\>[0]\AgdaFunction{self-app}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{lam}\AgdaSpace{}%
+\AgdaSymbol{(λ}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{app}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSymbol{)}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaFunction{Ω}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{Λ}\<%
+\\
+\>[0]\AgdaFunction{Ω}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{app}\AgdaSpace{}%
+\AgdaFunction{self-app}\AgdaSpace{}%
+\AgdaFunction{self-app}\<%
+\end{code}
+
+The \AgdaFunction{Ω} represents the famous non-terminating λ-term \texttt{(λx.x x)(λx.x x)} which reduces to itself infinitely. It is valid in untyped λ-calculus but not typable in simply-typed λ-calculus. 
+
 \section{Aims and Objectives}
 
+Using the language of \textbf{Type Theory} and adopting the semantics of \textbf{Category Theory}, we wish to achieve the following objectives:
+
+\begin{itemize}
+  \item{To develop the syntax and semantics of \textbf{Higher(-Kinded) Functors} and their natural transformations, which capture the definition of higher types and higher polymorphic functions}
+  \item{To develop the syntax and semantics of \textbf{Higher(-Kinded) Containers} and their morphisms, which should give rise higher functors and their natural transformations}
+  \item{To show higher container model is simply-typed category with family}
+  \item{...}
+\end{itemize}
+
 \section{Overview of the Report}
+
+In the rest of report, I will cover:
+\begin{itemize}
+  \item{Section 2 - Prerequisites: General background knowleagde of this report. We introduce type theory, category theory.}
+  \item{Section 3 - Conducted Research: Literature review, and topics studied. We introduce inductive types, containers, category with families, hereditary substitution.}
+  \item{Section 4 - Future Work Plan: Our future plan!}
+\end{itemize}
 
