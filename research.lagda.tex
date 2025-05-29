@@ -2,11 +2,19 @@
 
 In this section, we introduce basic concepts of type theory and category theory, as well as background knowledge of relevant fields. Then we give the definition of containers and demonstrate their properties. Finally, we introduce some contributions to the container model, such as higher functoriality, higher containers and their properties. We will use Agda.
 
-\section{Type Theory}
+\section{Type Theory and Agda}
 
-The \textbf{Martin-L\"of Type Theory - MLTT} is a formal language in mathematics logics. The idea of type theory is very close to the type system of functional programmings, which describes all objects and functions as types. Additionally, it introduces concepts like dependent types, universe size, strong normalization, etc. avoiding paradoxes and being used as foundations of mathematics and programmings.
+\textbf{Martin-L\"of Type Theory - MLTT} is a formal language in mathematics logics. The idea of type theory is very close to the type system of functional programmings, which describes all objects and functions as types. Additionally, it introduces advanced concepts like dependent types, universe size, strong normalization, etc. avoiding paradoxes and being used as foundations of mathematics and programmings.
 
-Each types should be generated within some constraints, namely the corresponding \textit{formation rule}, \textit{introduction rule}, \textit{elimination rule} and \textit{computation rule}. For example to define natural number \AgdaDatatype{ℕ} as a new type in Agda:
+\textbf{Agda} is dependently typed programming language and interactive theorem prover based on and extend MLTT. Therefore, we use Agda as our meta language in our research and this report.
+
+\section{Inductive Types}
+
+We now give a definition of inductive types. An inductive type \AgdaDatatype{T} is given by a finite number of data constructors, such that they should follow some constraints, namely the \textit{formation rule}, \textit{introduction rule}, \textit{elimination rule} and \textit{computation rule}. We look at natural number type in detail, followed by other examples.
+
+\subsubsection*{Natural Number}
+
+To define natural number \AgdaDatatype{ℕ} as a new type in Agda:
 
 \begin{code}[hide]
 open import Relation.Binary.PropositionalEquality
@@ -15,10 +23,14 @@ open import Relation.Binary.PropositionalEquality
 \begin{code}
 {- Formation Rule -}
 data ℕ : Set where
-{- Introduction Rule -}
+  {- Introduction Rule -}
   zero : ℕ
   suc  : ℕ → ℕ
+\end{code}
 
+We need to explicitly define type constructor \AgdaDatatype{ℕ} and data constructors \AgdaInductiveConstructor{zero} and \AgdaInductiveConstructor{suc}, which correspond to the formation rule and introduction rule.
+
+\begin{code}
 {- Elimination Rule -}
 recℕ : (P : ℕ → Set)
   → P zero
@@ -27,55 +39,41 @@ recℕ : (P : ℕ → Set)
 recℕ P p₀ pₛ zero = p₀
 recℕ P p₀ pₛ (suc n) = pₛ n (recℕ P p₀ pₛ n)
 
-{- Computation Rule -}
-recℕ₀ : ∀ {P p₀ pₛ} → recℕ P p₀ pₛ zero ≡ p₀
-recℕ₀ = refl
+_+2 : ℕ → ℕ
+_+2 = recℕ (λ _ → ℕ) (suc (suc zero)) (λ _ ssn → suc ssn)
 
-recℕₛ : ∀ {P p₀ pₛ n} → recℕ P p₀ pₛ (suc n) ≡ pₛ n (recℕ P p₀ pₛ n)
-recℕₛ = refl
+_+2' : ℕ → ℕ
+zero +2' = suc (suc zero)
+suc n +2' = suc (n +2)
 \end{code}
 
-\subsection{Intensional and Extensional Type Theory}
+The elimination rule, also called recursor in FP, tells how to define functions or proofs out of \AgdaDatatype{ℕ}. We can define function \AgdaFunction{\AgdaUnderscore{}+2} using \AgdaFunction{recℕ}, or alternatively using pattern matching, which provides equivalent definition but syntactically better.
 
-We need to be able to talk about equality of types. However, there are different notions of equality depends on whether you are looking at types from inside or outside. The definitional equality says two terms are equal if they are constructed in the same way. That is 
+\begin{code}
+{- Computation Rule -}
+compℕ₀ : ∀ {P p₀ pₛ}
+  → recℕ P p₀ pₛ zero ≡ p₀
+compℕ₀ = refl
 
-\section{Inductive Types}
+compℕₛ : ∀ {P p₀ pₛ n} 
+  → recℕ P p₀ pₛ (suc n) ≡ pₛ n (recℕ P p₀ pₛ n)
+compℕₛ = refl
+\end{code}
 
-We now give a definition of inductive types. An inductive type \AgdaDatatype{T} is given by a finite number of constructors \AgdaInductiveConstructor{cᵢ}:
+Finally, the computation rule describes how eliminations behave on terms. It is primitively implemented in Agda type system and therefore trivially hold.
 
-\AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{T}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSpace{}%
-\AgdaKeyword{where}%
+\subsubsection*{Bool}
 
-\AgdaIndent{0}%
-\AgdaInductiveConstructor{c₀}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{A₀}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{A₁}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-...
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{T}%
+\begin{code}
+data Bool : Set where
+  false true : Bool
+\end{code}
 
-\AgdaIndent{0}%
-\AgdaInductiveConstructor{c₁}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{A₀}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{A₁}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-...
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{T}%
-
-such that there should also be corresponding elimination rule and computation rule.
-
-It means \AgdaDatatype{Bool}, \AgdaDatatype{ℕ}, \AgdaDatatype{List}, \AgdaDatatype{BTree} are all inductive types.
+Types like \AgdaDatatype{Bool} which has enumerable many terms can be instantiated by explicitly listing all terms as constructors.
 
 \section{Category Theory}
+
+\textbf{Category Theory}
 
 \section{Containers}
 

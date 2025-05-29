@@ -4,7 +4,7 @@
 
 The concept of types is one of the most important features in most modern programming languages. It is introduced to classify variables and functions, enabling more meaningful and readable codes as well as ensuring type correctness. Types such as \textit{boolean}, \textit{natural number}, \textit{list}, \textit{binary tree}, etc. are massively used in everyday programming.
 
-We can even classify types according to their "types", aka the \textbf{kind}. To continue the previous example, Boolean and integer are stand-alone types and we say \textit{'true' is term of boolean} directly. In contrast, list and binary tree are higher-kinded types (or parameterized datatypes as they need to be parameterized by other types), and we say \textit{'[1,2,3]' is a term of list of natural numbers}.
+We can even classify types according to their \"types\", aka the \textbf{kind}. To continue the previous example, Boolean and integer are stand-alone types and we say \textit{\'true\' is term of boolean} directly. In contrast, list and binary tree are higher-kinded types (or parameterized datatypes as they need to be parameterized by other types), and we say \textit{\'[1,2,3]\' is a term of list of natural numbers}.
 
 It is usually more interesting to work on higher-kinded types parameterized by an arbitrary type X instead of a concrete type, which has led to the emergence of \textbf{(parametric) polymorphism}. The \AgdaFunction{flatten} function, as the last step of tree sorting algorithm, which converts binary tree to list is a typical example such polymorphic functions, cause there is no special constraints upon the internal type X.
 
