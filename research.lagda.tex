@@ -1,12 +1,45 @@
 \chapter{Conducted Research}
 
-\section{Literature review}
-
-\section{Topics Studied}
+In this section, we introduce basic concepts of type theory and category theory, as well as background knowledge of relevant fields. Then we give the definition of containers and demonstrate their properties. Finally, we introduce some contributions to the container model, such as higher functoriality, higher containers and their properties. We will use Agda.
 
 \section{Type Theory}
 
-\subsection{Inductive Types}
+The \textbf{Martin-L\"of Type Theory - MLTT} is a formal language in mathematics logics. The idea of type theory is very close to the type system of functional programmings, which describes all objects and functions as types. Additionally, it introduces concepts like dependent types, universe size, strong normalization, etc. avoiding paradoxes and being used as foundations of mathematics and programmings.
+
+Each types should be generated within some constraints, namely the corresponding \textit{formation rule}, \textit{introduction rule}, \textit{elimination rule} and \textit{computation rule}. For example to define natural number \AgdaDatatype{ℕ} as a new type in Agda:
+
+\begin{code}[hide]
+open import Relation.Binary.PropositionalEquality
+\end{code}
+
+\begin{code}
+{- Formation Rule -}
+data ℕ : Set where
+{- Introduction Rule -}
+  zero : ℕ
+  suc  : ℕ → ℕ
+
+{- Elimination Rule -}
+recℕ : (P : ℕ → Set)
+  → P zero
+  → ((n : ℕ) → P n → P (suc n))
+  → (n : ℕ) → P n
+recℕ P p₀ pₛ zero = p₀
+recℕ P p₀ pₛ (suc n) = pₛ n (recℕ P p₀ pₛ n)
+
+{- Computation Rule -}
+recℕ₀ : ∀ {P p₀ pₛ} → recℕ P p₀ pₛ zero ≡ p₀
+recℕ₀ = refl
+
+recℕₛ : ∀ {P p₀ pₛ n} → recℕ P p₀ pₛ (suc n) ≡ pₛ n (recℕ P p₀ pₛ n)
+recℕₛ = refl
+\end{code}
+
+\subsection{Intensional and Extensional Type Theory}
+
+We need to be able to talk about equality of types. However, there are different notions of equality depends on whether you are looking at types from inside or outside. The definitional equality says two terms are equal if they are constructed in the same way. That is 
+
+\section{Inductive Types}
 
 We now give a definition of inductive types. An inductive type \AgdaDatatype{T} is given by a finite number of constructors \AgdaInductiveConstructor{cᵢ}:
 
@@ -42,12 +75,12 @@ such that there should also be corresponding elimination rule and computation ru
 
 It means \AgdaDatatype{Bool}, \AgdaDatatype{ℕ}, \AgdaDatatype{List}, \AgdaDatatype{BTree} are all inductive types.
 
-\subsection{Category Theory}
+\section{Category Theory}
 
-\subsection{Containers}
+\section{Containers}
 
-\subsection{Higher Functoriality}
+\section{Higher Functoriality}
 
-\subsection{Higher Containers}
+\section{Higher Containers}
 
 \section{Questions}

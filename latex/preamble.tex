@@ -1,26 +1,19 @@
-\usepackage{unicode-math}
-\usepackage{newunicodechar}
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage[hidelinks]{hyperref}
-\usepackage[links]{agda}
+\usepackage{agda}
+\usepackage{fontspec}
+
+\setmonofont{JuliaMono}[
+    Path       = ./fonts/,
+    Extension  = .ttf,
+    UprightFont = *-Regular,
+    BoldFont    = *-Bold,
+    ItalicFont  = *-RegularItalic,
+    Scale       = 0.9
+]
 
 \linespread{1.2}
 
 % Graphics Path
 \graphicspath{ {./graphics/} }
-
-% Declaring Extra Unicode Symbols
-\newunicodechar{∷}{\ensuremath{\mathnormal{\symbol{"2237}}}}
-\newunicodechar{ℕ}{\ensuremath{\mathnormal{\symbol{"2115}}}}
-\newunicodechar{≡}{\ensuremath{\mathnormal{\symbol{"2261}}}}
-\newunicodechar{λ}{\ensuremath{\mathnormal{\symbol{"03BB}}}}
-\newunicodechar{∘}{\ensuremath{\mathnormal{\symbol{"2218}}}}
-\newunicodechar{∀}{\ensuremath{\mathnormal{\symbol{"2200}}}}
-\newunicodechar{ℂ}{\ensuremath{\mathnormal{\symbol{"2102}}}}
-\newunicodechar{𝔻}{\ensuremath{\mathnormal{\symbol{"1D53B}}}}
-\newunicodechar{η}{\ensuremath{\mathnormal{\symbol{"03B7}}}}
-\newunicodechar{ᵢ}{\ensuremath{\mathnormal{_i}}}
-\newunicodechar{₀}{\ensuremath{\mathnormal{_0}}}
-\newunicodechar{₁}{\ensuremath{\mathnormal{_1}}}
-\newunicodechar{₂}{\ensuremath{\mathnormal{_2}}}

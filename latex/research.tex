@@ -1,37 +1,203 @@
 \chapter{Conducted Research}
 
-\section{Literature review}
+In this section, we introduce basic concepts of type theory and category theory, as well as background knowledge of relevant fields. Then we give the definition of containers and demonstrate their properties. Finally, we introduce some contributions to the container model, such as higher functoriality, higher containers and their properties. We will use Agda.
 
-\section{Topics Studied}
+\section{Type Theory}
 
-\subsection{Inductive Types}
+The \textbf{Martin-L\"of Type Theory - MLTT} is a formal language in mathematics logics. The idea of type theory is very close to the type system of functional programmings, which describes all objects and functions as types. Additionally, it introduces concepts like dependent types, universe size, strong normalization, etc. avoiding paradoxes and being used as foundations of mathematics and programmings.
 
-We now give a definition of inductive types. An inductive type \AgdaDatatype{T} is given by a finite number of constructors:
+Each types should be generated within some constraints, namely the corresponding \textit{formation rule}, \textit{introduction rule}, \textit{elimination rule} and \textit{computation rule}. For example when creating a type in Agda:
+
+\begin{code}[hide]%
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Relation.Binary.PropositionalEquality}\<%
+\end{code}
+
+\begin{code}%
+\>[0]\AgdaComment{\{-\ Formation\ Rule\ -\}}\<%
+\\
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+\>[0]\AgdaComment{\{-\ Introduction\ Rule\ -\}}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\<%
+\\
+%
+\>[2]\AgdaInductiveConstructor{suc}%
+\>[7]\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaComment{\{-\ Elimination\ Rule\ -\}}\<%
+\\
+\>[0]\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{P}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaPrimitive{Set}\AgdaSymbol{)}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaInductiveConstructor{zero}\<%
+\\
+%
+\>[2]\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaSymbol{((}\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{))}\<%
+\\
+%
+\>[2]\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{n}\<%
+\\
+\>[0]\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaBound{p₀}\<%
+\\
+\>[0]\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{)}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaComment{\{-\ Computation\ Rule\ -\}}\<%
+\\
+\>[0]\AgdaFunction{recℕ₀}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{∀}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{p₀}\<%
+\\
+\>[0]\AgdaFunction{recℕ₀}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{refl}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaFunction{recℕₛ}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{∀}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaFunction{recℕ}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{p₀}\AgdaSpace{}%
+\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaFunction{recℕₛ}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{refl}\<%
+\end{code}
+
+\subsection{Intensional and Extensional Type Theory}
+
+We need to be able to talk about equality of types. However, there are different notions of equality depends on whether you are looking at types from inside or outside. The definitional equality says two terms are equal if they are constructed in the same way. That is 
+
+\section{Inductive Types}
+
+We now give a definition of inductive types. An inductive type \AgdaDatatype{T} is given by a finite number of constructors \AgdaInductiveConstructor{cᵢ}:
 
 \AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{Bool}\AgdaSpace{}%
+\AgdaDatatype{T}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaPrimitive{Set}\AgdaSpace{}%
 \AgdaKeyword{where}%
 
-\AgdaIndent{0}
-\AgdaInductiveConstructor{cᵢ}
-\AgdaSymbol{:}\AgdaSpace{}
-\AgdaDatatype{A₁}\AgdaSpace{}
-\AgdaSymbol{→}\AgdaSpace{}
-\AgdaDatatype{A₂}\AgdaSpace{}
-\AgdaSymbol{→}\AgdaSpace{}
+\AgdaIndent{0}%
+\AgdaInductiveConstructor{c₀}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{A₀}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{A₁}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
 ...
-\AgdaSymbol{→}\AgdaSpace{}
-\AgdaDatatype{T}
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{T}%
 
+\AgdaIndent{0}%
+\AgdaInductiveConstructor{c₁}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{A₀}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{A₁}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+...
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{T}%
 
-\subsection{Containers}
+such that there should also be corresponding elimination rule and computation rule.
 
-\subsection{Higher Functoriality}
+It means \AgdaDatatype{Bool}, \AgdaDatatype{ℕ}, \AgdaDatatype{List}, \AgdaDatatype{BTree} are all inductive types.
 
-\subsection{Higher Containers}
+\section{Category Theory}
 
-\subsection{Category with Family}
+\section{Containers}
+
+\section{Higher Functoriality}
+
+\section{Higher Containers}
 
 \section{Questions}

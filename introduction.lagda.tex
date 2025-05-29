@@ -6,31 +6,20 @@ The concept of types is one of the most important features in most modern progra
 
 We can even classify types according to their "types", aka the \textbf{kind}. To continue the previous example, Boolean and integer are stand-alone types and we say \textit{'true' is term of boolean} directly. In contrast, list and binary tree are higher-kinded types (or parameterized datatypes as they need to be parameterized by other types), and we say \textit{'[1,2,3]' is a term of list of natural numbers}.
 
-It is usually more interesting to work on higher-kinded types parameterized by an arbitrary type X instead of a concrete type, which has led to the emergence of \textbf{(parametric) polymorphism}. The \AgdaFunction{flatten} function, as the last step of tree sorting algorthm, which converts binary tree to list is a typical example such polymorphic functions, cause there is no special constraints upon the internal type X.
+It is usually more interesting to work on higher-kinded types parameterized by an arbitrary type X instead of a concrete type, which has led to the emergence of \textbf{(parametric) polymorphism}. The \AgdaFunction{flatten} function, as the last step of tree sorting algorithm, which converts binary tree to list is a typical example such polymorphic functions, cause there is no special constraints upon the internal type X.
 
-We use \textbf{Agda}, a dependently typed functional programming language, in the rest of the report. Here is a piece of agda code that illustrates all the concepts - simple types, higher-kinded types, and polymorphic functions as discussed before:
+\begin{code}[hide]
+open import Data.List
 
-\begin{code}
-data Bool : Set where
-  false true : Bool
-
-data ℕ : Set where
-  zero : ℕ
-  suc  : ℕ → ℕ
-
-data List (X : Set) : Set where
-  []  : List X
-  _∷_ : X → List X → List X
-
-_++_ : {X : Set} → List X → List X → List X
-[] ++ ys = ys
-(x ∷ xs) ++ ys = x ∷ (xs ++ ys)
+variable X : Set
 
 data BTree (X : Set) : Set where
   leaf : BTree X
   node : BTree X → X → BTree X → BTree X
+\end{code}
 
-flatten : {X : Set} → BTree X → List X
+\begin{code}
+flatten : BTree X → List X
 flatten leaf = []
 flatten (node lt x rt) = flatten lt ++ (x ∷ flatten rt)
 \end{code}
@@ -69,7 +58,7 @@ Using the language of \textbf{Type Theory} and adopting the semantics of \textbf
 
 In the rest of report, I will cover:
 \begin{itemize}
-  \item{Section 2 - Prerequisites: General background knowleagde of this report. We introduce type theory, category theory.}
+  \item{Section 2 - Literature Review: ...}
   \item{Section 3 - Conducted Research: Literature review, and topics studied. We introduce inductive types, containers, category with families, hereditary substitution.}
   \item{Section 4 - Future Work Plan: Our future plan!}
 \end{itemize}
