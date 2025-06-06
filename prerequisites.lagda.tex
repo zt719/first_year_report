@@ -1,0 +1,118 @@
+\chapter{Prerequisites}
+
+We assume basic knowledge in logics and functional programming. We give overview of background materials and fix terminology by introducing type theory (with Agda) and category theory. 
+
+\section{Type Theory}
+
+\textbf{Martin-Löf Type Theory - MLTT} is a formal language in mathematics logics, where all objects and functions are assigned to some types. Additionally, it introduces advanced concepts like dependent types, universe size, strong normalization, etc. avoiding paradoxes and being used as foundations of mathematics and programmings.
+
+Inference rules are the fundamental set of rules that regulate all valid definitions and computations. Especially, we are interested in rules about the formation of contexts, types and terms. Take natural number as an example:
+
+The \textbf{formation rule} says \texttt{ℕ} is postulated in the empty context.
+
+\[ \frac{}{\texttt{⊢ ℕ type}} \]
+
+The \textbf{introduction rule} says \texttt{zero} is a term of \texttt{ℕ}
+
+\[
+  \frac{}{\texttt{⊢ zero : ℕ}}
+  \hspace{2.0cm} 
+  \frac{}{\texttt{⊢ suc : ℕ → ℕ}}
+\]
+
+\[ 
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ Indℕ(p₀, pₛ) : Π (n : ℕ). P(n)}
+  }
+\]
+
+\[
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ indℕ(p₀,pₛ,zero) ≐ p₀ : P(zero)}
+  }
+\]
+
+\[
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ indℕ(p₀,pₛ,suc(n)) ≐ pₛ(n,indℕ(p₀,pₛ,n)) : P(suc(n))}
+  }
+\]
+
+
+\section{Agda}
+
+\textbf{Agda} is dependently typed programming language and interactive theorem prover based on MLTT. We therefore use Agda as our meta language in our research and this report. 
+
+\subsubsection*{Natural Number}
+
+To define natural number \AgdaDatatype{ℕ} as a new type and define functions over it in Agda, we need to express the equivalent:
+
+\begin{code}[hide]
+{-# OPTIONS --guardedness #-}
+open import Relation.Binary.PropositionalEquality
+
+Type : Set₁
+Type = Set
+\end{code}
+
+\begin{code}
+{- Formation Rule -}
+data ℕ : Type where
+  {- Introduction Rule -}
+  zero : ℕ
+  suc  : ℕ → ℕ
+\end{code}
+
+We need to explicitly define type constructor \AgdaDatatype{ℕ} and data constructors \AgdaInductiveConstructor{zero} and \AgdaInductiveConstructor{suc}, which correspond to the formation rule and introduction rule.
+
+\begin{code}
+{- Elimination Rule -}
+recℕ : (P : ℕ → Type)
+  → P zero
+  → ((n : ℕ) → P n → P (suc n))
+  → (n : ℕ) → P n
+recℕ P p₀ pₛ zero = p₀
+recℕ P p₀ pₛ (suc n) = pₛ n (recℕ P p₀ pₛ n)
+
+_+2 : ℕ → ℕ
+_+2 = recℕ (λ _ → ℕ) (suc (suc zero)) (λ _ ssn → suc ssn)
+
+_+2' : ℕ → ℕ
+zero +2' = suc (suc zero)
+suc n +2' = suc (n +2)
+\end{code}
+
+The elimination rule, also called recursor in FP, tells how to define functions or proofs out of \AgdaDatatype{ℕ}. We can define function \AgdaFunction{\AgdaUnderscore{}+2} using \AgdaFunction{recℕ}, or alternatively using pattern matching, which provides equivalent definition but syntactically better.
+
+\begin{code}
+{- Computation Rule -}
+compℕ₀ : ∀ {P p₀ pₛ}
+  → recℕ P p₀ pₛ zero ≡ p₀
+compℕ₀ = refl
+
+compℕₛ : ∀ {P p₀ pₛ n}
+  → recℕ P p₀ pₛ (suc n) ≡ pₛ n (recℕ P p₀ pₛ n)
+compℕₛ = refl
+\end{code}
+
+Finally, the computation rule describes how eliminations behave on terms. It is primitively implemented in Agda type system and therefore trivially hold.
+
+\section{Category Theory}
