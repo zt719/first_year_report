@@ -1,0 +1,162 @@
+\begin{code}[hide]
+{-# OPTIONS --guardedness #-}
+
+open import Data.Empty
+open import Data.Unit
+open import Data.Sum
+open import Data.Product
+
+open import Relation.Binary.PropositionalEquality
+
+Type : Set₁
+Type = Set
+
+Type₁ : Set₂
+Type₁ = Set₁
+
+variable X Y : Type
+\end{code}
+
+\chapter{Topics Studied}
+
+In this section, we will cover the topics studied, related background knowledge and illustrate the issues we encountered. First, we introduce inductive types, coinductive types and their categorical semantics. Then we give the definition and some nice properties of containers, and how containers can be used to capture the semantics of types. Finally, we demonstrate that some types can not be naively defined through traditional containers.
+
+\section{Types and Categorical Semantics}
+
+\subsection{Inductive Types and Initial Algebras}
+
+To avoid getting too deep into strict type theory, we give an informal (functional programming) definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
+
+\subsubsection*{Natural Number}
+
+The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano axiom. The first constructor says \AgdaInductiveConstructor{zero} is a \AgdaDatatype{ℕ}. The second constructor is a function that sends \AgdaDatatype{ℕ} to \AgdaDatatype{ℕ}, which in other word, if \AgdaBound{n} is a \AgdaDatatype{ℕ}, so is the \AgdaBound{suc n}. 
+
+\begin{code}
+data ℕ : Type where
+  zero : ℕ
+  suc : ℕ → ℕ
+\end{code}
+
+ The \AgdaDatatype{ℕ} itself is not so useful until we spell out its induction principle \AgdaFunction{indℕ}. In principle, whenever we need to define a function out of \AgdaDatatype{ℕ}, we always using \AgdaFunction{indℕ}. That also corresponds to one of the Peano axioms.
+
+\begin{code}
+indℕ : (P : ℕ → Type)
+  → P zero
+  → ((n : ℕ) → P n → P (suc n))
+  → (n : ℕ) → P n
+indℕ P z s zero = z
+indℕ P z s (suc n) = s n (indℕ P z s n)
+
+double : ℕ → ℕ
+double = indℕ (λ _ → ℕ) zero (λ n dn → suc (suc dn))
+\end{code}
+
+It is rather verbose to explicitly call induction every time. Fortunately, we are able to instead use pattern-matching in Agda, which implements induction internally and guarantees correctness.
+
+\begin{code}
+double' : ℕ → ℕ
+double' zero = zero
+double' (suc n) = suc (suc n)
+\end{code}
+
+\subsubsection*{Inductive Types are Initial Algebras}
+
+In the category of \AgdaFunction{Type}, an algebra \AgdaFunction{Alg} of a given endofunctor \AgdaBound{F} \AgdaSymbol{:} \AgdaFunction{Type} \AgdaSymbol{→} \AgdaFunction{Type} is:
+\begin{itemize}
+  \item{An object \AgdaBound{A} \AgdaSymbol{:} \AgdaFunction{Type}}, and
+  \item{A morphism \AgdaBound{α} \AgdaSymbol{:} \AgdaBound{F} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{A}}
+\end{itemize}
+
+A morphism between algebras \AgdaSymbol{(}\AgdaBound{A} \AgdaInductiveConstructor{,} \AgdaBound{α}\AgdaSymbol{)} and \AgdaSymbol{(}\AgdaBound{B} \AgdaInductiveConstructor{,} \AgdaBound{β}\AgdaSymbol{)} is defined as:
+\begin{itemize}
+  \item{A morphism \AgdaBound{f} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B}}, and
+  \item{A commuting diagram:}
+    \begin{tikzcd}
+    \AgdaBound{F A} \arrow[r, "\AgdaBound{F f}"] \arrow[d, "\AgdaBound{α}"]
+    & \AgdaBound{F B} \arrow[d, "\AgdaBound{β}"] \\
+    \AgdaBound{A} \arrow[r, "\AgdaBound{f}"]
+    & \AgdaBound{B}
+    \end{tikzcd}
+\end{itemize}
+
+We therefore obtain a category of algebras. It turns out that in every such category, there exists an initial object which corresponds to an inductive type. We show a concrete example and discuss the general theory in later section.
+
+\subsubsection*{Natural Number as Initial Algebra}
+
+Natural number is the initial algebra of the \AgdaDatatype{⊤ ⊎} functor. To prove this, we massage \AgdaDatatype{ℕ} into an equivalent \AgdaDatatype{Alg} form:
+
+\begin{code}
+[z,s] : ⊤ ⊎ ℕ → ℕ
+[z,s] (inj₁ tt) = zero
+[z,s] (inj₂ n) = suc n
+\end{code}
+
+To show the initiality, we show for arbitrary algebra, there exists a unique morphism form algebra \texttt{ℕ}. That is to undefine \AgdaFunction{fold}:
+
+\begin{code}
+fold : (⊤ ⊎ X → X) → ℕ → X
+fold α zero = α (inj₁ tt)
+fold α (suc n) = α (inj₂ (fold α n))
+\end{code}
+
+Then we check the following diagram commutes:
+
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaDatatype{⊤ ⊎ ℕ} \arrow[r, "\AgdaFunction{⊤⊎₁ } \AgdaSymbol{(}\AgdaFunction{fold }\AgdaBound{α}\AgdaSymbol{)}"] \arrow[d, "\AgdaFunction{[z,s]}"]
+& \AgdaDatatype{⊤ ⊎ }\AgdaBound{X} \arrow[d, "\AgdaBound{α}"] \\
+\AgdaDatatype{ℕ} \arrow[r, "\AgdaFunction{fold }\AgdaBound{α}"]
+& \AgdaBound{X}
+\end{tikzcd}
+\]
+
+\begin{code}
+⊤⊎₁ : (X → Y) → ⊤ ⊎ X → ⊤ ⊎ Y
+⊤⊎₁ f (inj₁ tt) = inj₁ tt
+⊤⊎₁ f (inj₂ x) = inj₂ (f x)
+
+commute : (β : ⊤ ⊎ X → X) (x : ⊤ ⊎ ℕ)
+  → fold β ([z,s] x) ≡ β (⊤⊎₁ (fold β) x)
+commute β (inj₁ tt) = refl
+commute β (inj₂ n) = refl
+\end{code}
+
+\subsection{Coinductive Types and Terminal Coalgebras}
+
+One of the greatest power of category theory is that, whenever we define something, we always get an opposite version for free. Indeed, if we inverse all the morphisms in above diagram, we will obtain a definition of conatural number \AgdaRecord{ℕ∞} and a result that \AgdaRecord{ℕ∞} is the terminal coalgebra of \AgdaDatatype{⊤ ⊎}. Therefore, conatural number is defined as a coinductive type:
+
+\begin{code}
+record ℕ∞ : Type where
+  coinductive
+  field
+    pred∞ : ⊤ ⊎ ℕ∞
+open ℕ∞
+\end{code}
+
+We also define the dual of \AgdaFunction{fold}, which is \AgdaFunction{unfold}:
+
+\begin{code}
+unfold : (X → ⊤ ⊎ X) → X → ℕ∞
+pred∞ (unfold α⁻ x) with α⁻ x 
+... | inj₁ tt = inj₁ tt
+... | inj₂ x' = inj₂ (unfold α⁻ x')
+\end{code}
+
+That gives rise to the following commutative diagram:
+
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaBound{X} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
+& \AgdaDatatype{ℕ∞} \arrow[d, "\AgdaField{pred∞}"] \\
+\AgdaDatatype{⊤ ⊎ }\AgdaBound{X} \arrow[r, "\AgdaFunction{⊤⊎₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
+& \AgdaDatatype{⊤ ⊎ ℕ∞}
+\end{tikzcd}
+\]
+
+\section{Containers}
+
+\subsection{Syntax and Semantics}
+
+\subsection{Semi-ring Structure}
+
+\subsection{W and M Types}
