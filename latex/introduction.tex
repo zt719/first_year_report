@@ -4,172 +4,26 @@
 
 The concept of types is one of the most important features in most modern programming languages. It is introduced to classify variables and functions, enabling more meaningful and readable codes as well as ensuring type correctness. Types such as \textit{boolean}, \textit{natural number}, \textit{list}, \textit{binary tree}, etc. are massively used in everyday programming.
 
-We can even classify types according to their \"types\", aka the \textbf{kind}. To continue the previous example, Boolean and integer are stand-alone types and we say \textit{\'true\' is term of boolean} directly. In contrast, list and binary tree are higher-kinded types (or parameterized datatypes as they need to be parameterized by other types), and we say \textit{\'[1,2,3]\' is a term of list of natural numbers}.
-
-It is usually more interesting to work on higher-kinded types parameterized by an arbitrary type X instead of a concrete type, which has led to the emergence of \textbf{(parametric) polymorphism}. The \AgdaFunction{flatten} function, as the last step of tree sorting algorithm, which converts binary tree to list is a typical example such polymorphic functions, cause there is no special constraints upon the internal type X.
-
-\begin{code}[hide]%
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Data.List}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaKeyword{variable}\AgdaSpace{}%
-\AgdaGeneralizable{X}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{BTree}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaInductiveConstructor{leaf}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{BTree}\AgdaSpace{}%
-\AgdaBound{X}\<%
-\\
-%
-\>[2]\AgdaInductiveConstructor{node}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{BTree}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{BTree}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{BTree}\AgdaSpace{}%
-\AgdaBound{X}\<%
-\end{code}
-
-\begin{code}%
-\>[0]\AgdaFunction{flatten}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{BTree}\AgdaSpace{}%
-\AgdaGeneralizable{X}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{List}\AgdaSpace{}%
-\AgdaGeneralizable{X}\<%
-\\
-\>[0]\AgdaFunction{flatten}\AgdaSpace{}%
-\AgdaInductiveConstructor{leaf}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{[]}\<%
-\\
-\>[0]\AgdaFunction{flatten}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{node}\AgdaSpace{}%
-\AgdaBound{lt}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaBound{rt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{flatten}\AgdaSpace{}%
-\AgdaBound{lt}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{++}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{∷}}\AgdaSpace{}%
-\AgdaFunction{flatten}\AgdaSpace{}%
-\AgdaBound{rt}\AgdaSymbol{)}\<%
-\end{code}
-
-However, not all types are well-behaved in our language. Here is a typical counterexample:
-
-\begin{code}%
-\>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
-\AgdaKeyword{NO\AgdaUnderscore{}POSITIVITY\AgdaUnderscore{}CHECK}\AgdaSpace{}%
-\AgdaSymbol{\#-\}}\<%
-\\
-\>[0]\AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{Λ}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaDatatype{Λ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Λ}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Λ}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{app}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Λ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Λ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Λ}\<%
-\\
-\>[0]\AgdaFunction{app}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaBound{x}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{self-app}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Λ}\<%
-\\
-\>[0]\AgdaFunction{self-app}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{app}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{Ω}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Λ}\<%
-\\
-\>[0]\AgdaFunction{Ω}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{app}\AgdaSpace{}%
-\AgdaFunction{self-app}\AgdaSpace{}%
-\AgdaFunction{self-app}\<%
-\end{code}
-
-The \AgdaFunction{Ω} represents the famous non-terminating \texttt{λ}-term \texttt{(λx.x x)(λx.x x)} which reduces to itself infinitely. It is valid in untyped \texttt{λ}-calculus but not typable in simply-typed \texttt{λ}-calculus. 
+TODO
 
 \section{Aims and Objectives}
 
-Using the language of \textbf{Type Theory} and adopting the semantics of \textbf{Category Theory}, we wish to achieve the following objectives:
+TODO
 
 \begin{itemize}
-  \item{To develop the syntax and semantics of \textbf{Higher(-Kinded) Functors} and their natural transformations, which capture the definition of higher types and higher polymorphic functions}
-  \item{To develop the syntax and semantics of \textbf{Higher(-Kinded) Containers} and their morphisms, which should give rise higher functors and their natural transformations}
-  \item{To show higher container model is simply-typed category with family}
-  \item{...}
+  \item{bla bla}
+  \item{bla bla}
 \end{itemize}
+
+\section{Progress to Date}
+
+TODO : progress and achievements during this stage, training courses, seminars and presentations.
 
 \section{Overview of the Report}
 
-In the rest of report, I will cover:
 \begin{itemize}
-  \item{Chapter 2 - Prerequisites: ...}
-  \item{Chapter 3 - Literature Review: ...}
-  \item{Chapter 4 - Conducted Research: Literature review, and topics studied. We introduce inductive types, containers, category with families, hereditary substitution.}
-  \item{Chapter 5 - Future Work Plan: Our future plan!}
+  \item{Chapter 2 - Literature Review: reviews the related literature, and further motivates our project}
+  \item{Chapter 3 - Conducted Research: covers background knowledge, topics studied and questions. We introduce type theory, category theory, containers, etc.}
+  \item{Chapter 4 - Future Work Plan: TODO}
 \end{itemize}
 

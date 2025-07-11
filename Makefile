@@ -6,8 +6,5 @@ all:
 	lualatex main.tex
 	# lualatex main.tex
 
-%.tex: %.lagda.tex
-	agda --latex $<
-
 clean:
 	rm *.aux *.out *.log *.ptb *.bbl *.blg *.toc *dvi

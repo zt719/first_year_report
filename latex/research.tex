@@ -60,13 +60,73 @@
 \AgdaFunction{Type}\<%
 \end{code}
 
-\chapter{Topics Studied}
+\chapter{Conducted Research}
 
-In this section, we will cover the topics studied, related background knowledge and illustrate the issues we encountered. First, we introduce inductive types, coinductive types and their categorical semantics. Then we give the definition and some nice properties of containers, and how containers can be used to capture the semantics of types. Finally, we demonstrate that some types can not be naively defined through traditional containers.
+In this section, we will cover the related background knowledge, literature reviews, topics studied and illustrate the issues we encountered. We assume basic knowledge in logics and functional programming. First, we fix our formal languages to type theory and category theory. Then we review current literatures and introduce inductive types, coinductive types, containers and some nice properties of them. Finally, we present questions of the limitations of existing schemes by examples.
+
+\section{Our Languages}
+
+\subsection{Type Theory and Agda}
+
+\textbf{Martin-Löf Type Theory - MLTT} is a formal language in mathematics logics...
+
+Should I do this?
+
+\[ \frac{}{\texttt{⊢ ℕ type}} \]
+
+\[
+  \frac{}{\texttt{⊢ zero : ℕ}}
+  \hspace{2.0cm} 
+  \frac{}{\texttt{⊢ suc : ℕ → ℕ}}
+\]
+
+\[ 
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ Indℕ(p₀, pₛ) : Π (n : ℕ). P(n)}
+  }
+\]
+
+\[
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ indℕ(p₀,pₛ,zero) ≐ p₀ : P(zero)}
+  }
+\]
+
+\[
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ indℕ(p₀,pₛ,suc(n)) ≐ pₛ(n,indℕ(p₀,pₛ,n)) : P(suc(n))}
+  }
+\]
+
+\subsection{Category Theory}
+
+TODO
+
+\section{Literature Review}
+
+TODO
 
 \section{Types and Categorical Semantics}
 
-\subsection{Inductive Types and Initial Algebras}
+\subsection{Inductive Types}
 
 To avoid getting too deep into strict type theory semantics, we give an informal (functional programming) definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
 
@@ -377,13 +437,13 @@ Then we check the following diagram commutes:
 \AgdaInductiveConstructor{refl}\<%
 \end{code}
 
-\subsection{Coinductive Types and Terminal Coalgebras}
+\subsection{Coinductive Types}
 
 One of the greatest power of category theory is that, whenever we define something, we always get an opposite version for free. Indeed, if we inverse all the morphisms in above diagram, then we will:
 \begin{itemize}
   \item{talk about the category of coalgebras;}
   \item{obtain a definition of conatural number \AgdaRecord{ℕ∞};}
-  \item{derive that \AgdaRecord{ℕ∞} is the terminal coalgebra of \AgdaDatatype{⊤ ⊎}}
+  \item{derive that \AgdaRecord{ℕ∞} is the terminal coalgebra of \AgdaDatatype{⊤⊎\_}}
 \end{itemize}
 
 The definition of coalgebras is trivial. We define conatural number as a coinductive type:
@@ -630,7 +690,7 @@ A container should give rise to a endofunctor \AgdaFunction{Type} \AgdaSymbol{�
 \AgdaBound{k}\<%
 \end{code}
 
-\subsection{W and M Types}
+\subsection{W and M}
 
 We now give the definition of general form of inductive types, which is the \AgdaDatatype{W} type:
 
@@ -657,7 +717,7 @@ We now give the definition of general form of inductive types, which is the \Agd
 \AgdaBound{SP}\<%
 \end{code}
 
-From the definition, \AgdaDatatype{W} is an inductive type that specified by a polynomial functor. In another word, any inductive type can be specified by a strictly positive functor! We can retrieve the definition of \AgdaDatatype{ℕ} through the \AgdaDatatype{⊤ ⊎} functor:
+From the definition, \AgdaDatatype{W} is an inductive type that specified by a container. In another word, any inductive type can be specified by a strictly positive functor! We can retrieve the definition of \AgdaDatatype{ℕ} through the \AgdaDatatype{⊤ ⊎} functor:
 
 \begin{code}%
 \>[0]\AgdaFunction{⊤⊎Cont}\AgdaSpace{}%
@@ -881,7 +941,7 @@ Containers are also known as \textbf{polynomial functors} as they forms a semiri
 \AgdaSymbol{\}}\<%
 \end{code}
 
-such that ......
+such that ....
 
 Even better, we can define \AgdaFunction{Π} and \AgdaFunction{Σ} for containers:
 

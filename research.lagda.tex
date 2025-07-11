@@ -1,0 +1,385 @@
+\begin{code}[hide]
+{-# OPTIONS --guardedness #-}
+
+open import Data.Empty
+open import Data.Unit
+open import Data.Sum
+open import Data.Product
+open import Function.Base
+open import Relation.Binary.PropositionalEquality
+
+Type : Set₁
+Type = Set
+
+Type₁ : Set₂
+Type₁ = Set₁
+
+variable X Y I : Type
+\end{code}
+
+\chapter{Conducted Research}
+
+In this section, we will cover the related background knowledge, literature reviews, topics studied and illustrate the issues we encountered. We assume basic knowledge in logics and functional programming. First, we fix our formal languages to type theory and category theory. Then we review current literatures and introduce inductive types, coinductive types, containers and some nice properties of them. Finally, we present questions of the limitations of existing schemes by examples.
+
+\section{Our Languages}
+
+\subsection{Type Theory and Agda}
+
+\textbf{Martin-Löf Type Theory - MLTT} is a formal language in mathematics logics...
+
+Should I do this?
+
+\[ \frac{}{\texttt{⊢ ℕ type}} \]
+
+\[
+  \frac{}{\texttt{⊢ zero : ℕ}}
+  \hspace{2.0cm} 
+  \frac{}{\texttt{⊢ suc : ℕ → ℕ}}
+\]
+
+\[ 
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ Indℕ(p₀, pₛ) : Π (n : ℕ). P(n)}
+  }
+\]
+
+\[
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ indℕ(p₀,pₛ,zero) ≐ p₀ : P(zero)}
+  }
+\]
+
+\[
+  \frac{
+    \begin{array}{l}
+      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
+      \texttt{Γ ⊢ p₀ : P(zero)} \\
+      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
+    \end{array}
+  }{
+    \texttt{Γ ⊢ indℕ(p₀,pₛ,suc(n)) ≐ pₛ(n,indℕ(p₀,pₛ,n)) : P(suc(n))}
+  }
+\]
+
+\subsection{Category Theory}
+
+TODO
+
+\section{Literature Review}
+
+TODO
+
+\section{Types and Categorical Semantics}
+
+\subsection{Inductive Types}
+
+To avoid getting too deep into strict type theory semantics, we give an informal (functional programming) definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
+
+\subsubsection*{Natural Number}
+
+The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano axiom. The first constructor says \AgdaInductiveConstructor{zero} is a \AgdaDatatype{ℕ}. The second constructor is a function that sends \AgdaDatatype{ℕ} to \AgdaDatatype{ℕ}, which in other word, if \AgdaBound{n} is a \AgdaDatatype{ℕ}, so is the \AgdaBound{suc n}. 
+
+\begin{code}
+data ℕ : Type where
+  zero : ℕ
+  suc : ℕ → ℕ
+\end{code}
+
+ The \AgdaDatatype{ℕ} itself is not so useful until we spell out its induction principle \AgdaFunction{indℕ}. In principle, whenever we need to define a function out of \AgdaDatatype{ℕ}, we always using \AgdaFunction{indℕ}. That also corresponds to one of the Peano axioms.
+
+\begin{code}
+indℕ : (P : ℕ → Type)
+  → P zero
+  → ((n : ℕ) → P n → P (suc n))
+  → (n : ℕ) → P n
+indℕ P z s zero = z
+indℕ P z s (suc n) = s n (indℕ P z s n)
+
+double : ℕ → ℕ
+double = indℕ (λ _ → ℕ) zero (λ n dn → suc (suc dn))
+\end{code}
+
+It is rather verbose to explicitly call induction every time. Fortunately, we are able to instead use pattern-matching in Agda, which implements induction internally and guarantees correctness.
+
+\begin{code}
+double' : ℕ → ℕ
+double' zero = zero
+double' (suc n) = suc (suc n)
+\end{code}
+
+\subsubsection*{Inductive Types are Initial Algebras}
+
+The category of algebra in \AgdaFunction{Type} of a given endofunctor \AgdaBound{F} \AgdaSymbol{:} \AgdaFunction{Type} \AgdaSymbol{→} \AgdaFunction{Type} is defined as:
+\begin{itemize}
+  \item{Objects are:}
+  \begin{itemize}
+    \item{A carrier type \AgdaBound{A} \AgdaSymbol{:} \AgdaFunction{Type}}, and
+    \item{A function \AgdaBound{α} \AgdaSymbol{:} \AgdaBound{F} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{A}}
+  \end{itemize}
+  \item{Morphisms of \AgdaSymbol{(}\AgdaBound{A} \AgdaInductiveConstructor{,} \AgdaBound{α}\AgdaSymbol{)} and \AgdaSymbol{(}\AgdaBound{B} \AgdaInductiveConstructor{,} \AgdaBound{β}\AgdaSymbol{)} are:}
+  \begin{itemize}
+    \item{A morphism \AgdaBound{f} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B}}, and
+    \item{A commuting diagram:}
+      \begin{tikzcd}
+      \AgdaBound{F A} \arrow[r, "\AgdaBound{F f}"] \arrow[d, "\AgdaBound{α}"]
+      & \AgdaBound{F B} \arrow[d, "\AgdaBound{β}"] \\
+      \AgdaBound{A} \arrow[r, "\AgdaBound{f}"]
+      & \AgdaBound{B}
+      \end{tikzcd}
+  \end{itemize}
+\end{itemize}
+
+We therefore obtain a category of algebras. It turns out that in every such category, there exists an initial object which corresponds to an inductive type. We show a concrete example and discuss the general theory in later section.
+
+\subsubsection*{Natural Number as Initial Algebra}
+
+Natural number is the initial algebra of the \AgdaDatatype{⊤⊎\_} functor. To prove this, we massage \AgdaDatatype{ℕ} into an equivalent \AgdaDatatype{Alg} form:
+
+\begin{code}
+[z,s] : ⊤ ⊎ ℕ → ℕ
+[z,s] (inj₁ tt) = zero
+[z,s] (inj₂ n) = suc n
+\end{code}
+
+To show the initiality, we show for arbitrary algebra, there exists a unique morphism form algebra \texttt{ℕ}. That is to undefine \AgdaFunction{fold}:
+
+\begin{code}
+fold : (⊤ ⊎ X → X) → ℕ → X
+fold α zero = α (inj₁ tt)
+fold α (suc n) = α (inj₂ (fold α n))
+\end{code}
+
+Then we check the following diagram commutes:
+
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaDatatype{⊤ ⊎ ℕ} \arrow[r, "\AgdaFunction{⊤⊎₁ } \AgdaSymbol{(}\AgdaFunction{fold }\AgdaBound{α}\AgdaSymbol{)}"] \arrow[d, "\AgdaFunction{[z,s]}"]
+& \AgdaDatatype{⊤ ⊎ }\AgdaBound{X} \arrow[d, "\AgdaBound{α}"] \\
+\AgdaDatatype{ℕ} \arrow[r, "\AgdaFunction{fold }\AgdaBound{α}"]
+& \AgdaBound{X}
+\end{tikzcd}
+\]
+
+\begin{code}
+⊤⊎₁ : (X → Y) → ⊤ ⊎ X → ⊤ ⊎ Y
+⊤⊎₁ f (inj₁ tt) = inj₁ tt
+⊤⊎₁ f (inj₂ x) = inj₂ (f x)
+
+commute : (β : ⊤ ⊎ X → X) (x : ⊤ ⊎ ℕ)
+  → fold β ([z,s] x) ≡ β (⊤⊎₁ (fold β) x)
+commute β (inj₁ tt) = refl
+commute β (inj₂ n) = refl
+\end{code}
+
+\subsection{Coinductive Types}
+
+One of the greatest power of category theory is that, whenever we define something, we always get an opposite version for free. Indeed, if we inverse all the morphisms in above diagram, then we will:
+\begin{itemize}
+  \item{talk about the category of coalgebras;}
+  \item{obtain a definition of conatural number \AgdaRecord{ℕ∞};}
+  \item{derive that \AgdaRecord{ℕ∞} is the terminal coalgebra of \AgdaDatatype{⊤⊎\_}}
+\end{itemize}
+
+The definition of coalgebras is trivial. We define conatural number as a coinductive type:
+
+\begin{code}
+record ℕ∞ : Type where
+  coinductive
+  field
+    pred∞ : ⊤ ⊎ ℕ∞
+open ℕ∞
+\end{code}
+
+We also define the inverse of \AgdaFunction{fold}, which is \AgdaFunction{unfold}:
+
+\begin{code}
+unfold : (X → ⊤ ⊎ X) → X → ℕ∞
+pred∞ (unfold α⁻ x) with α⁻ x 
+... | inj₁ tt = inj₁ tt
+... | inj₂ x' = inj₂ (unfold α⁻ x')
+\end{code}
+
+That gives rise to the following commutative diagram:
+
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaBound{X} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
+& \AgdaDatatype{ℕ∞} \arrow[d, "\AgdaField{pred∞}"] \\
+\AgdaDatatype{⊤ ⊎ }\AgdaBound{X} \arrow[r, "\AgdaFunction{⊤⊎₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
+& \AgdaDatatype{⊤ ⊎ ℕ∞}
+\end{tikzcd}
+\]
+
+\section{Containers}
+
+\subsection{Strictly Positivity}
+
+Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. Being strictly positive is important when constructing new types. Disobeying such property would normally cause bad behavior in the type system. Formally, a strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow. \AgdaDatatype{ℕ} is one of such types. It can be trivially checked if we rewrite the constructors into an equivalent arrow form:
+
+\begin{code}
+data ℕ' : Type where
+  zero : (⊤ → ⊤) → ℕ'
+  suc : (⊤ → ℕ') → ℕ'
+\end{code}
+
+One typical counterexample of strictly positive types is \AgdaDatatype{Λ}:
+
+\begin{code}
+{-# NO_POSITIVITY_CHECK #-}
+data Λ : Type where
+  lam : (Λ → Λ) → Λ
+\end{code}
+
+\AgdaDatatype{Λ} is not strictly positive as in constructor \AgdaInductiveConstructor{lam}, \AgdaDatatype{X} itself appears on the left side of the \AgdaSymbol{→}. Indeed, using this definition, we can easily construct a not normalizable term.
+
+\subsection{Syntax and Semantics}
+
+A container is given by a shape \AgdaField{S} \AgdaSymbol{:} \AgdaFunction{Type} with a position \AgdaField{P} \AgdaSymbol{:} \AgdaField{S} \AgdaSymbol{→} \AgdaFunction{Type}:
+
+\begin{code}
+record Cont : Type₁ where
+  constructor _◃_
+  field
+    S : Type
+    P : S → Type
+\end{code}
+
+A container should give rise to a endofunctor \AgdaFunction{Type} \AgdaSymbol{⇒} \AgdaFunction{Type}. Again we explicitly distinguish mapping objects part and mapping morphisms part of functors:
+
+\begin{code}
+record ⟦_⟧₀ (SP : Cont) (X : Type) : Type where
+  constructor _,_
+  open Cont SP
+  field
+    s : S
+    k : P s → X
+
+⟦_⟧₁ : (SP : Cont) → (X → Y) → ⟦ SP ⟧₀ X → ⟦ SP ⟧₀ Y
+⟦ SP ⟧₁ f (s , k) = s , f ∘ k
+\end{code}
+
+\subsection{W and M}
+
+We now give the definition of general form of inductive types, which is the \AgdaDatatype{W} type:
+
+\begin{code}
+data W (SP : Cont) : Type where
+  sup : ⟦ SP ⟧₀ (W SP) → W SP
+\end{code}
+
+From the definition, \AgdaDatatype{W} is an inductive type that specified by a container. In another word, any inductive type can be specified by a strictly positive functor! We can retrieve the definition of \AgdaDatatype{ℕ} through the \AgdaDatatype{⊤ ⊎} functor:
+
+\begin{code}
+⊤⊎Cont : Cont
+⊤⊎Cont = S ◃ P
+  where
+  S : Type
+  S = ⊤ ⊎ ⊤
+
+  P : S → Type
+  P (inj₁ tt) = ⊥
+  P (inj₂ tt) = ⊤
+
+ℕW : Type
+ℕW = W ⊤⊎Cont
+\end{code}
+
+Dually, the general form of coinductive types - \AgdaRecord{M} type is just the terminal coalgebra of containers, and we can redefine \AgdaRecord{ℕ∞} using \AgdaRecord{M}:
+
+\begin{code}
+record M (SP : Cont) : Type where
+  coinductive
+  field
+    inf : ⟦ SP ⟧₀ (M SP)
+
+ℕ∞M : Type
+ℕ∞M = M ⊤⊎Cont
+\end{code}
+
+Commutative diagrams:
+
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧₀ }\AgdaSymbol{(}\AgdaDatatype{W }\AgdaBound{SP}\AgdaSymbol{)} \arrow[r, "\AgdaFunction{⟦ }\AgdaBound{SP }\AgdaFunction{⟧₁ }\AgdaSymbol{(}\AgdaFunction{fold }\AgdaBound{α}\AgdaSymbol{)}"] \arrow[d, "\AgdaInductiveConstructor{sup}"]
+& \AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧₀ }\AgdaBound{X} \arrow[d, "\AgdaBound{α}"] \\
+\AgdaDatatype{W }\AgdaBound{SP} \arrow[r, "\AgdaFunction{fold }\AgdaBound{α}"]
+& \AgdaBound{X}
+\end{tikzcd}
+\]
+
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaBound{X} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
+& \AgdaRecord{M } \AgdaBound{SP}\arrow[d, "\AgdaField{inf}"] \\
+\AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧₀ }\AgdaBound{X} \arrow[r, "\AgdaFunction{⟦ }\AgdaBound{SP }\AgdaFunction{⟧₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
+& \AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧₀ }\AgdaSymbol{(}\AgdaRecord{M }\AgdaBound{SP}\AgdaSymbol{)}
+\end{tikzcd}
+\]
+
+\subsection{Semiring Structure}
+
+Containers are also known as \textbf{polynomial functors} as they forms a semiring structure. Namely, we can define zero, one, addition and multiplication for containers:
+
+\begin{code}
+zero-C : Cont
+zero-C = ⊥ ◃ λ ()
+
+one-C : Cont
+one-C = ⊤ ◃ λ{ tt → ⊥ }
+
+_×C_ : Cont → Cont → Cont
+(S ◃ P) ×C (T ◃ Q) = (S × T) ◃ λ (s , t) → P s ⊎ Q t
+
+_⊎C_ : Cont → Cont → Cont
+(S ◃ P) ⊎C (T ◃ Q) = (S ⊎ T) ◃ λ{ (inj₁ s) → P s ; (inj₂ t) → Q t }
+\end{code}
+
+such that ....
+
+Even better, we can define \AgdaFunction{Π} and \AgdaFunction{Σ} for containers:
+
+\begin{code}[hide]
+open Cont
+\end{code}
+
+\begin{code}
+ΠC : (I → Cont) → Cont
+ΠC {I} C⃗ = ((i : I) → C⃗ i .S) ◃ λ f → Σ[ i ∈ I ] C⃗ i .P (f i)
+
+ΣC : (I → Cont) → Cont
+ΣC {I} C⃗ = (Σ[ i ∈ I ] C⃗ i .S) ◃ λ (i , s) → C⃗ i .P s
+\end{code}
+
+\section{Questions}
+
+\subsection{Bush}
+
+\begin{code}
+record Bush (X : Type) : Type where
+  coinductive
+  field
+    head : X
+    tail : Bush (Bush X)
+open Bush    
+
+{-# TERMINATING #-}
+Bush₁ : (X → Y) → Bush X → Bush Y
+head (Bush₁ f bx) = f (head bx)
+tail (Bush₁ f bx) = Bush₁ (Bush₁ f) (tail bx)
+\end{code}
+
+We now look at the definition of a coinductive type \AgdaRecord{Bush}. What is the container for this type? Or how to represent it as a \AgdaRecord{M} type?
+
+It turns out that previews scheme is no longer applicable.
