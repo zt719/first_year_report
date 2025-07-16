@@ -21,8 +21,8 @@ variable X Y I : Type
 
 In this section, we will cover the necessary background knowledge, review related literatures, outline the topics studied and illustrate the current challenge. We assume the reader has basic knowledge in logics and functional programming.
 
-\input{latex/background1}
-\input{latex/background2}
+% \input{latex/background1}
+% \input{latex/background2}
 
 \section{Literature Review}
 
@@ -131,10 +131,10 @@ Then we construct the morphism mapping part of \AgdaDatatype{⊤ ⊎\_} and chec
 ⊤⊎₁ f (inj₁ tt) = inj₁ tt
 ⊤⊎₁ f (inj₂ x) = inj₂ (f x)
 
--- commute : (β : ⊤ ⊎ X → X) (x : ⊤ ⊎ ℕ)
---   → fold β ([z,s] x) ≡ β (⊤⊎₁ (fold β) x)
--- commute β (inj₁ tt) = refl
--- commute β (inj₂ n) = refl
+commute : (β : ⊤ ⊎ X → X) (x : ⊤ ⊎ ℕ)
+  → fold β ([z,s] x) ≡ β (⊤⊎₁ (fold β) x)
+commute β (inj₁ tt) = refl
+commute β (inj₂ n) = refl
 \end{code}
 
 \subsection{Coinductive Types}
@@ -216,6 +216,10 @@ record Cont : Type₁ where
     P : S → Type
 \end{code}
 
+\begin{code}[hide]
+variable SP TQ : Cont
+\end{code}
+
 A container should give rise to a endofunctor \AgdaFunction{Type} \AgdaSymbol{⇒} \AgdaFunction{Type}. Again we explicitly distinguish mapping objects part and mapping morphisms part of functors:
 
 \begin{code}
@@ -228,6 +232,60 @@ record ⟦_⟧₀ (SP : Cont) (X : Type) : Type where
 
 ⟦_⟧₁ : (SP : Cont) → (X → Y) → ⟦ SP ⟧₀ X → ⟦ SP ⟧₀ Y
 ⟦ SP ⟧₁ f (s , k) = s , f ∘ k
+\end{code}
+
+\subsection{Categorical Structure}
+
+Containers and their morphisms form a category. The morphisms are defined as follow:
+
+\begin{code}
+record ContHom (SP TQ : Cont) : Type where
+  constructor _◃_
+  open Cont SP
+  open Cont TQ renaming (S to T; P to Q)
+  field
+    f : S → T
+    g : (s : S) → Q (f s) → P s
+\end{code}
+
+where we can also show that it has identity and composition.
+
+\begin{code}
+⟦_⟧Hom : ContHom SP TQ → (X : Set) → ⟦ SP ⟧₀ X → ⟦ TQ ⟧₀ X
+⟦ f ◃ g ⟧Hom X (s , k) = f s , k ∘ g s
+\end{code}
+
+\subsection{Semiring Structure}
+
+Containers are also known as \textbf{polynomial functors} as they forms a semiring structure. Namely, we can define zero, one, addition and multiplication for containers:
+
+\begin{code}
+zero-C : Cont
+zero-C = ⊥ ◃ λ ()
+
+one-C : Cont
+one-C = ⊤ ◃ λ{ tt → ⊥ }
+
+_×C_ : Cont → Cont → Cont
+(S ◃ P) ×C (T ◃ Q) = (S × T) ◃ λ (s , t) → P s ⊎ Q t
+
+_⊎C_ : Cont → Cont → Cont
+(S ◃ P) ⊎C (T ◃ Q) = (S ⊎ T) ◃ λ{ (inj₁ s) → P s ; (inj₂ t) → Q t }
+\end{code}
+
+such that semiring laws should hold. In fact, both multiplication and addition are commutative, associative and left- and right-annihilated by their units. Even better, we can define \AgdaFunction{Π} and \AgdaFunction{Σ} for containers which are the infinite generalization of \AgdaFunction{×} and \AgdaFunction{⊎}:
+
+\begin{code}[hide]
+module _ where
+  open Cont
+\end{code}
+
+\begin{code}
+  ΠC : (I → Cont) → Cont
+  ΠC {I} C⃗ = ((i : I) → C⃗ i .S) ◃ λ f → Σ[ i ∈ I ] C⃗ i .P (f i)
+
+  ΣC : (I → Cont) → Cont
+  ΣC {I} C⃗ = (Σ[ i ∈ I ] C⃗ i .S) ◃ λ (i , s) → C⃗ i .P s
 \end{code}
 
 \subsection{W and M}
@@ -287,38 +345,6 @@ Commutative diagrams:
 & \AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧₀ }\AgdaSymbol{(}\AgdaRecord{M }\AgdaBound{SP}\AgdaSymbol{)}
 \end{tikzcd}
 \]
-
-\subsection{Semiring Structure}
-
-Containers are also known as \textbf{polynomial functors} as they forms a semiring structure. Namely, we can define zero, one, addition and multiplication for containers:
-
-\begin{code}
-zero-C : Cont
-zero-C = ⊥ ◃ λ ()
-
-one-C : Cont
-one-C = ⊤ ◃ λ{ tt → ⊥ }
-
-_×C_ : Cont → Cont → Cont
-(S ◃ P) ×C (T ◃ Q) = (S × T) ◃ λ (s , t) → P s ⊎ Q t
-
-_⊎C_ : Cont → Cont → Cont
-(S ◃ P) ⊎C (T ◃ Q) = (S ⊎ T) ◃ λ{ (inj₁ s) → P s ; (inj₂ t) → Q t }
-\end{code}
-
-such that semiring laws should hold. In fact, both multiplication and addition are commutative, associative and left- and right-annihilated by their units. Even better, we can define \AgdaFunction{Π} and \AgdaFunction{Σ} for containers which are the infinite generalization of \AgdaFunction{×} and \AgdaFunction{⊎}:
-
-\begin{code}[hide]
-open Cont
-\end{code}
-
-\begin{code}
-ΠC : (I → Cont) → Cont
-ΠC {I} C⃗ = ((i : I) → C⃗ i .S) ◃ λ f → Σ[ i ∈ I ] C⃗ i .P (f i)
-
-ΣC : (I → Cont) → Cont
-ΣC {I} C⃗ = (Σ[ i ∈ I ] C⃗ i .S) ◃ λ (i , s) → C⃗ i .P s
-\end{code}
 
 \section{Questions}
 

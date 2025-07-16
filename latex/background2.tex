@@ -19,355 +19,53 @@ Finally, cubical type theory!!!
 
 We define a category as follow:
 
-\begin{code}%
-\>[0]\AgdaKeyword{record}\AgdaSpace{}%
-\AgdaRecord{Cat}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type₁}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{field}\<%
-\\
-\>[2][@{}l@{\AgdaIndent{0}}]%
-\>[4]\AgdaField{Obj}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type}\<%
-\\
-%
-\>[4]\AgdaField{Hom}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{Obj}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaField{Obj}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaPrimitive{Type}\<%
-\\
-%
-\>[4]\AgdaField{id}%
-\>[8]\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{X}\<%
-\\
-%
-\>[4]\AgdaOperator{\AgdaField{\AgdaUnderscore{}∘\AgdaUnderscore{}}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaBound{Z}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaBound{Z}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Z}\<%
-\\
-%
-\>[4]\AgdaField{idl}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaField{id}\AgdaSpace{}%
-\AgdaOperator{\AgdaField{∘}}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{≡}}\AgdaSpace{}%
-\AgdaBound{f}\<%
-\\
-%
-\>[4]\AgdaField{idr}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaOperator{\AgdaField{∘}}\AgdaSpace{}%
-\AgdaField{id}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{≡}}\AgdaSpace{}%
-\AgdaBound{f}\<%
-\\
-%
-\>[4]\AgdaField{ass}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaBound{Z}\AgdaSpace{}%
-\AgdaBound{W}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{Z}\AgdaSpace{}%
-\AgdaBound{W}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{g}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaBound{Z}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{h}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{)}\<%
-\\
-\>[4][@{}l@{\AgdaIndent{0}}]%
-\>[6]\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
-\AgdaOperator{\AgdaField{∘}}\AgdaSpace{}%
-\AgdaBound{g}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaOperator{\AgdaField{∘}}\AgdaSpace{}%
-\AgdaBound{h}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{≡}}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaOperator{\AgdaField{∘}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{g}\AgdaSpace{}%
-\AgdaOperator{\AgdaField{∘}}\AgdaSpace{}%
-\AgdaBound{h}\AgdaSymbol{)}\<%
-\\
-%
-\>[4]\AgdaField{isSetHom}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{isSet}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaField{Hom}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[2]\AgdaOperator{\AgdaFunction{∣\AgdaUnderscore{}∣}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaField{Obj}\<%
-\\
-%
-\>[2]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}[\AgdaUnderscore{},\AgdaUnderscore{}]}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaField{Hom}\<%
-\end{code}
+% \begin{code}
+% record Cat : Type₁ where
+%   field
+%     Obj : Type
+%     Hom : Obj → Obj → Type
+%     id  : ∀ {X} → Hom X X
+%     _∘_ : ∀ {X Y Z} → Hom Y Z → Hom X Y → Hom X Z
+%     idl : ∀ {X Y} (f : Hom X Y) → id ∘ f ≡ f
+%     idr : ∀ {X Y} (f : Hom X Y) → f ∘ id ≡ f
+%     ass : ∀ {X Y Z W} (f : Hom Z W) (g : Hom Y Z)  (h : Hom X Y)
+%       → (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
+%     isSetHom : ∀ {X Y} → isSet (Hom X Y)
+
+%   ∣_∣ = Obj
+%   _[_,_] = Hom
+% \end{code}
 
 \subsubsection*{Functors}
 
-\begin{code}%
-\>[0]\AgdaKeyword{record}\AgdaSpace{}%
-\AgdaRecord{Func}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaRecord{Cat}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type₁}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Cat}\<%
-\\
-%
-\>[2]\AgdaKeyword{field}\<%
-\\
-\>[2][@{}l@{\AgdaIndent{0}}]%
-\>[4]\AgdaField{F₀}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\<%
-\\
-%
-\>[4]\AgdaField{F₁}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{[}}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{,}}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{]}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{[}}\AgdaSpace{}%
-\AgdaField{F₀}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{,}}\AgdaSpace{}%
-\AgdaField{F₀}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{]}}\<%
-\end{code}
+% \begin{code}
+% record Func (ℂ 𝔻 : Cat) : Type₁ where
+%   open Cat
+%   field
+%     F₀ : ∣ ℂ ∣ → ∣ 𝔻 ∣
+%     F₁ : ∀ {X Y} → ℂ [ X , Y ] → 𝔻 [ F₀ X , F₀ Y ]
+% \end{code}
 
 \subsubsection*{Natural Transformations}
 
-\begin{code}%
-\>[0]\AgdaKeyword{record}\AgdaSpace{}%
-\AgdaRecord{NatTrans}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{F}\AgdaSpace{}%
-\AgdaBound{G}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaRecord{Func}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Cat}\AgdaSpace{}%
-\AgdaKeyword{hiding}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaOperator{\AgdaField{\AgdaUnderscore{}∘\AgdaUnderscore{}}}\AgdaSymbol{)}\<%
-\\
-%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Cat}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSpace{}%
-\AgdaKeyword{using}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaOperator{\AgdaField{\AgdaUnderscore{}∘\AgdaUnderscore{}}}\AgdaSymbol{)}\<%
-\\
-%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Func}\AgdaSpace{}%
-\AgdaBound{F}\<%
-\\
-%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Func}\AgdaSpace{}%
-\AgdaBound{G}\AgdaSpace{}%
-\AgdaKeyword{renaming}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaField{F₀}\AgdaSpace{}%
-\AgdaSymbol{to}\AgdaSpace{}%
-\AgdaField{G₀}\AgdaSpace{}%
-\AgdaSymbol{;}\AgdaSpace{}%
-\AgdaField{F₁}\AgdaSpace{}%
-\AgdaSymbol{to}\AgdaSpace{}%
-\AgdaField{G₁}\AgdaSymbol{)}\<%
-\\
-%
-\>[2]\AgdaKeyword{field}\<%
-\\
-\>[2][@{}l@{\AgdaIndent{0}}]%
-\>[4]\AgdaField{η}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{𝔻}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{[}}\AgdaSpace{}%
-\AgdaFunction{F₀}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{,}}\AgdaSpace{}%
-\AgdaFunction{G₀}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{]}}\<%
-\\
-%
-\>[4]\AgdaField{com}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{X}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{[}}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{,}}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{]}}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaField{η}\AgdaSpace{}%
-\AgdaBound{Y}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∘}}\AgdaSpace{}%
-\AgdaFunction{F₁}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{≡}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{G₁}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∘}}\AgdaSpace{}%
-\AgdaField{η}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSymbol{)}\<%
-\end{code}
+% \begin{code}
+% record NatTrans {ℂ 𝔻} (F G : Func ℂ 𝔻) : Type where
+%   open Cat hiding (_∘_)
+%   open Cat 𝔻 using (_∘_)
+%   open Func F
+%   open Func G renaming (F₀ to G₀ ; F₁ to G₁)
+%   field
+%     η : (X : ∣ ℂ ∣) → 𝔻 [ F₀ X , G₀ X ]
+%     com : ∀ {X Y} (f : ℂ [ X , Y ]) → (η Y ∘ F₁ f) ≡ (G₁ f ∘ η X)
+% \end{code}
 
 \subsubsection*{Algebra}
 
-\begin{code}%
-\>[0]\AgdaKeyword{record}\AgdaSpace{}%
-\AgdaRecord{Alg}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaRecord{Cat}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{F}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaRecord{Func}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Cat}\<%
-\\
-%
-\>[2]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaModule{Func}\AgdaSpace{}%
-\AgdaBound{F}\<%
-\\
-%
-\>[2]\AgdaKeyword{field}\<%
-\\
-\>[2][@{}l@{\AgdaIndent{0}}]%
-\>[4]\AgdaField{X}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{∣}}\<%
-\\
-%
-\>[4]\AgdaField{α}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaBound{ℂ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{[}}\AgdaSpace{}%
-\AgdaFunction{F₀}\AgdaSpace{}%
-\AgdaField{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{,}}\AgdaSpace{}%
-\AgdaField{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{]}}\<%
-\end{code}
+% \begin{code}
+% record Alg {ℂ : Cat} (F : Func ℂ ℂ) : Type where
+%   open Cat
+%   open Func F
+%   field
+%     X : ∣ ℂ ∣
+%     α : ℂ [ F₀ X , X ]
+% \end{code}

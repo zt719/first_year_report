@@ -13,53 +13,53 @@ Finally, cubical type theory!!!
 
 We define a category as follow:
 
-\begin{code}
-record Cat : Type₁ where
-  field
-    Obj : Type
-    Hom : Obj → Obj → Type
-    id  : ∀ {X} → Hom X X
-    _∘_ : ∀ {X Y Z} → Hom Y Z → Hom X Y → Hom X Z
-    idl : ∀ {X Y} (f : Hom X Y) → id ∘ f ≡ f
-    idr : ∀ {X Y} (f : Hom X Y) → f ∘ id ≡ f
-    ass : ∀ {X Y Z W} (f : Hom Z W) (g : Hom Y Z) (h : Hom X Y)
-      → (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
-    isSetHom : ∀ {X Y} → isSet (Hom X Y)
+% \begin{code}
+% record Cat : Type₁ where
+%   field
+%     Obj : Type
+%     Hom : Obj → Obj → Type
+%     id  : ∀ {X} → Hom X X
+%     _∘_ : ∀ {X Y Z} → Hom Y Z → Hom X Y → Hom X Z
+%     idl : ∀ {X Y} (f : Hom X Y) → id ∘ f ≡ f
+%     idr : ∀ {X Y} (f : Hom X Y) → f ∘ id ≡ f
+%     ass : ∀ {X Y Z W} (f : Hom Z W) (g : Hom Y Z)  (h : Hom X Y)
+%       → (f ∘ g) ∘ h ≡ f ∘ (g ∘ h)
+%     isSetHom : ∀ {X Y} → isSet (Hom X Y)
 
-  ∣_∣ = Obj
-  _[_,_] = Hom
-\end{code}
+%   ∣_∣ = Obj
+%   _[_,_] = Hom
+% \end{code}
 
 \subsubsection*{Functors}
 
-\begin{code}
-record Func (ℂ 𝔻 : Cat) : Type₁ where
-  open Cat
-  field
-    F₀ : ∣ ℂ ∣ → ∣ 𝔻 ∣
-    F₁ : ∀ {X Y} → ℂ [ X , Y ] → 𝔻 [ F₀ X , F₀ Y ]
-\end{code}
+% \begin{code}
+% record Func (ℂ 𝔻 : Cat) : Type₁ where
+%   open Cat
+%   field
+%     F₀ : ∣ ℂ ∣ → ∣ 𝔻 ∣
+%     F₁ : ∀ {X Y} → ℂ [ X , Y ] → 𝔻 [ F₀ X , F₀ Y ]
+% \end{code}
 
 \subsubsection*{Natural Transformations}
 
-\begin{code}
-record NatTrans {ℂ 𝔻} (F G : Func ℂ 𝔻) : Type where
-  open Cat hiding (_∘_)
-  open Cat 𝔻 using (_∘_)
-  open Func F
-  open Func G renaming (F₀ to G₀ ; F₁ to G₁)
-  field
-    η : (X : ∣ ℂ ∣) → 𝔻 [ F₀ X , G₀ X ]
-    com : ∀ {X Y} (f : ℂ [ X , Y ]) → (η Y ∘ F₁ f) ≡ (G₁ f ∘ η X)
-\end{code}
+% \begin{code}
+% record NatTrans {ℂ 𝔻} (F G : Func ℂ 𝔻) : Type where
+%   open Cat hiding (_∘_)
+%   open Cat 𝔻 using (_∘_)
+%   open Func F
+%   open Func G renaming (F₀ to G₀ ; F₁ to G₁)
+%   field
+%     η : (X : ∣ ℂ ∣) → 𝔻 [ F₀ X , G₀ X ]
+%     com : ∀ {X Y} (f : ℂ [ X , Y ]) → (η Y ∘ F₁ f) ≡ (G₁ f ∘ η X)
+% \end{code}
 
 \subsubsection*{Algebra}
 
-\begin{code}
-record Alg {ℂ : Cat} (F : Func ℂ ℂ) : Type where
-  open Cat
-  open Func F
-  field
-    X : ∣ ℂ ∣
-    α : ℂ [ F₀ X , X ]
-\end{code}
+% \begin{code}
+% record Alg {ℂ : Cat} (F : Func ℂ ℂ) : Type where
+%   open Cat
+%   open Func F
+%   field
+%     X : ∣ ℂ ∣
+%     α : ℂ [ F₀ X , X ]
+% \end{code}

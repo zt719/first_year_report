@@ -5,6 +5,8 @@
 
 \begin{document}
 
+\pagenumbering{gobble}
+
 % Title Page
 \input{latex/titlepage}
 
@@ -14,9 +16,12 @@
 % Contents Table
 \tableofcontents
 
+\cleardoublepage
+\pagenumbering{arabic}
+
 % Main Body
 \input{latex/introduction}
-\input{latex/research}
+% \input{latex/research}
 \input{latex/contribution}
 \input{latex/future}
 \input{latex/conclusions}
