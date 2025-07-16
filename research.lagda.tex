@@ -19,63 +19,10 @@ variable X Y I : Type
 
 \chapter{Conducted Research}
 
-In this section, we will cover the related background knowledge, literature reviews, topics studied and illustrate the issues we encountered. We assume basic knowledge in logics and functional programming. First, we fix our formal languages to type theory and category theory. Then we review current literatures and introduce inductive types, coinductive types, containers and some nice properties of them. Finally, we present questions of the limitations of existing schemes by examples.
+In this section, we will cover the necessary background knowledge, review related literatures, outline the topics studied and illustrate the current challenge. We assume the reader has basic knowledge in logics and functional programming.
 
-\section{Our Languages}
-
-\subsection{Type Theory and Agda}
-
-\textbf{Martin-Löf Type Theory - MLTT} is a formal language in mathematics logics...
-
-Should I do this?
-
-\[ \frac{}{\texttt{⊢ ℕ type}} \]
-
-\[
-  \frac{}{\texttt{⊢ zero : ℕ}}
-  \hspace{2.0cm} 
-  \frac{}{\texttt{⊢ suc : ℕ → ℕ}}
-\]
-
-\[ 
-  \frac{
-    \begin{array}{l}
-      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
-      \texttt{Γ ⊢ p₀ : P(zero)} \\
-      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
-    \end{array}
-  }{
-    \texttt{Γ ⊢ Indℕ(p₀, pₛ) : Π (n : ℕ). P(n)}
-  }
-\]
-
-\[
-  \frac{
-    \begin{array}{l}
-      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
-      \texttt{Γ ⊢ p₀ : P(zero)} \\
-      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
-    \end{array}
-  }{
-    \texttt{Γ ⊢ indℕ(p₀,pₛ,zero) ≐ p₀ : P(zero)}
-  }
-\]
-
-\[
-  \frac{
-    \begin{array}{l}
-      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
-      \texttt{Γ ⊢ p₀ : P(zero)} \\
-      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
-    \end{array}
-  }{
-    \texttt{Γ ⊢ indℕ(p₀,pₛ,suc(n)) ≐ pₛ(n,indℕ(p₀,pₛ,n)) : P(suc(n))}
-  }
-\]
-
-\subsection{Category Theory}
-
-TODO
+\input{latex/background1}
+\input{latex/background2}
 
 \section{Literature Review}
 
@@ -85,7 +32,7 @@ TODO
 
 \subsection{Inductive Types}
 
-To avoid getting too deep into strict type theory semantics, we give an informal (functional programming) definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
+We give an informal definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
 
 \subsubsection*{Natural Number}
 
@@ -95,6 +42,13 @@ The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano ax
 data ℕ : Type where
   zero : ℕ
   suc : ℕ → ℕ
+{-# BUILTIN NATURAL ℕ #-}
+
+_ : ℕ ⊎ ℕ
+_ = inj₁ zero
+
+_ : ℕ × ℕ
+_ = zero , zero
 \end{code}
 
  The \AgdaDatatype{ℕ} itself is not so useful until we spell out its induction principle \AgdaFunction{indℕ}. In principle, whenever we need to define a function out of \AgdaDatatype{ℕ}, we always using \AgdaFunction{indℕ}. That also corresponds to one of the Peano axioms.
@@ -141,11 +95,11 @@ The category of algebra in \AgdaFunction{Type} of a given endofunctor \AgdaBound
   \end{itemize}
 \end{itemize}
 
-We therefore obtain a category of algebras. It turns out that in every such category, there exists an initial object which corresponds to an inductive type. We show a concrete example and discuss the general theory in later section.
+After proving identity and composition of morphisms, we obtain a category of algebras. It turns out that in every such category, there exists an initial object which corresponds to an inductive type. We show a concrete example and discuss the general theory in later section.
 
-\subsubsection*{Natural Number as Initial Algebra}
+\subsubsection*{Natural Number is Initial Algebra of Maybe}
 
-Natural number is the initial algebra of the \AgdaDatatype{⊤⊎\_} functor. To prove this, we massage \AgdaDatatype{ℕ} into an equivalent \AgdaDatatype{Alg} form:
+Natural number (together with its constructor) is the initial algebra of the \AgdaDatatype{⊤⊎\_} functor, which is also known as the \AgdaDatatype{Maybe}. To prove this, we first combine and rewrite \AgdaInductiveConstructor{zero} and \AgdaInductiveConstructor{suc} into equivalent form:
 
 \begin{code}
 [z,s] : ⊤ ⊎ ℕ → ℕ
@@ -161,7 +115,7 @@ fold α zero = α (inj₁ tt)
 fold α (suc n) = α (inj₂ (fold α n))
 \end{code}
 
-Then we check the following diagram commutes:
+Then we construct the morphism mapping part of \AgdaDatatype{⊤ ⊎\_} and check the following diagram commutes:
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=5.0cm]
@@ -177,10 +131,10 @@ Then we check the following diagram commutes:
 ⊤⊎₁ f (inj₁ tt) = inj₁ tt
 ⊤⊎₁ f (inj₂ x) = inj₂ (f x)
 
-commute : (β : ⊤ ⊎ X → X) (x : ⊤ ⊎ ℕ)
-  → fold β ([z,s] x) ≡ β (⊤⊎₁ (fold β) x)
-commute β (inj₁ tt) = refl
-commute β (inj₂ n) = refl
+-- commute : (β : ⊤ ⊎ X → X) (x : ⊤ ⊎ ℕ)
+--   → fold β ([z,s] x) ≡ β (⊤⊎₁ (fold β) x)
+-- commute β (inj₁ tt) = refl
+-- commute β (inj₂ n) = refl
 \end{code}
 
 \subsection{Coinductive Types}
@@ -224,9 +178,9 @@ That gives rise to the following commutative diagram:
 
 \section{Containers}
 
-\subsection{Strictly Positivity}
+\subsection{Strict Positivity}
 
-Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. Being strictly positive is important when constructing new types. Disobeying such property would normally cause bad behavior in the type system. Formally, a strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow. \AgdaDatatype{ℕ} is one of such types. It can be trivially checked if we rewrite the constructors into an equivalent arrow form:
+Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow in the domain. \AgdaDatatype{ℕ} is one of such types, and it can be trivially checked if we rewrite its constructors into an equivalent form:
 
 \begin{code}
 data ℕ' : Type where
@@ -234,19 +188,25 @@ data ℕ' : Type where
   suc : (⊤ → ℕ') → ℕ'
 \end{code}
 
-One typical counterexample of strictly positive types is \AgdaDatatype{Λ}:
+One typical counterexample is \AgdaDatatype{Weird}:
 
 \begin{code}
 {-# NO_POSITIVITY_CHECK #-}
-data Λ : Type where
-  lam : (Λ → Λ) → Λ
+data Weird : Set where
+  foo : (Weird → ⊥) → Weird
+
+¬weird : Weird → ⊥
+¬weird (foo x) = x (foo x)
+
+bad : ⊥
+bad = ¬weird (foo ¬weird)
 \end{code}
 
-\AgdaDatatype{Λ} is not strictly positive as in constructor \AgdaInductiveConstructor{lam}, \AgdaDatatype{X} itself appears on the left side of the \AgdaSymbol{→}. Indeed, using this definition, we can easily construct a not normalizable term.
+\AgdaDatatype{Weird} is not strictly positive as in the domain of \AgdaInductiveConstructor{foo}, \AgdaDatatype{Weird} itself appears on the left-side of \AgdaSymbol{→}. Losing strict positivity can cause issues like non-normalizable, non-terminating, inconsistency, etc. In this case, we can construct an term in the empty type using \AgdaFunction{¬weird} which is inconsistent to the definition.
 
 \subsection{Syntax and Semantics}
 
-A container is given by a shape \AgdaField{S} \AgdaSymbol{:} \AgdaFunction{Type} with a position \AgdaField{P} \AgdaSymbol{:} \AgdaField{S} \AgdaSymbol{→} \AgdaFunction{Type}:
+A container is given by a shape \AgdaBound{S} \AgdaSymbol{:} \AgdaFunction{Type} with a position \AgdaBound{P} \AgdaSymbol{:} \AgdaBound{S} \AgdaSymbol{→} \AgdaFunction{Type}:
 
 \begin{code}
 record Cont : Type₁ where
@@ -346,9 +306,7 @@ _⊎C_ : Cont → Cont → Cont
 (S ◃ P) ⊎C (T ◃ Q) = (S ⊎ T) ◃ λ{ (inj₁ s) → P s ; (inj₂ t) → Q t }
 \end{code}
 
-such that ....
-
-Even better, we can define \AgdaFunction{Π} and \AgdaFunction{Σ} for containers:
+such that semiring laws should hold. In fact, both multiplication and addition are commutative, associative and left- and right-annihilated by their units. Even better, we can define \AgdaFunction{Π} and \AgdaFunction{Σ} for containers which are the infinite generalization of \AgdaFunction{×} and \AgdaFunction{⊎}:
 
 \begin{code}[hide]
 open Cont
@@ -367,19 +325,26 @@ open Cont
 \subsection{Bush}
 
 \begin{code}
-record Bush (X : Type) : Type where
+record Bush₀ (X : Type) : Type where
   coinductive
   field
     head : X
-    tail : Bush (Bush X)
-open Bush    
+    tail : Bush₀ (Bush₀ X)
+open Bush₀
 
 {-# TERMINATING #-}
-Bush₁ : (X → Y) → Bush X → Bush Y
-head (Bush₁ f bx) = f (head bx)
-tail (Bush₁ f bx) = Bush₁ (Bush₁ f) (tail bx)
+Bush₁ : (X → Y) → Bush₀ X → Bush₀ Y
+head (Bush₁ f a) = f (head a)
+tail (Bush₁ f a) = Bush₁ (Bush₁ f) (tail a)
 \end{code}
 
-We now look at the definition of a coinductive type \AgdaRecord{Bush}. What is the container for this type? Or how to represent it as a \AgdaRecord{M} type?
+We now look at the definition of a coinductive type \AgdaRecord{Bush}. Is \AgdaRecord{Bush} \AgdaBound{X} a terminal coalgebra of any endofunctor? It turns out that previews scheme is no longer applicable. Th solution is to lift the space from \AgdaDatatype{Type} to \AgdaDatatype{Type} \AgdaSymbol{→} \AgdaDatatype{Type} and observe whether \AgdaRecord{Bush} is the terminal coalgebra of a higher endofunctor.
 
-It turns out that previews scheme is no longer applicable.
+\[
+\begin{tikzcd}[row sep=huge, column sep=5.0cm]
+\AgdaBound{F} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
+& \AgdaRecord{Bush₀} \arrow[d, "\AgdaFunction{< }\AgdaField{head }\AgdaFunction{, }\AgdaField{tail }\AgdaFunction{>}"] \\
+\AgdaFunction{H }\AgdaBound{F} \arrow[r, "\AgdaDatatype{H₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
+& \AgdaFunction{H }\AgdaRecord{Bush₀}
+\end{tikzcd}
+\]
