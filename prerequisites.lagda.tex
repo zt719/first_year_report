@@ -1,0 +1,131 @@
+\begin{code}[hide]
+open import Data.Empty
+open import Data.Unit
+open import Data.Nat
+
+Type : Set₁
+Type = Set
+
+infixr 5 _∷_
+infix  4 _≡_
+\end{code}
+
+\chapter{Prerequisites}
+
+We adopt Martin-L\"{o}f type theory - MLTT and category theory as the framework. In particular, we use Agda, an implemented programming language, for our study and in this report.
+
+Assuming \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} and \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{B}, the following are standard Agda syntax for common algebraic data types:
+
+\begin{itemize}
+  \item{\AgdaFunction{⊥} - Empty Type, with no term}
+  \item{\AgdaRecord{⊤} - Unit Type, with \AgdaInductiveConstructor{tt} \AgdaSymbol{:} \AgdaRecord{⊤}}
+  \item{\AgdaRecord{×} - Product Type, with \AgdaBound{a} \AgdaInductiveConstructor{,} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{×} \AgdaBound{B}}
+  \item{\AgdaDatatype{⊎} - Coproduct (Sum) Type, with \AgdaInductiveConstructor{inj₁} \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}, and \AgdaInductiveConstructor{inj₂} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B} }
+\end{itemize}
+
+\section{Type Theory}
+
+Type theory is a formal language of mathematical logics, designed to serve as a foundation for mathematics and programming languages. Various flavors of type theories exist, differing in their treatment of equality, interpretation of types, computational univalence, etc. We introduce basic concepts in type theory and outline the development.
+
+\subsection*{Universes}
+
+In type theory, everything has a type, even types have a type. We call it the universe and denote it as \AgdaPrimitive{Type}. Such that:
+
+\[ \AgdaFunction{⊥ } \texttt{, } \AgdaRecord{⊤ } \texttt{, } \AgdaDatatype{ℕ } \texttt{, ... } \AgdaSymbol{: } \AgdaPrimitive{Type} \]
+
+But what is the type of \AgdaPrimitive{Type}? It turns out if we naively postulate \AgdaPrimitive{Type} \AgdaSymbol{:} \AgdaPrimitive{Type}, then it leads to Girard’s paradox which causes inconsistency in the system. The solution is to build hierarchy of the universes:
+
+\[ \AgdaPrimitive{Type } \AgdaSymbol{: } \AgdaPrimitive{Type₁ } \AgdaSymbol{: } \AgdaPrimitive{Type₂ } \AgdaSymbol{: } \texttt{...} \]
+
+where each universe is bigger than the previous ones. In addition, if a type is in a universe, it is also in a bigger universe.
+
+\subsection*{Type Families}
+
+The concepts of Type families can be viewed as generalization of ordinary functions, where the codomain is allowed to be \AgdaPrimitive{Type}. For example a predicate that tells the evenness can be defined as a type family over \AgdaDatatype{ℕ}:
+
+\begin{code}
+isEven : ℕ → Type
+isEven zero = ⊤
+isEven (suc zero) = ⊥
+isEven (suc (suc n)) = isEven n
+\end{code}
+
+\subsection*{MLTT}
+
+Per Martin-L\"{o}f introduced MLTT as a constructive foundations for mathematics. It is also known as the intuitionistic type theory or dependent type theory. Form a programming point of view, it adds type level control of data types. For example we can define vector:
+
+\begin{code}
+data Vec (A : Type) : ℕ → Type where
+  [] : Vec A 0
+  _∷_ : {n : ℕ} → A → Vec A n → Vec A (suc n)
+\end{code}
+
+According to this definition, \AgdaDatatype{Vec} \AgdaDatatype{ℕ} \AgdaNumber{3} should have exactly 3 numbers:
+
+\begin{code}
+vec : Vec ℕ 3
+vec = 1 ∷ 2 ∷ 3 ∷ []
+\end{code}
+
+\subsection*{Curry-Howard Correspondence}
+
+It also generalizes function type \AgdaFunction{→} into dependent function type \AgdaFunction{Π} and pair type \AgdaDatatype{×} into dependent pair type \AgdaDatatype{Σ}.
+
+\begin{code}
+Π : (A : Type) (B : A → Type) → Type
+Π A B = (a : A) → B a
+
+record Σ (A : Type) (B : A → Type) : Type where
+  constructor _,_
+  field
+    proj₁ : A
+    proj₂ : B proj₁
+\end{code}
+
+Most importantly, the Curry-Howard correspondence interprets \AgdaFunction{Π} as universal quantification \texttt{∀}, and \AgdaRecord{Σ} as existential quantification. We can show there is some even number exists using \AgdaRecord{Σ}:
+
+\begin{code}
+∃Even : Σ ℕ isEven
+∃Even = 2 , tt
+\end{code}
+
+\subsection*{Equalities}
+
+It is also important to distinguish different notions of equality. The definitional equality is a very strong notion of equality which two terms are reduced to the same normal forms. However, most theorems and results of practical interests do not hold definitionally. Their proofs normally involves doing case analysis, building extra lemmas, etc. We refer this weaker notion of equality the propositional equality.
+
+In Agda, (definitional) equality is represented by identity type, which is a binary type family over any type \AgdaBound{A}, and it is witnessed by \AgdaInductiveConstructor{refl}.
+
+\begin{code}
+data _≡_ {A : Type} (x : A) : A → Type where
+  refl : x ≡ x
+\end{code}
+
+Therefore, if a proposition is hold directly by \AgdaInductiveConstructor{refl}, then It is definitional equality. In contrast, if an explicit proof is required, then it is propositional equality.
+
+\begin{code}
+thm0 : 1 + 1 ≡ 2
+thm0 = refl
+
+thm1 : (n : ℕ) → 1 + n ≡ n + 1
+thm1 zero = refl
+thm1 (suc n) = cong suc (thm1 n)
+  where
+  cong : {A B : Type} (f : A → B) {x y : A} → x ≡ y → f x ≡ f y
+  cong f refl = refl
+\end{code}
+
+\subsection*{Function Extensionality}
+
+Here arises another question - what is the good notion of equality of functions? Function extensionality suggests that two functions should considered as equal if they yield the same output for every input. However, in intensional type theory, for example Agda, where equality is defined as definitional equality, the \AgdaFunction{funExt} is not provable within the system and must instead be postulated.
+
+\begin{code}
+postulate
+  funExt : {A : Type} {B : A → Type} {f g : (x : A) → B x} →
+           ((x : A) → f x ≡ g x) → f ≡ g
+\end{code}
+
+On the other hand, an extensional type theory suggest to treat two notions of equality as the same one. That is, it forces the proposition equality back into the definitional one. However, this approach has significant drawbacks: type checking becomes undecidable, and computation loses canonicity.
+
+\subsection*{HoTT}
+
+The homotopy type theory provides a solution to lacking of extensionality in MLTT by adding the univalence axiom. The univalence axiom is It is introduced by Vladimir Voevodsky

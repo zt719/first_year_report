@@ -19,13 +19,9 @@ variable X Y I : Type
 
 \chapter{Conducted Research}
 
-In this section, we will cover the necessary background knowledge, review related literatures, outline the topics studied and illustrate the current challenge. We assume the reader has basic knowledge in logics and functional programming.
-
-% \input{latex/background1}
-% \input{latex/background2}
+In this section, we will review related literatures, outline the topics studied and illustrate the current challenge. We assume the reader has basic knowledge in logics and functional programming.
 
 \section{Literature Review}
-
 TODO
 
 \section{Types and Categorical Semantics}
@@ -180,15 +176,7 @@ That gives rise to the following commutative diagram:
 
 \subsection{Strict Positivity}
 
-Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow in the domain. \AgdaDatatype{ℕ} is one of such types, and it can be trivially checked if we rewrite its constructors into an equivalent form:
-
-\begin{code}
-data ℕ' : Type where
-  zero : (⊤ → ⊤) → ℕ'
-  suc : (⊤ → ℕ') → ℕ'
-\end{code}
-
-One typical counterexample is \AgdaDatatype{Weird}:
+Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow in the domain. One typical counterexample is \AgdaDatatype{Weird}:
 
 \begin{code}
 {-# NO_POSITIVITY_CHECK #-}

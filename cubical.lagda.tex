@@ -3,13 +3,13 @@
 open import Cubical.Foundations.Prelude
 \end{code}
 
-\subsubsection*{Cubical TT}
+\subsection*{Cubical TT}
 
 Finally, cubical type theory!!!
 
-\subsection{Category Theory}
+\section{Category Theory}
 
-\subsubsection*{Categories}
+\subsection*{Categories}
 
 We define a category as follow:
 
@@ -30,7 +30,7 @@ We define a category as follow:
 %   _[_,_] = Hom
 % \end{code}
 
-\subsubsection*{Functors}
+\subsection*{Functors}
 
 % \begin{code}
 % record Func (ℂ 𝔻 : Cat) : Type₁ where
@@ -40,7 +40,7 @@ We define a category as follow:
 %     F₁ : ∀ {X Y} → ℂ [ X , Y ] → 𝔻 [ F₀ X , F₀ Y ]
 % \end{code}
 
-\subsubsection*{Natural Transformations}
+\subsection*{Natural Transformations}
 
 % \begin{code}
 % record NatTrans {ℂ 𝔻} (F G : Func ℂ 𝔻) : Type where
@@ -53,7 +53,7 @@ We define a category as follow:
 %     com : ∀ {X Y} (f : ℂ [ X , Y ]) → (η Y ∘ F₁ f) ≡ (G₁ f ∘ η X)
 % \end{code}
 
-\subsubsection*{Algebra}
+\subsection*{Algebra}
 
 % \begin{code}
 % record Alg {ℂ : Cat} (F : Func ℂ ℂ) : Type where

@@ -1,272 +1,398 @@
-\chapter{Prerequisites}
-
-We assume basic knowledge in logics and functional programming. We give overview of background materials and fix terminology by introducing type theory (with Agda) and category theory. 
-
-\section{Type Theory}
-
-\textbf{Martin-Löf Type Theory - MLTT} is a formal language in mathematics logics, where all objects and functions are assigned to some types. Additionally, it introduces advanced concepts like dependent types, universe size, strong normalization, etc. avoiding paradoxes and being used as foundations of mathematics and programmings.
-
-Inference rules are the fundamental set of rules that regulate all valid definitions and computations. Especially, we are interested in rules about the formation of contexts, types and terms. Take natural number as an example:
-
-\[ \frac{}{\texttt{⊢ ℕ type}} \]
-
-\[
-  \frac{}{\texttt{⊢ zero : ℕ}}
-  \hspace{2.0cm} 
-  \frac{}{\texttt{⊢ suc : ℕ → ℕ}}
-\]
-
-\[ 
-  \frac{
-    \begin{array}{l}
-      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
-      \texttt{Γ ⊢ p₀ : P(zero)} \\
-      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
-    \end{array}
-  }{
-    \texttt{Γ ⊢ recℕ(p₀, pₛ) : Π (n : ℕ). P(n)}
-  }
-\]
-
-\[
-  \frac{
-    \begin{array}{l}
-      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
-      \texttt{Γ ⊢ p₀ : P(zero)} \\
-      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
-    \end{array}
-  }{
-    \texttt{Γ ⊢ recℕ(p₀,pₛ,zero) ≐ p₀ : P(zero)}
-  }
-\]
-
-\[
-  \frac{
-    \begin{array}{l}
-      \texttt{Γ, n : ℕ ⊢ P(n) type} \\
-      \texttt{Γ ⊢ p₀ : P(zero)} \\
-      \texttt{Γ ⊢ pₛ : Π (n : ℕ). P(n) → P(suc(n))}
-    \end{array}
-  }{
-    \texttt{Γ ⊢ recℕ(p₀,pₛ,suc(n)) ≐ pₛ(n,recℕ(p₀,pₛ,n)) : P(suc(n))}
-  }
-\]
-
-
-\section{Agda}
-
-\textbf{Agda} is dependently typed programming language and interactive theorem prover based on MLTT. We therefore use Agda as our meta language in our research and this report. 
-
-\subsubsection*{Natural Number}
-
-To define natural number \AgdaDatatype{ℕ} as a new type in Agda:
-
 \begin{code}[hide]%
-\>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
-\AgdaKeyword{OPTIONS}\AgdaSpace{}%
-\AgdaPragma{--guardedness}\AgdaSpace{}%
-\AgdaSymbol{\#-\}}\<%
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Data.Empty}\<%
 \\
 \>[0]\AgdaKeyword{open}\AgdaSpace{}%
 \AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Relation.Binary.PropositionalEquality}\<%
+\AgdaModule{Data.Unit}\<%
+\\
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Data.Nat}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set₁}\<%
+\\
+\>[0]\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaPrimitive{Set}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaKeyword{infixr}\AgdaSpace{}%
+\AgdaNumber{5}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{}∷\AgdaUnderscore{}}}\<%
+\\
+\>[0]\AgdaKeyword{infix}%
+\>[7]\AgdaNumber{4}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{\AgdaUnderscore{}≡\AgdaUnderscore{}}}\<%
 \end{code}
 
+\chapter{Prerequisites}
+
+We adopt Martin-L\"{o}f type theory - MLTT and category theory as the framework. In particular, we use Agda, an implemented programming language, for our study and in this report.
+
+Assuming \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} and \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{B}, the following are standard Agda syntax for common algebraic data types:
+
+\begin{itemize}
+  \item{\AgdaFunction{⊥} - Empty Type, with no term}
+  \item{\AgdaRecord{⊤} - Unit Type, with \AgdaInductiveConstructor{tt} \AgdaSymbol{:} \AgdaRecord{⊤}}
+  \item{\AgdaRecord{×} - Product Type, with \AgdaBound{a} \AgdaInductiveConstructor{,} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{×} \AgdaBound{B}}
+  \item{\AgdaDatatype{⊎} - Coproduct (Sum) Type, with \AgdaInductiveConstructor{inj₁} \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}, and \AgdaInductiveConstructor{inj₂} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B} }
+\end{itemize}
+
+\section{Type Theory}
+
+Type theory is a formal language of mathematical logics, designed to serve as a foundation for mathematics and programming languages. Various flavors of type theories exist, differing in their treatment of equality, interpretation of types, computational univalence, etc. We introduce basic concepts in type theory and outline the development.
+
+\subsection*{Universes}
+
+In type theory, everything has a type, even types have a type. We call it the universe and denote it as \AgdaPrimitive{Type}. Such that:
+
+\[ \AgdaFunction{⊥ } \texttt{, } \AgdaRecord{⊤ } \texttt{, } \AgdaDatatype{ℕ } \texttt{, ... } \AgdaSymbol{: } \AgdaPrimitive{Type} \]
+
+But what is the type of \AgdaPrimitive{Type}? It turns out if we naively postulate \AgdaPrimitive{Type} \AgdaSymbol{:} \AgdaPrimitive{Type}, then it leads to Girard’s paradox which causes inconsistency in the system. The solution is to build hierarchy of the universes:
+
+\[ \AgdaPrimitive{Type } \AgdaSymbol{: } \AgdaPrimitive{Type₁ } \AgdaSymbol{: } \AgdaPrimitive{Type₂ } \AgdaSymbol{: } \texttt{...} \]
+
+where each universe is bigger than the previous ones. In addition, if a type is in a universe, it is also in a bigger universe.
+
+\subsection*{Type Families}
+
+The concepts of Type families can be viewed as generalization of ordinary functions, where the codomain is allowed to be \AgdaPrimitive{Type}. For example a predicate that tells the evenness can be defined as a type family over \AgdaDatatype{ℕ}:
+
 \begin{code}%
-\>[0]\AgdaComment{\{-\ Formation\ Rule\ -\}}\<%
-\\
-\>[0]\AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
+\>[0]\AgdaFunction{isEven}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\<%
+\\
+\>[0]\AgdaFunction{isEven}\AgdaSpace{}%
+\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaRecord{⊤}\<%
+\\
+\>[0]\AgdaFunction{isEven}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaInductiveConstructor{zero}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{⊥}\<%
+\\
+\>[0]\AgdaFunction{isEven}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSymbol{))}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{isEven}\AgdaSpace{}%
+\AgdaBound{n}\<%
+\end{code}
+
+\subsection*{MLTT}
+
+Per Martin-L\"{o}f introduced MLTT as a constructive foundations for mathematics. It is also known as the intuitionistic type theory or dependent type theory. Form a programming point of view, it adds type level control of data types. For example we can define vector:
+
+\begin{code}%
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{Vec}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSpace{}%
 \AgdaKeyword{where}\<%
 \\
 \>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaComment{\{-\ Introduction\ Rule\ -\}}\<%
+\>[2]\AgdaInductiveConstructor{[]}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{Vec}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaNumber{0}\<%
 \\
 %
-\>[2]\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\>[2]\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{}∷\AgdaUnderscore{}}}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-%
-\>[2]\AgdaInductiveConstructor{suc}%
-\>[7]\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\end{code}
-
-We need to explicitly define type constructor \AgdaDatatype{ℕ} and data constructors \AgdaInductiveConstructor{zero} and \AgdaInductiveConstructor{suc}, which correspond to the formation rule and introduction rule.
-
-\begin{code}%
-\>[0]\AgdaComment{\{-\ Elimination\ Rule\ -\}}\<%
-\\
-\>[0]\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{P}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
-\AgdaPrimitive{Set}\AgdaSymbol{)}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\<%
-\\
-%
-\>[2]\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaSymbol{((}\AgdaBound{n}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
+\AgdaDatatype{Vec}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
 \AgdaBound{n}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
+\AgdaDatatype{Vec}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSymbol{))}\<%
-\\
-%
-\>[2]\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{n}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{n}\<%
-\\
-\>[0]\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{p₀}\<%
-\\
-\>[0]\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
 \AgdaBound{n}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}+2}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}+2}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{\AgdaUnderscore{}}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSymbol{))}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{\AgdaUnderscore{}}\AgdaSpace{}%
-\AgdaBound{ssn}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaBound{ssn}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}+2'}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaInductiveConstructor{zero}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{+2'}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSymbol{)}\<%
-\\
-\>[0]\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{+2'}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{suc}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{n}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{+2}}\AgdaSymbol{)}\<%
 \end{code}
 
-The elimination rule, also called recursor in FP, tells how to define functions or proofs out of \AgdaDatatype{ℕ}. We can define function \AgdaFunction{\AgdaUnderscore{}+2} using \AgdaFunction{recℕ}, or alternatively using pattern matching, which provides equivalent definition but syntactically better.
+According to this definition, \AgdaDatatype{Vec} \AgdaDatatype{ℕ} \AgdaNumber{3} should have exactly 3 numbers:
 
 \begin{code}%
-\>[0]\AgdaComment{\{-\ Computation\ Rule\ -\}}\<%
-\\
-\>[0]\AgdaFunction{compℕ₀}\AgdaSpace{}%
+\>[0]\AgdaFunction{vec}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSymbol{\}}\<%
+\AgdaDatatype{Vec}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaNumber{3}\<%
+\\
+\>[0]\AgdaFunction{vec}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaNumber{1}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{∷}}\AgdaSpace{}%
+\AgdaNumber{2}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{∷}}\AgdaSpace{}%
+\AgdaNumber{3}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{∷}}\AgdaSpace{}%
+\AgdaInductiveConstructor{[]}\<%
+\end{code}
+
+\subsection*{Curry-Howard Correspondence}
+
+It also generalizes function type \AgdaFunction{→} into dependent function type \AgdaFunction{Π} and pair type \AgdaDatatype{×} into dependent pair type \AgdaDatatype{Σ}.
+
+\begin{code}%
+\>[0]\AgdaFunction{Π}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{B}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\<%
+\\
+\>[0]\AgdaFunction{Π}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{a}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSpace{}%
+\AgdaBound{a}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaKeyword{record}\AgdaSpace{}%
+\AgdaRecord{Σ}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{B}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
 \\
 \>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSpace{}%
-\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
-\AgdaBound{p₀}\<%
+\>[2]\AgdaKeyword{constructor}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{},\AgdaUnderscore{}}}\<%
 \\
-\>[0]\AgdaFunction{compℕ₀}\AgdaSpace{}%
+%
+\>[2]\AgdaKeyword{field}\<%
+\\
+\>[2][@{}l@{\AgdaIndent{0}}]%
+\>[4]\AgdaField{proj₁}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\<%
+\\
+%
+\>[4]\AgdaField{proj₂}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSpace{}%
+\AgdaField{proj₁}\<%
+\end{code}
+
+Most importantly, the Curry-Howard correspondence interprets \AgdaFunction{Π} as universal quantification \texttt{∀}, and \AgdaRecord{Σ} as existential quantification. We can show there is some even number exists using \AgdaRecord{Σ}:
+
+\begin{code}%
+\>[0]\AgdaFunction{∃Even}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaRecord{Σ}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSpace{}%
+\AgdaFunction{isEven}\<%
+\\
+\>[0]\AgdaFunction{∃Even}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaNumber{2}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaInductiveConstructor{tt}\<%
+\end{code}
+
+\subsection*{Equalities}
+
+It is also important to distinguish different notions of equality. The definitional equality is a very strong notion of equality which two terms are reduced to the same normal forms. However, most theorems and results of practical interests do not hold definitionally. Their proofs normally involves doing case analysis, building extra lemmas, etc. We refer this weaker notion of equality the propositional equality.
+
+In Agda, (definitional) equality is represented by identity type, which is a binary type family over any type \AgdaBound{A}, and it is witnessed by \AgdaInductiveConstructor{refl}.
+
+\begin{code}%
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{\AgdaUnderscore{}≡\AgdaUnderscore{}}}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaInductiveConstructor{refl}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{x}\<%
+\end{code}
+
+Therefore, if a proposition is hold directly by \AgdaInductiveConstructor{refl}, then It is definitional equality. In contrast, if an explicit proof is required, then it is propositional equality.
+
+\begin{code}%
+\>[0]\AgdaFunction{thm0}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaNumber{1}\AgdaSpace{}%
+\AgdaOperator{\AgdaPrimitive{+}}\AgdaSpace{}%
+\AgdaNumber{1}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaNumber{2}\<%
+\\
+\>[0]\AgdaFunction{thm0}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaInductiveConstructor{refl}\<%
 \\
 %
 \\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{compℕₛ}\AgdaSpace{}%
+\>[0]\AgdaFunction{thm1}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{∀}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSymbol{\}}\<%
+\AgdaSymbol{(}\AgdaBound{n}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{ℕ}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaNumber{1}\AgdaSpace{}%
+\AgdaOperator{\AgdaPrimitive{+}}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{n}\AgdaSpace{}%
+\AgdaOperator{\AgdaPrimitive{+}}\AgdaSpace{}%
+\AgdaNumber{1}\<%
 \\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
+\>[0]\AgdaFunction{thm1}\AgdaSpace{}%
+\AgdaInductiveConstructor{zero}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{refl}\<%
+\\
+\>[0]\AgdaFunction{thm1}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
 \AgdaBound{n}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
-\AgdaBound{n}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{recℕ}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{p₀}\AgdaSpace{}%
-\AgdaBound{pₛ}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{cong}\AgdaSpace{}%
+\AgdaInductiveConstructor{suc}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaFunction{thm1}\AgdaSpace{}%
 \AgdaBound{n}\AgdaSymbol{)}\<%
 \\
-\>[0]\AgdaFunction{compℕₛ}\AgdaSpace{}%
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaKeyword{where}\<%
+\\
+%
+\>[2]\AgdaFunction{cong}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{A}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{x}\AgdaSpace{}%
+\AgdaBound{y}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{y}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaBound{y}\<%
+\\
+%
+\>[2]\AgdaFunction{cong}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaInductiveConstructor{refl}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaInductiveConstructor{refl}\<%
 \end{code}
 
-Finally, the computation rule describes how eliminations behave on terms. It is primitively implemented in Agda type system and therefore trivially hold.
+\subsection*{Function Extensionality}
 
-\section{Category Theory}
+Here arises another question - what is the good notion of equality of functions? Function extensionality suggests that two functions should considered as equal if they yield the same output for every input. However, in intensional type theory, for example Agda, where equality is defined as definitional equality, the \AgdaFunction{funExt} is not provable within the system and must instead be postulated.
+
+\begin{code}%
+\>[0]\AgdaKeyword{postulate}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaPostulate{funExt}\AgdaSpace{}%
+\AgdaSymbol{:}%
+\>[191I]\AgdaSymbol{\{}\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{B}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{f}\AgdaSpace{}%
+\AgdaBound{g}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSymbol{\}}\AgdaSpace{}%
+\AgdaSymbol{→}\<%
+\\
+\>[.][@{}l@{}]\<[191I]%
+\>[11]\AgdaSymbol{((}\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{g}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{≡}}\AgdaSpace{}%
+\AgdaBound{g}\<%
+\end{code}
+
+On the other hand, an extensional type theory suggest to treat two notions of equality as the same one. That is, it forces the proposition equality back into the definitional one. However, this approach has significant drawbacks: type checking becomes undecidable, and computation loses canonicity.
+
+\subsection*{HoTT}
+
+The homotopy type theory provides a solution to lacking of extensionality in MLTT by adding the univalence axiom. The univalence axiom is It is introduced by Vladimir Voevodsky

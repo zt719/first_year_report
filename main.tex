@@ -1,17 +1,69 @@
 \documentclass{report}
 
 % Preamble
-\input{latex/preamble}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{agda}
+\usepackage{fontspec}
+\usepackage{tikz-cd}
+\usepackage{tikz}
+\usetikzlibrary{trees}
+\usetikzlibrary{positioning}
+
+% \hypersetup{pageanchor=false}
+
+% Mono-Space Font
+\setmonofont{JuliaMono-Regular.ttf}[
+  Path  = ./fonts/,
+  Scale = 0.85
+  ]
+
+\linespread{1.2}
+
+% Graphics Path
+\graphicspath{ {./graphics/} }
 
 \begin{document}
 
 \pagenumbering{gobble}
 
 % Title Page
-\input{latex/titlepage}
+\begin{titlepage}
+    \centering
+    
+    \includegraphics[width=0.7\textwidth]{nottingham-logo.png} \\[1.5cm]
+    
+    {\huge \textbf{Progression Review Report}} \\[0.5cm]
+    {\large Formalizing Higher-Order Containers} \\[1.0cm]
+    
+    {\large \textbf{Zhili Tian}} \\[0.2cm]
+    {\large Supervised by Thorsten Altenkirch} \\ [0.2cm]
+    {\large \& Ulrik Buchholtz} \\[2.0cm]
+
+    \includegraphics[width=0.7\textwidth]{fplab-title7.png} \\[0.5cm]
+
+    {\large Functional Programming Lab} \\[0.2cm]    
+    {\large School of Computer Science} \\[0.2cm]
+    {\large University of Nottingham} \\[1.0cm]
+    
+    {\large \today}
+    
+    \vfill
+
+\end{titlepage}
+
+\pagenumbering{roman}
+\addtocounter{page}{1}
 
 % Abstract
-\input{latex/abstract}
+\begin{abstract}
+
+Giving a short overview of the work in your project.\cite{ABBOTT20053}
+
+\end{abstract}
+
+\addtocounter{page}{1}
 
 % Contents Table
 \tableofcontents
@@ -21,10 +73,12 @@
 
 % Main Body
 \input{latex/introduction}
-% \input{latex/research}
+\input{latex/prerequisites}
+\input{latex/cubical}
+\input{latex/research}
 \input{latex/contribution}
-\input{latex/future}
 \input{latex/conclusions}
+\input{latex/future}
 \input{latex/appendix}
 
 % Bibliography
