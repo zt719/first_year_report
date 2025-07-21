@@ -6,13 +6,16 @@ open import Data.Nat
 Type : Set₁
 Type = Set
 
+Type₁ : Set₂
+Type₁ = Set₁
+
 infixr 5 _∷_
 infix  4 _≡_
 \end{code}
 
-\chapter{Prerequisites}
+\chapter{Prerequisites and Settings}
 
-We adopt Martin-L\"{o}f type theory - MLTT and category theory as the framework. In particular, we use Agda, an implemented programming language, for our study and in this report.
+We assume the reader has basic knowledge in logics, functional programming and category theory. We introduce type theory and set it as our framework. In particular, we use Agda, an implemented programming language, for our study and in this report.
 
 Assuming \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} and \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{B}, the following are standard Agda syntax for common algebraic data types:
 
@@ -20,7 +23,7 @@ Assuming \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} and \AgdaBound{b} \AgdaSymbo
   \item{\AgdaFunction{⊥} - Empty Type, with no term}
   \item{\AgdaRecord{⊤} - Unit Type, with \AgdaInductiveConstructor{tt} \AgdaSymbol{:} \AgdaRecord{⊤}}
   \item{\AgdaRecord{×} - Product Type, with \AgdaBound{a} \AgdaInductiveConstructor{,} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{×} \AgdaBound{B}}
-  \item{\AgdaDatatype{⊎} - Coproduct (Sum) Type, with \AgdaInductiveConstructor{inj₁} \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}, and \AgdaInductiveConstructor{inj₂} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B} }
+  \item{\AgdaDatatype{⊎} - Coproduct (Sum) Type, with \AgdaInductiveConstructor{inj₁} \AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}, and \AgdaInductiveConstructor{inj₂} \AgdaBound{b} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}}
 \end{itemize}
 
 \section{Type Theory}
@@ -37,11 +40,11 @@ But what is the type of \AgdaPrimitive{Type}? It turns out if we naively postula
 
 \[ \AgdaPrimitive{Type } \AgdaSymbol{: } \AgdaPrimitive{Type₁ } \AgdaSymbol{: } \AgdaPrimitive{Type₂ } \AgdaSymbol{: } \texttt{...} \]
 
-where each universe is bigger than the previous ones. In addition, if a type is in a universe, it is also in a bigger universe.
+where each universe is bigger than the previous ones. In addition, if a type is in a universe, it can be lifted into a bigger universe.
 
 \subsection*{Type Families}
 
-The concepts of Type families can be viewed as generalization of ordinary functions, where the codomain is allowed to be \AgdaPrimitive{Type}. For example a predicate that tells the evenness can be defined as a type family over \AgdaDatatype{ℕ}:
+The concepts of type families can be viewed as generalization of ordinary functions, where the codomain is allowed to be \AgdaPrimitive{Type}. For example a predicate that tells the evenness can be defined as a type family over \AgdaDatatype{ℕ}:
 
 \begin{code}
 isEven : ℕ → Type
@@ -67,9 +70,7 @@ vec : Vec ℕ 3
 vec = 1 ∷ 2 ∷ 3 ∷ []
 \end{code}
 
-\subsection*{Curry-Howard Correspondence}
-
-It also generalizes function type \AgdaFunction{→} into dependent function type \AgdaFunction{Π} and pair type \AgdaDatatype{×} into dependent pair type \AgdaDatatype{Σ}.
+Type families also generalize function type \AgdaFunction{→} into dependent function type \AgdaFunction{Π} and pair type \AgdaDatatype{×} into dependent pair type \AgdaDatatype{Σ}.
 
 \begin{code}
 Π : (A : Type) (B : A → Type) → Type
@@ -82,7 +83,7 @@ record Σ (A : Type) (B : A → Type) : Type where
     proj₂ : B proj₁
 \end{code}
 
-Most importantly, the Curry-Howard correspondence interprets \AgdaFunction{Π} as universal quantification \texttt{∀}, and \AgdaRecord{Σ} as existential quantification. We can show there is some even number exists using \AgdaRecord{Σ}:
+We can now extend the Curry-Howard correspondence by interpreting \AgdaFunction{Π} as universal quantification and \AgdaRecord{Σ} as existential quantification. For example, we can show there is some even number through \AgdaRecord{Σ}:
 
 \begin{code}
 ∃Even : Σ ℕ isEven
@@ -126,6 +127,84 @@ postulate
 
 On the other hand, an extensional type theory suggest to treat two notions of equality as the same one. That is, it forces the proposition equality back into the definitional one. However, this approach has significant drawbacks: type checking becomes undecidable, and computation loses canonicity.
 
+\subsection*{UIP}
+
+Given two terms \AgdaBound{x y} \AgdaSymbol{:} \AgdaBound{A} and two proofs of equality \AgdaBound{p q} \AgdaSymbol{:} \AgdaBound{x} \AgdaDatatype{≡} \AgdaBound{y}, should we have \AgdaBound{p} \AgdaDatatype{≡} \AgdaBound{q}?
+
+The answer is, in MLTT, the identity type can have multiple district proofs, so \AgdaBound{p} \AgdaFunction{≢} \AgdaBound{q} may be possible. However, one could add the uniqueness of identity proofs, aka K, as an axiom to force \AgdaBound{p} \AgdaDatatype{≡} \AgdaBound{q} always holds. From another point of view, types are treated much like sets, as in set theory two terms being equal is just a proposition and nobody talks about the equality of propositions.
+
 \subsection*{HoTT}
 
-The homotopy type theory provides a solution to lacking of extensionality in MLTT by adding the univalence axiom. The univalence axiom is It is introduced by Vladimir Voevodsky
+The homotopy type theory extends MLTT further and provides an alternative interpretation of types. By adopting the concepts from homotopy theory, it types are viewed as spaces and equalities are viewed as paths between spaces.
+
+We will omit a discussion of the univalence axiom, as it falls outside the scope of this report.
+
+\subsection*{H-Levels}
+
+UIP does not hold in HoTT and it is not allowed to be postulated. Instead, HoTT introduces the concepts of h(omotopy)-levels in order to interpret and fix this nested equalities issue. The idea is to classify and assign each type (or space) to a h-level.
+
+At the base, a (−2)-type, or the contractible, is one in which has exactly one term (or center point), up to equality (or homotopy):
+
+\begin{code}
+record isContr (A : Type) : Type where
+  field
+    center : A
+    paths : (x : A) → center ≡ x
+\end{code}
+
+A (−1)-type, or the proposition, is one that all terms are equal:
+
+\begin{code}
+isProp : Type → Type
+isProp A = (x y : A) → x ≡ y
+\end{code}
+
+A 0-type, or set, is one in which all equalities are equal.
+
+\begin{code}
+isSet : Type → Type
+isSet A = (x y : A) (p q : x ≡ y) → p ≡ q
+\end{code}
+
+Indeed, one could inductively define \AgdaFunction{isHLevel} over \AgdaDatatype{ℕ} to get general form of higher homotopy type.
+
+\begin{code}
+isOfHLevel : ℕ → Type → Type
+isOfHLevel zero A = isContr A
+isOfHLevel (suc n) A = (x y : A) → isOfHLevel n (x ≡ y)
+\end{code}
+
+\subsection*{CTT}
+
+One of the major drawbacks of HoTT is its lack of computability. Cubical type theory is then developed as a computable version of HoTT. In particular, equality (or path) of type \AgdaBound{A} is redefined as a function \AgdaGeneralizable{I} \AgdaSymbol{→} \AgdaBound{A}, where \AgdaGeneralizable{I} is a primitive type called interval. There are two terms in an interval - \AgdaInductiveConstructor{i0} \texttt{,} \AgdaInductiveConstructor{i1} \AgdaSymbol{:} \AgdaGeneralizable{I}, being used to parametrize two endpoints of a path. In Cubical Agda, path type is defined as follow.
+
+\begin{code}[hide]
+module _ {I : Type} where
+\end{code}
+
+\begin{code}
+  Path : (A : Type) → A  → A → Type
+  Path A a₀ a₁ = I → A
+\end{code}
+
+A path \AgdaFunction{p} comes also with two side constraints: \AgdaFunction{p }\AgdaInductiveConstructor{i0 }\AgdaSymbol{= }\AgdaBound{a₀} and \AgdaFunction{p }\AgdaInductiveConstructor{i1 }\AgdaSymbol{= }\AgdaBound{a₁}
+
+We can explicitly define path of path to capture equalities of equalities:
+
+\begin{code}
+  Square : (A : Type) {a₀₀ a₀₁ a₁₀ a₁₁ : A} 
+    → Path A a₀₀ a₀₁ → Path A a₁₀ a₁₁ 
+    → Path A a₀₀ a₁₀ → Path A a₀₁ a₁₁
+    → Type
+  Square A top bottom left right = I → I → A
+\end{code}
+
+Again a square \AgdaFunction{s} should satisfy the cubical side conditions which makes the function evaluation to each \AgdaBound{a} point-wisely. Finally, one could repeat this to define cubes and general higher cubes.
+
+\section{Non-Cubical Settings}
+
+Terence Tao once describes three stages in mathematical learning and practice: pre-rigorous, rigorous, and post-rigorous. The idea of post-rigorous is that, when one already know how to do thins rigorously, then he can move fluently between intuition, informal reasoning, and formal rigor as needed.
+
+In our context, we conduct theoretical research within HoTT, exploring concepts such as the interpretation of containers as endofunctors on h-level sets. This requires us to explicitly track h-level fields in Cubical Agda. We did formalizations in both MLTT and CTT and decided to continue and present our code using vanilla Agda.
+
+We now explicitly state our working assumptions. H-level checking is hidden, therefore equalities between equalities within set-level structures are ignored. We also assume function extensionality and minimize the use of universe levels for simplicity.

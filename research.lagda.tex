@@ -19,7 +19,7 @@ variable X Y I : Type
 
 \chapter{Conducted Research}
 
-In this section, we will review related literatures, outline the topics studied and illustrate the current challenge. We assume the reader has basic knowledge in logics and functional programming.
+In this section, we will first review related literatures. Then we outline the topics studied, such as categorical semantics of inductive and coinductive types, containers, W and M types, etc. Finally, we illustrate the current challenge.
 
 \section{Literature Review}
 TODO
@@ -28,26 +28,23 @@ TODO
 
 \subsection{Inductive Types}
 
-We give an informal definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
+We now give a definition of inductive types. An inductive type \AgdaDatatype{A} is specified by a finite set of its data constructors, and a function \AgdaFunction{f} \AgdaSymbol{:} \AgdaDatatype{A} \AgdaSymbol{→} \AgdaDatatype{B}, where \AgdaDatatype{B} is arbitrary type.
 
 \subsubsection*{Natural Number}
 
-The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano axiom. The first constructor says \AgdaInductiveConstructor{zero} is a \AgdaDatatype{ℕ}. The second constructor is a function that sends \AgdaDatatype{ℕ} to \AgdaDatatype{ℕ}, which in other word, if \AgdaBound{n} is a \AgdaDatatype{ℕ}, so is the \AgdaBound{suc n}. 
+We can define natural number \texttt{ℕ = \{0, 1, 2, 3, ...\}} as an inductive type. The constructors of natural number \AgdaDatatype{ℕ} follows exactly the Peano's 1st and 6th axioms - "0 is a natural number" and "For every natural number n, S(n) is a natural number".
 
 \begin{code}
 data ℕ : Type where
   zero : ℕ
   suc : ℕ → ℕ
-{-# BUILTIN NATURAL ℕ #-}
-
-_ : ℕ ⊎ ℕ
-_ = inj₁ zero
-
-_ : ℕ × ℕ
-_ = zero , zero
 \end{code}
 
- The \AgdaDatatype{ℕ} itself is not so useful until we spell out its induction principle \AgdaFunction{indℕ}. In principle, whenever we need to define a function out of \AgdaDatatype{ℕ}, we always using \AgdaFunction{indℕ}. That also corresponds to one of the Peano axioms.
+\begin{code}[hide]
+{-# BUILTIN NATURAL ℕ #-}
+\end{code}
+
+ We also need to spell out the induction principle, also known as the eliminator, of the type. In this case, we are doing mathematical induction on \AgdaDatatype{ℕ}:
 
 \begin{code}
 indℕ : (P : ℕ → Type)
@@ -56,42 +53,22 @@ indℕ : (P : ℕ → Type)
   → (n : ℕ) → P n
 indℕ P z s zero = z
 indℕ P z s (suc n) = s n (indℕ P z s n)
-
-double : ℕ → ℕ
-double = indℕ (λ _ → ℕ) zero (λ n dn → suc (suc dn))
 \end{code}
 
-It is rather verbose to explicitly call induction every time. Fortunately, we are able to instead use pattern-matching in Agda, which implements induction internally and guarantees correctness.
+In principle, \AgdaFunction{indℕ} should be explicitly called to define any function out of \AgdaDatatype{ℕ}, which can be a rather verbose process. Fortunately, one is able to instead use pattern-matching to define functions, as it internally implements induction while ensuring correctness.
 
 \begin{code}
+double : ℕ → ℕ
+double = indℕ (λ _ → ℕ) zero (λ n dn → suc (suc dn))
+
 double' : ℕ → ℕ
 double' zero = zero
-double' (suc n) = suc (suc n)
+double' (suc n) = suc (suc (double n))
 \end{code}
 
 \subsubsection*{Inductive Types are Initial Algebras}
 
-The category of algebra in \AgdaFunction{Type} of a given endofunctor \AgdaBound{F} \AgdaSymbol{:} \AgdaFunction{Type} \AgdaSymbol{→} \AgdaFunction{Type} is defined as:
-\begin{itemize}
-  \item{Objects are:}
-  \begin{itemize}
-    \item{A carrier type \AgdaBound{A} \AgdaSymbol{:} \AgdaFunction{Type}}, and
-    \item{A function \AgdaBound{α} \AgdaSymbol{:} \AgdaBound{F} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{A}}
-  \end{itemize}
-  \item{Morphisms of \AgdaSymbol{(}\AgdaBound{A} \AgdaInductiveConstructor{,} \AgdaBound{α}\AgdaSymbol{)} and \AgdaSymbol{(}\AgdaBound{B} \AgdaInductiveConstructor{,} \AgdaBound{β}\AgdaSymbol{)} are:}
-  \begin{itemize}
-    \item{A morphism \AgdaBound{f} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B}}, and
-    \item{A commuting diagram:}
-      \begin{tikzcd}
-      \AgdaBound{F A} \arrow[r, "\AgdaBound{F f}"] \arrow[d, "\AgdaBound{α}"]
-      & \AgdaBound{F B} \arrow[d, "\AgdaBound{β}"] \\
-      \AgdaBound{A} \arrow[r, "\AgdaBound{f}"]
-      & \AgdaBound{B}
-      \end{tikzcd}
-  \end{itemize}
-\end{itemize}
-
-After proving identity and composition of morphisms, we obtain a category of algebras. It turns out that in every such category, there exists an initial object which corresponds to an inductive type. We show a concrete example and discuss the general theory in later section.
+In the categorical semantics, inductive types correspond to initial algebras.
 
 \subsubsection*{Natural Number is Initial Algebra of Maybe}
 

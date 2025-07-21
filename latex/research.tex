@@ -62,7 +62,7 @@
 
 \chapter{Conducted Research}
 
-In this section, we will review related literatures, outline the topics studied and illustrate the current challenge. We assume the reader has basic knowledge in logics and functional programming.
+In this section, we will first review related literatures. Then we outline the topics studied, such as categorical semantics of inductive and coinductive types, containers, W and M types, etc. Finally, we illustrate the current challenge.
 
 \section{Literature Review}
 TODO
@@ -71,11 +71,11 @@ TODO
 
 \subsection{Inductive Types}
 
-We give an informal definition of inductive types followed by some examples. An inductive type \AgdaDatatype{A} is given by a finite number of data constructors, and a rule says how to define a function out of \AgdaDatatype{A} to arbitrary type \AgdaDatatype{B}.
+We now give a definition of inductive types. An inductive type \AgdaDatatype{A} is specified by a finite set of its data constructors, and a function \AgdaFunction{f} \AgdaSymbol{:} \AgdaDatatype{A} \AgdaSymbol{→} \AgdaDatatype{B}, where \AgdaDatatype{B} is arbitrary type.
 
 \subsubsection*{Natural Number}
 
-The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano axiom. The first constructor says \AgdaInductiveConstructor{zero} is a \AgdaDatatype{ℕ}. The second constructor is a function that sends \AgdaDatatype{ℕ} to \AgdaDatatype{ℕ}, which in other word, if \AgdaBound{n} is a \AgdaDatatype{ℕ}, so is the \AgdaBound{suc n}. 
+We can define natural number \texttt{ℕ = \{0, 1, 2, 3, ...\}} as an inductive type:
 
 \begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
@@ -95,42 +95,19 @@ The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano ax
 \AgdaDatatype{ℕ}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{ℕ}\<%
-\\
+\end{code}
+
+\begin{code}[hide]%
 \>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
 \AgdaKeyword{BUILTIN}\AgdaSpace{}%
 \AgdaKeyword{NATURAL}\AgdaSpace{}%
 \AgdaDatatype{ℕ}\AgdaSpace{}%
 \AgdaSymbol{\#-\}}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{\AgdaUnderscore{}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaOperator{\AgdaDatatype{⊎}}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaSymbol{\AgdaUnderscore{}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{inj₁}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{\AgdaUnderscore{}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{×}}\AgdaSpace{}%
-\AgdaDatatype{ℕ}\<%
-\\
-\>[0]\AgdaSymbol{\AgdaUnderscore{}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaInductiveConstructor{zero}\<%
 \end{code}
 
- The \AgdaDatatype{ℕ} itself is not so useful until we spell out its induction principle \AgdaFunction{indℕ}. In principle, whenever we need to define a function out of \AgdaDatatype{ℕ}, we always using \AgdaFunction{indℕ}. That also corresponds to one of the Peano axioms.
+The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano axiom. The first constructor says \AgdaInductiveConstructor{zero} is a \AgdaDatatype{ℕ}. The second constructor is a function that sends \AgdaDatatype{ℕ} to \AgdaDatatype{ℕ}, which in other word, if \AgdaBound{n} is a \AgdaDatatype{ℕ}, so is the \AgdaBound{suc n}. 
+
+ We also need to spell out the induction principle, aka the eliminator, of \AgdaFunction{ℕ}:
 
 \begin{code}%
 \>[0]\AgdaFunction{indℕ}\AgdaSpace{}%
@@ -190,9 +167,11 @@ The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano ax
 \AgdaBound{z}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSpace{}%
 \AgdaBound{n}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+In principle, we always need to call \AgdaFunction{indℕ} explicitly to define a function out of \AgdaDatatype{ℕ}. It is a rather verbose process. Fortunately, we are able to instead use pattern-matching to define functions, which implements induction internally and guarantees correctness.
+
+\begin{code}%
 \>[0]\AgdaFunction{double}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{ℕ}\AgdaSpace{}%
@@ -214,11 +193,9 @@ The definition of natural number \AgdaDatatype{ℕ} follows exactly the Peano ax
 \AgdaInductiveConstructor{suc}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{suc}\AgdaSpace{}%
 \AgdaBound{dn}\AgdaSymbol{))}\<%
-\end{code}
-
-It is rather verbose to explicitly call induction every time. Fortunately, we are able to instead use pattern-matching in Agda, which implements induction internally and guarantees correctness.
-
-\begin{code}%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaFunction{double'}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{ℕ}\AgdaSpace{}%
