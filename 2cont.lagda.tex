@@ -1,0 +1,97 @@
+\section{2nd-order Containers}
+
+\begin{code}[hide]
+
+open import Function.Base
+open import Relation.Binary.PropositionalEquality
+
+Type : Set₁
+Type = Set
+
+Type₁ : Set₂
+Type₁ = Set₁
+
+infix  0 _◃_
+record Cont : Set₁ where
+  constructor _◃_
+  field
+    S : Type
+    P : S → Type
+
+private variable SP TQ WR : Cont
+
+record ContHom (SP TQ : Cont) : Type where
+  constructor _◃_
+  open Cont SP
+  open Cont TQ renaming (S to T; P to Q)
+  field
+    f : S → T
+    g : (s : S) → Q (f s) → P s
+
+record ⟦_⟧₀ (SP : Cont) (X : Type) : Type where
+  constructor _,_
+  open Cont SP
+  field
+    s : S
+    k : P s → X
+
+⟦_⟧₁ : (SP : Cont) {X Y : Type} → (X → Y) → ⟦ SP ⟧₀ X → ⟦ SP ⟧₀ Y
+⟦ SP ⟧₁ f (s , k) = s , (f ∘ k)
+
+⟦_⟧Hom : {SP TQ : Cont} (fg : ContHom SP TQ)
+  → (X : Type) → ⟦ SP ⟧₀ X → ⟦ TQ ⟧₀ X
+⟦ f ◃ g ⟧Hom X (s , k) = f s , (k ∘ g s)
+\end{code}
+
+\subsection{Syntax and Semantics}
+
+We first define the 2nd-order containers before going straight to general higher order containers
+
+\begin{code}
+record 2Cont : Type₁ where
+  constructor _◃_◃_◃_
+  inductive
+  field
+    S : Type
+    PX : S → Type
+    PF : S → Type
+    RF : (s : S) → PF s → 2Cont
+
+record 2ContHom (SPR TQL : 2Cont) : Type where
+  constructor _◃_◃_◃_
+  inductive
+  eta-equality
+  open 2Cont SPR
+  open 2Cont TQL renaming (S to T; PX to QX; PF to QF; RF to LF)
+  field
+    f : S → T
+    gx : (s : S) → QX (f s) → PX s
+    gf : (s : S) → QF (f s) → PF s
+    hf : (s : S) (qf : QF (f s)) → 2ContHom (RF s (gf s qf)) (LF (f s) qf) 
+
+record 2⟦_⟧₀ (SPR : 2Cont) (F : Cont) (X : Type) : Type where
+  constructor _,_,_
+  inductive
+  eta-equality
+  open 2Cont SPR
+  field
+    s : S
+    kx : PX s → X
+    kf : (p : PF s) → ⟦ F ⟧₀ (2⟦ RF s p ⟧₀ F X)
+
+{-# TERMINATING #-}
+2⟦_⟧₁ : (SPR : 2Cont)
+  → {F G : Cont} → ContHom F G
+  → {X Y : Type} → (X → Y)
+  → 2⟦ SPR ⟧₀ F X → 2⟦ SPR ⟧₀ G Y
+2⟦ SPR ⟧₁ {F} {G} α {X} {Y} f (s , kx , kf) = s , (f ∘ kx)
+   , (λ pf → ⟦ α ⟧Hom (2⟦ RF s pf ⟧₀ G Y) (⟦ F ⟧₁ (2⟦ RF s pf ⟧₁ α f) (kf pf)))
+  where open 2Cont SPR
+
+{-# TERMINATING #-}
+2⟦_⟧Hom : {H J : 2Cont} → 2ContHom H J
+  → (F : Cont) (X : Type)
+  → 2⟦ H ⟧₀ F X → 2⟦ J ⟧₀ F X
+2⟦ f ◃ gx ◃ gf ◃ hf ⟧Hom F X (s , kx , kf) = f s , (kx ∘ gx s)
+  , (λ pf → ⟦ F ⟧₁ (2⟦ hf s pf ⟧Hom F X) (kf (gf s pf)))
+\end{code}

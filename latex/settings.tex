@@ -1,0 +1,67 @@
+\chapter{Formalization Settings}
+
+\section{Type Theory}
+
+We assume the reader has basic knowledge in type theory. For simplicity and readability, we only introduce Agda syntax to fix terminology, rather than formally introducing all underlying concepts.
+
+\subsection*{Types}
+\begin{itemize}
+  \item{\AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B}- function type}
+  \item{\AgdaRecord{⊤} - unit type}
+  \begin{itemize}
+    \item{\AgdaInductiveConstructor{tt} \AgdaSymbol{:} \AgdaRecord{⊤}}
+  \end{itemize}
+  \item{\AgdaFunction{⊥} - empty type}
+  \item{\AgdaBound{A} \AgdaRecord{×} \AgdaBound{B} - product type}
+  \begin{itemize}
+    \item{\AgdaInductiveConstructor{\_,\_} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B} \AgdaSymbol{→} \AgdaBound{A} \AgdaRecord{×} \AgdaBound{B}}
+    \item{\AgdaField{proj₁} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{×} \AgdaBound{B} \AgdaSymbol{→} \AgdaBound{A}}
+    \item{\AgdaField{proj₂} \AgdaSymbol{:} \AgdaBound{A} \AgdaRecord{×} \AgdaBound{B} \AgdaSymbol{→} \AgdaBound{B}}
+  \end{itemize}
+  \item{\AgdaBound{A} \AgdaDatatype{⊎} \AgdaBound{B} - coproduct type}
+  \begin{itemize}
+    \item{\AgdaInductiveConstructor{inj₁} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}}
+    \item{\AgdaInductiveConstructor{inj₂} \AgdaSymbol{:} \AgdaBound{B} \AgdaSymbol{→} \AgdaBound{A} \AgdaRecord{⊎} \AgdaBound{B}}
+  \end{itemize} 
+  \item{\AgdaFunction{Π} \AgdaBound{A B} or \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaBound{B a} - dependent function type}
+  \item{\AgdaRecord{Σ} \AgdaBound{A B} or \AgdaFunction{Σ[} \AgdaBound{a} \AgdaFunction{∈} \AgdaBound{A} \AgdaFunction{]} \AgdaBound{B a} - dependent product type}
+  \begin{itemize}
+    \item{\AgdaInductiveConstructor{\_,\_} \AgdaSymbol{:} \AgdaSymbol{(}\AgdaBound{a} \AgdaSymbol{:} \AgdaBound{A}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaBound{B a} \AgdaSymbol{→} \AgdaRecord{Σ} \AgdaBound{A B}}
+    \item{\AgdaField{proj₁} \AgdaSymbol{:} \AgdaRecord{Σ} \AgdaBound{A B} \AgdaSymbol{→} \AgdaBound{A}}
+    \item{\AgdaField{proj₂} \AgdaSymbol{:} \AgdaSymbol{(}\AgdaBound{ab} \AgdaSymbol{:} \AgdaRecord{Σ} \AgdaBound{A B}\AgdaSymbol{)} \AgdaSymbol{→} \AgdaBound{B} \AgdaSymbol{(}\AgdaField{proj₁} \AgdaBound{ab}\AgdaSymbol{)}}
+  \end{itemize}
+\end{itemize}
+
+\section{Category theory}
+
+\begin{itemize}
+  \item{\AgdaBound{ℂ} \AgdaSymbol{:} \AgdaRecord{Cat}} - Category
+  \item{\AgdaField{∣} \AgdaBound{ℂ} \AgdaField{∣}} - Objects of category
+  \item{\AgdaBound{ℂ} \AgdaField{[} \AgdaBound{X} \AgdaField{,} \AgdaBound{Y} \AgdaField{]}} - Morphisms of category
+  \item{\AgdaBound{F} \AgdaSymbol{:} \AgdaBound{ℂ} \AgdaFunction{⇒} \AgdaBound{𝔻} or \AgdaRecord{Func} \AgdaBound{ℂ} \AgdaBound{𝔻}} - Functor
+  \item{\AgdaFunction{F} \AgdaField{₀}} - Mapping objects part of functor
+  \item{\AgdaFunction{F} \AgdaField{₁}} - Mapping morphisms part of functor
+  \item{\AgdaBound{α} \AgdaSymbol{:} \AgdaRecord{∫} \AgdaBound{F} \AgdaRecord{⇒} \AgdaBound{G} or \AgdaRecord{NatTrans} \AgdaBound{F} \AgdaBound{G}} - Natural transformation.
+  \item{\AgdaFunction{[} \AgdaBound{f} \AgdaFunction{,} \AgdaBound{g} \AgdaFunction{]}} - The unique morphism to the product
+  \[
+  \begin{tikzcd}[row sep=huge, column sep=huge]
+    & \AgdaBound{X} \arrow[dl, "\AgdaBound{f}"'] \arrow[dr, "\AgdaBound{g}"] \arrow[d, dashed, "\AgdaFunction{[}\AgdaBound{f}\AgdaFunction{,}\AgdaBound{g}\AgdaFunction{]}"] & \\
+    \AgdaBound{A} & \AgdaBound{A × B} \arrow[l, "\AgdaField{proj₁}"] \arrow[r, "\AgdaField{proj₂}"'] & \AgdaBound{B}
+  \end{tikzcd}
+  \]
+  \item{\AgdaFunction{<} \AgdaBound{f} \AgdaFunction{,} \AgdaBound{g} \AgdaFunction{>}} - The unique morphism from the coproduct
+  \[
+  \begin{tikzcd}[row sep=huge, column sep=huge]
+    \AgdaBound{A} \arrow[r, "\AgdaField{inj₁}"] \arrow[dr, "\AgdaBound{f}"'] & \AgdaBound{A + B} \arrow[d, dashed, "\AgdaFunction{<}\AgdaBound{f}\AgdaFunction{,}\AgdaBound{g}\AgdaFunction{>}"] & \AgdaBound{B} \arrow[l, "\AgdaField{inj₂}"'] \arrow[dl, "\AgdaBound{g}"] \\
+    & \AgdaBound{X} &
+  \end{tikzcd}
+  \]
+\end{itemize}
+
+\section{Non-Cubical Settings}
+
+Terence Tao once describes three stages in mathematical learning and practice: pre-rigorous, rigorous, and post-rigorous. The idea of post-rigorous is that, when one already know how to do thins rigorously, then he can move fluently between intuition, informal reasoning, and formal rigor as needed.
+
+In our context, we conduct theoretical research within HoTT, exploring concepts such as the interpretation of containers as endofunctors on h-level sets. This requires us to explicitly track h-level fields such as \AgdaFunction{isSet} in Cubical Agda. We did formalizations in both MLTT and CTT and decided to continue and present our work using vanilla Agda.
+
+We now explicitly state our working assumptions. H-level checking is hidden, therefore equalities between equalities within set-level structures are ignored. We also assume function extensionality and minimize the use of universe levels for simplicity.
