@@ -162,7 +162,7 @@ record ⟦_⟧₀ (SP : Cont) (X : Type) : Type where
 ⟦ SP ⟧₁ f (s , k) = s , f ∘ k
 \end{code}
 
-\subsection{Categorical Structure}
+\subsection{Categorical Structures}
 
 Containers and their morphisms form a category. The morphisms are defined as follow:
 
@@ -183,7 +183,7 @@ As containers give rise to functors, the morphisms of containers should naturall
 ⟦ f ◃ g ⟧Hom X (s , k) = f s , k ∘ g s
 \end{code}
 
-\subsection{Semiring Structure}
+\subsection{Algebraic Structures}
 
 Containers are also known as \textbf{polynomial functors} as they forms a semiring structure. Namely, we can define one, zero, multiplication and addition for containers:
 
@@ -271,9 +271,11 @@ Finally, we have the following commutative diagrams for \AgdaDatatype{W} and \Ag
 
 We have now showed inductive types are initial algebras and coinductive types are terminal coalgebras.
 
-\section{Simply-Typed Category with Families}
+\section{Simply-typed Categories with Families}
 
-\section{Hereditary Substitutions}
+TODO : What is CwFs?
+
+\section{Normalization by Hereditary Substitutions}
 
 We introduce the hereditary substitutions for \lambda-calculus normalization. To build the syntax of \lambda-calculus, we first define types and contexts:
 
@@ -282,20 +284,20 @@ data Ty : Type where
   *   : Ty
   _⇒_ : Ty → Ty → Ty
 
-data Ctx : Type where
-  ∙   : Ctx
-  _▹_ : Ctx → Ty → Ctx
+data Con : Type where
+  ∙   : Con
+  _▹_ : Con → Ty → Con
 \end{code}
 
 \begin{code}[hide]
 variable A B C : Ty
-variable Γ Δ : Ctx
+variable Γ Δ : Con
 \end{code}
 
 We adopt the De Bruijn indices to represent bound variables without explicit naming.
 
 \begin{code}
-data Var : Ctx → Ty → Type where
+data Var : Con → Ty → Type where
   vz : Var (Γ ▹ A) A
   vs : Var Γ A → Var (Γ ▹ B) A
 \end{code}
@@ -312,14 +314,14 @@ The normal form \lambda-terms \AgdaDatatype{Nf} are defined as either:
 \end{itemize}
 
 \begin{code}
-  data Nf : Ctx → Ty → Type where
+  data Nf : Con → Ty → Type where
     lam : Nf (Γ ▹ A) B → Nf Γ (A ⇒ B)
     ne  : Ne Γ * → Nf Γ *
 
-  data Ne : Ctx → Ty → Type where
+  data Ne : Con → Ty → Type where
     _,_ : Var Γ A → Sp Γ A B → Ne Γ B
 
-  data Sp : Ctx → Ty → Ty → Type where
+  data Sp : Con → Ty → Ty → Type where
     ε   : Sp Γ A A
     _,_ : Nf Γ A → Sp Γ B C → Sp Γ (A ⇒ B) C
 \end{code}

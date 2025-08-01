@@ -1,12 +1,13 @@
 \chapter{Formalization Settings}
 
-\section{Type Theory}
+\section{Notations}
 
-We assume the reader has basic knowledge in type theory. For simplicity and readability, we only introduce Agda syntax to fix terminology, rather than formally introducing all underlying concepts.
+We assume the reader has basic knowledge in type theory and category theory. For simplicity and readability, we only present some Agda syntax, rather than formally introducing all underlying concepts.
 
-\subsection*{Types}
+\subsection{Type Theory}
+
 \begin{itemize}
-  \item{\AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B}- function type}
+  \item{\AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B} - function type}
   \item{\AgdaRecord{⊤} - unit type}
   \begin{itemize}
     \item{\AgdaInductiveConstructor{tt} \AgdaSymbol{:} \AgdaRecord{⊤}}
@@ -32,7 +33,7 @@ We assume the reader has basic knowledge in type theory. For simplicity and read
   \end{itemize}
 \end{itemize}
 
-\section{Category theory}
+\subsection{Category Theory}
 
 \begin{itemize}
   \item{\AgdaBound{ℂ} \AgdaSymbol{:} \AgdaRecord{Cat}} - Category
@@ -58,10 +59,12 @@ We assume the reader has basic knowledge in type theory. For simplicity and read
   \]
 \end{itemize}
 
-\section{Non-Cubical Settings}
+\section{Settings}
 
-Terence Tao once describes three stages in mathematical learning and practice: pre-rigorous, rigorous, and post-rigorous. The idea of post-rigorous is that, when one already know how to do thins rigorously, then he can move fluently between intuition, informal reasoning, and formal rigor as needed.
+TODO : our settings
 
-In our context, we conduct theoretical research within HoTT, exploring concepts such as the interpretation of containers as endofunctors on h-level sets. This requires us to explicitly track h-level fields such as \AgdaFunction{isSet} in Cubical Agda. We did formalizations in both MLTT and CTT and decided to continue and present our work using vanilla Agda.
+% Terence Tao once describes three stages in mathematical learning and practice: pre-rigorous, rigorous, and post-rigorous. The idea of post-rigorous is that, when one already know how to do thins rigorously, then he can move fluently between intuition, informal reasoning, and formal rigor as needed.
 
-We now explicitly state our working assumptions. H-level checking is hidden, therefore equalities between equalities within set-level structures are ignored. We also assume function extensionality and minimize the use of universe levels for simplicity.
+% In our context, we conduct theoretical research within HoTT, exploring concepts such as the interpretation of containers as endofunctors on h-level sets. This requires us to explicitly track h-level fields such as \AgdaFunction{isSet} in Cubical Agda. We did formalizations in both MLTT and CTT and decided to continue and present our work using vanilla Agda.
+
+% We now explicitly state our working assumptions. H-level checking is hidden, therefore equalities between equalities within set-level structures are ignored. We also assume function extensionality and minimize the use of universe levels for simplicity.

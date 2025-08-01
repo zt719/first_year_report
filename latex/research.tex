@@ -127,7 +127,7 @@ Natural number (with its constructors) is the initial algebra of the \AgdaDataty
 \AgdaBound{n}\<%
 \end{code}
 
-For the initiality, we show for any algebra there exists a unique morphism form algebra \texttt{ℕ}. That is to undefine \AgdaFunction{fold}:
+For the initiality, we show for any algebra there exists a unique morphism form algebra \texttt{ℕ}. That is to first undefine \AgdaFunction{fold}:
 
 \begin{code}%
 \>[0]\AgdaFunction{fold}\AgdaSpace{}%
@@ -210,7 +210,7 @@ such that the following diagram commutes:
 
 \subsection{Coinductive Types are Terminal Coalgebras}
 
-One of the greatest power of category theory is that the opposite version of a theorem can always be derived for free. Now we inverse all the morphisms in above diagram and dualize all the concepts. We define conatural number as a coinductive type and inverse of \AgdaFunction{fold}, which is \AgdaFunction{unfold}:
+One of the greatest power of category theory is that the opposite version of a theorem can always be derived for free. Now we inverse all the morphisms in above diagram and therefore dualize all concepts. We define conatural number as coinductive type and reverse \AgdaFunction{fold} to \AgdaFunction{unfold}:
 
 \begin{code}%
 \>[0]\AgdaKeyword{record}\AgdaSpace{}%
@@ -287,11 +287,13 @@ such that the following diagram commutes:
 \end{tikzcd}
 \]
 
+Therefore we get the result of coinductive types are terminal coalgebras for free.
+
 \section{Containers}
 
 \subsection{Strict Positivity}
 
-Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow in the domain. One typical counterexample is \AgdaDatatype{Weird}:
+Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow. One typical counterexample is \AgdaDatatype{Weird}:
 
 \begin{code}%
 \>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
@@ -312,9 +314,11 @@ Containers are categorical and type-theoretical abstraction to describe strictly
 \AgdaFunction{⊥}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Weird}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+\AgdaDatatype{Weird} is not strictly positive, as \AgdaDatatype{Weird} itself appears on the left-side of \AgdaSymbol{→} in \AgdaInductiveConstructor{foo}. Losing strict positivity can cause issues like non-normalizable, non-terminating, inconsistency, etc. In this case, a empty type term can be constructed using \AgdaFunction{¬weird} which is inconsistent to empty definition:
+
+\begin{code}%
 \>[0]\AgdaFunction{¬weird}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Weird}\AgdaSpace{}%
@@ -342,11 +346,9 @@ Containers are categorical and type-theoretical abstraction to describe strictly
 \AgdaFunction{¬weird}\AgdaSymbol{)}\<%
 \end{code}
 
-\AgdaDatatype{Weird} is not strictly positive as in the domain of \AgdaInductiveConstructor{foo}, \AgdaDatatype{Weird} itself appears on the left-side of \AgdaSymbol{→}. Losing strict positivity can cause issues like non-normalizable, non-terminating, inconsistency, etc. In this case, we can construct an term in the empty type using \AgdaFunction{¬weird} which is inconsistent to the definition.
-
 \subsection{Syntax and Semantics}
 
-A container is given by a shape \AgdaBound{S} \AgdaSymbol{:} \AgdaPrimitive{Type} with a position \AgdaBound{P} \AgdaSymbol{:} \AgdaBound{S} \AgdaSymbol{→} \AgdaPrimitive{Type}:
+A container is given by a shape \AgdaBound{S} and with each shape a position \AgdaBound{P}:
 
 \begin{code}%
 \>[0]\AgdaKeyword{record}\AgdaSpace{}%
@@ -383,7 +385,7 @@ A container is given by a shape \AgdaBound{S} \AgdaSymbol{:} \AgdaPrimitive{Type
 \AgdaRecord{Cont}\<%
 \end{code}
 
-A container should give rise to a endofunctor \AgdaPrimitive{Type} \AgdaSymbol{⇒} \AgdaPrimitive{Type}. Again we explicitly distinguish mapping objects part and mapping morphisms part of functors:
+A container should give rise to a endofunctor \AgdaPrimitive{Type} \AgdaSymbol{⇒} \AgdaPrimitive{Type}. Again, we explicitly distinguish mapping objects part and mapping morphisms part of a functor:
 
 \begin{code}%
 \>[0]\AgdaKeyword{record}\AgdaSpace{}%
@@ -460,7 +462,7 @@ A container should give rise to a endofunctor \AgdaPrimitive{Type} \AgdaSymbol{�
 \AgdaBound{k}\<%
 \end{code}
 
-\subsection{Categorical Structure}
+\subsection{Categorical Structures}
 
 Containers and their morphisms form a category. The morphisms are defined as follow:
 
@@ -521,7 +523,7 @@ Containers and their morphisms form a category. The morphisms are defined as fol
 \AgdaBound{s}\<%
 \end{code}
 
-As containers give rise to functors, the morphisms of containers should naturally give rise to the morphisms of functors - the natural transformations.
+As containers give rise to functors, the morphisms of containers should naturally give rise to the morphisms of functors - the natural transformations:
 
 \begin{code}%
 \>[0]\AgdaOperator{\AgdaFunction{⟦\AgdaUnderscore{}⟧Hom}}\AgdaSpace{}%
@@ -563,7 +565,7 @@ As containers give rise to functors, the morphisms of containers should naturall
 \AgdaBound{s}\<%
 \end{code}
 
-\subsection{Semiring Structure}
+\subsection{Algebraic Structures}
 
 Containers are also known as \textbf{polynomial functors} as they forms a semiring structure. Namely, we can define one, zero, multiplication and addition for containers:
 
@@ -664,9 +666,9 @@ Containers are also known as \textbf{polynomial functors} as they forms a semiri
 \AgdaSymbol{\}}\<%
 \end{code}
 
-such that semiring laws should hold. In fact, both multiplication and addition are commutative, associative and left- and right-annihilated by their units. It turns out they also exactly correspond to the initial, terminal, product and coproduct of the containers. 
+such that the semiring laws should hold. In fact, both multiplication and addition are commutative, associative and left- and right-annihilated by their units. It turns out they also exactly correspond to the initial, terminal, product and coproduct of the containers. 
 
-Even better, we can generalize \AgdaFunction{×} and \AgdaFunction{⊎} to \AgdaFunction{Π} and \AgdaFunction{Σ} for containers, which are finitary product and coproduct objects.
+Even better, we can generalize \AgdaRecord{×} and \AgdaFunction{⊎} to \AgdaFunction{Π} and \AgdaRecord{Σ} for containers, which are finitary product and coproduct objects.
 
 \begin{code}[hide]%
 \>[0]\AgdaKeyword{module}\AgdaSpace{}%
@@ -753,7 +755,7 @@ Even better, we can generalize \AgdaFunction{×} and \AgdaFunction{⊎} to \Agda
 
 \subsection{W and M}
 
-We now give the definition of general form of inductive types, which is the \AgdaDatatype{W} type:
+With containers, we now give the definition of general form of inductive types, which is the \AgdaDatatype{W} type:
 
 \begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
@@ -778,7 +780,7 @@ We now give the definition of general form of inductive types, which is the \Agd
 \AgdaBound{SP}\<%
 \end{code}
 
-From the definition, \AgdaDatatype{W} is an inductive type that specified by a container. In another word, any inductive type can be specified by a strictly positive functor. We can retrieve the definition of \AgdaDatatype{ℕ} through the \AgdaDatatype{⊤ ⊎} functor:
+From the definition, \AgdaDatatype{W} is an inductive type that specified by a container. In another word, any inductive type can be specified by a strictly positive functor. We can retrieve \AgdaDatatype{ℕ} through the \AgdaDatatype{⊤ ⊎} container:
 
 \begin{code}%
 \>[0]\AgdaFunction{⊤⊎Cont}\AgdaSpace{}%
@@ -876,9 +878,11 @@ Finally, we have the following commutative diagrams for \AgdaDatatype{W} and \Ag
 
 We have now showed inductive types are initial algebras and coinductive types are terminal coalgebras.
 
-\section{Simply-Typed Category with Families}
+\section{Simply-typed Categories with Families}
 
-\section{Hereditary Substitutions}
+TODO : What is CwFs?
+
+\section{Normalization by Hereditary Substitutions}
 
 We introduce the hereditary substitutions for \lambda-calculus normalization. To build the syntax of \lambda-calculus, we first define types and contexts:
 
@@ -906,7 +910,7 @@ We introduce the hereditary substitutions for \lambda-calculus normalization. To
 %
 \\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\AgdaSpace{}%
+\AgdaDatatype{Con}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaFunction{Type}\AgdaSpace{}%
 \AgdaKeyword{where}\<%
@@ -914,16 +918,16 @@ We introduce the hereditary substitutions for \lambda-calculus normalization. To
 \>[0][@{}l@{\AgdaIndent{0}}]%
 \>[2]\AgdaInductiveConstructor{∙}%
 \>[6]\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\<%
+\AgdaDatatype{Con}\<%
 \\
 %
 \>[2]\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{}▹\AgdaUnderscore{}}}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\AgdaSpace{}%
+\AgdaDatatype{Con}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Ty}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\<%
+\AgdaDatatype{Con}\<%
 \end{code}
 
 \begin{code}[hide]%
@@ -938,7 +942,7 @@ We introduce the hereditary substitutions for \lambda-calculus normalization. To
 \AgdaGeneralizable{Γ}\AgdaSpace{}%
 \AgdaGeneralizable{Δ}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\<%
+\AgdaDatatype{Con}\<%
 \end{code}
 
 We adopt the De Bruijn indices to represent bound variables without explicit naming.
@@ -947,7 +951,7 @@ We adopt the De Bruijn indices to represent bound variables without explicit nam
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\AgdaSpace{}%
+\AgdaDatatype{Con}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Ty}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
@@ -993,7 +997,7 @@ The normal form \lambda-terms \AgdaDatatype{Nf} are defined as either:
 \>[2]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{Nf}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\AgdaSpace{}%
+\AgdaDatatype{Con}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Ty}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
@@ -1032,7 +1036,7 @@ The normal form \lambda-terms \AgdaDatatype{Nf} are defined as either:
 \>[2]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{Ne}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\AgdaSpace{}%
+\AgdaDatatype{Con}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Ty}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
@@ -1061,7 +1065,7 @@ The normal form \lambda-terms \AgdaDatatype{Nf} are defined as either:
 \>[2]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{Sp}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Ctx}\AgdaSpace{}%
+\AgdaDatatype{Con}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Ty}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
