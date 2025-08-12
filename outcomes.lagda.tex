@@ -1,13 +1,179 @@
 \chapter{Research Outcomes}
 
+\begin{code}[hide]
+open import Data.Empty
+open import Data.Unit
+open import Data.Sum
+open import Data.Product
+
+open import Level renaming (zero to lzero; suc to lsuc)
+
+Type : Set₁
+Type = Set
+
+Type₁ : Set₂
+Type₁ = Set₁
+\end{code}
+
+\section{Higher-Order Containers}
+
 TODO
 
-\section{Higher-order Containers}
+\subsection{Syntax}
 
-\subsection{Syntax and Semantics}
+\begin{code}[hide]
+infixr 20 _⇒_
+data Ty : Type where
+  * : Ty
+  _⇒_ : Ty → Ty → Ty
 
-\subsection{Categorical Structures}
+variable A B C : Ty
 
-\subsection{Algebraic Structures}
+infixl 5 _▹_
+data Con : Type where
+  ∙   : Con
+  _▹_ : Con → Ty → Con
 
-\subsection{Simply-typed Categories with Families}
+variable Γ Δ Θ : Con
+
+data Var : Con → Ty → Type where
+  vz : Var (Γ ▹ A) A
+  vs : Var Γ A → Var (Γ ▹ B) A
+
+variable x y : Var Γ A
+\end{code}
+
+We first observe the syntax of first-order functors and containers
+
+\begin{code}
+⊤⊎_ : Type → Type
+⊤⊎ X = ⊤ ⊎ X
+\end{code}
+
+The maybe functor 
+
+Through some observation, higher containers are much like a normal form of \lambda-calculus. We therefore reuse some of the syntax from previous sections:
+
+\begin{code}
+mutual
+  data Nf : Con → Ty → Type₁ where
+    lam : Nf (Γ ▹ A) B → Nf Γ (A ⇒ B)
+    ne  : Ne Γ * → Nf Γ *
+
+  record Ne (Γ : Con) (B : Ty) : Type₁ where
+    constructor _◃_◃_
+    inductive
+    field
+      S : Type
+      P : Var Γ A → S → Type
+      R : (x : Var Γ A) (s : S) → P x s → Sp Γ A B
+
+  data Sp : Con → Ty → Ty → Type₁ where
+    ε   : Sp Γ A A
+    _,_ : Nf Γ A → Sp Γ B C → Sp Γ (A ⇒ B) C
+\end{code}
+
+\begin{code}[hide]
+  variable t u v : Nf Γ A
+  variable spr tql : Ne Γ A
+  variable ts us : Sp Γ A B
+\end{code}
+
+We define higher-order containers as closed normal forms. From this point onward, we focus on normal forms in general, as higher-order containers are merely special cases of the former.
+
+\begin{code}
+HCont : Ty → Type₁
+HCont A = Nf ∙ A
+\end{code}
+
+\subsubsection*{Categorical Structures}
+
+\begin{code}
+mutual
+  data NfHom : (t u : Nf Γ A) → Type₁ where
+    lam : NfHom t u → NfHom (lam t) (lam u)
+    ne  : NeHom spr tql → NfHom (ne spr) (ne tql)
+
+  record NeHom {Γ} {B} (spr tql : Ne Γ B) : Type₁ where
+    constructor _◃_◃_
+    inductive
+    open Ne spr
+    open Ne tql renaming (S to T; P to Q; R to L)
+    field
+      f : S → T
+      g : (x : Var Γ A) (s : S) → Q x (f s) → P x s
+      h : (x : Var Γ A) (s : S) (q : Q x (f s))
+        → SpHom (R x s (g x s q)) (L x (f s) q)
+        
+  data SpHom : (t u : Sp Γ A B) → Type₁ where
+    ε   : SpHom ts ts
+    _,_ : NfHom t u → SpHom ts us → SpHom (t , ts) (u , us)
+\end{code}
+
+\subsubsection*{Algebraic Structures}
+
+\begin{code}
+
+\end{code}
+
+\subsection{Semantics}
+
+We need to first interpret types, contexts and variables:
+
+\begin{code}
+⟦_⟧t : Ty → Type₁
+⟦ * ⟧t = Type
+⟦ A ⇒ B ⟧t = ⟦ A ⟧t → ⟦ B ⟧t
+
+⟦_⟧c : Con → Type₁
+⟦ ∙ ⟧c = Lift (lsuc lzero) ⊤
+⟦ Γ ▹ A ⟧c = ⟦ Γ ⟧c × ⟦ A ⟧t
+
+⟦_⟧v : Var Γ A → ⟦ Γ ⟧c → ⟦ A ⟧t
+⟦ vz ⟧v (as , a) = a
+⟦ vs x ⟧v (as , a) = ⟦ x ⟧v as
+\end{code}
+
+\begin{code}[hide]
+mutual
+\end{code}
+
+The semantics of normal forms:
+
+\begin{code}
+  ⟦_⟧nf : Nf Γ A → ⟦ Γ ⟧c → ⟦ A ⟧t
+  ⟦ lam t ⟧nf as a = ⟦ t ⟧nf (as , a)
+  ⟦ ne spr ⟧nf as = ⟦ spr ⟧ne as
+
+  ⟦_⟧ne : Ne Γ * → ⟦ Γ ⟧c → Type
+  ⟦_⟧ne {Γ} (S ◃ P ◃ R) as =
+    Σ[ s ∈ S ] ({A : Ty} (x : Var Γ A) (p : P x s)
+      → ⟦ R x s p ⟧sp as (⟦ x ⟧v as))
+
+  ⟦_⟧sp : Sp Γ A B → ⟦ Γ ⟧c → ⟦ A ⟧t → ⟦ B ⟧t
+  ⟦ ε ⟧sp as a = a
+  ⟦ t , ts ⟧sp as f = ⟦ ts ⟧sp as (f (⟦ t ⟧nf as))
+\end{code}
+
+Again, higher containers are just special case of normal forms:
+
+\begin{code}
+⟦_⟧ : HCont A → ⟦ A ⟧t
+⟦ t ⟧ = ⟦ t ⟧nf (lift tt)
+\end{code}
+
+
+
+
+
+\subsection{Simply Typed Categories with Families}
+
+We can show that the categories of higher containers get rise to a SCwF with functions, where \texttt{Ty} is \texttt{Ty}, \texttt{Con} is \texttt{Con}, and \texttt{Tm} is \texttt{Nf}. We need to define the syntax for context substitutions.
+
+\begin{code}
+data Nfs : Con → Con → Type₁ where
+  ε   : Nfs Γ ∙
+  _,_ : Nfs Δ Γ → Nf Δ A → Nfs Δ (Γ ▹ A)
+\end{code}
+
+Similar to \texttt{Tms}, the \texttt{Nfs} is a list of normal forms.

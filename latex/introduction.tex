@@ -1,13 +1,143 @@
 \chapter{Introduction}
 
+\begin{code}[hide]%
+\>[0]\AgdaKeyword{variable}\AgdaSpace{}%
+\AgdaGeneralizable{X}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Set₁}\<%
+\\
+\>[0]\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaPrimitive{Set}\<%
+\end{code}
+
 \section{Background and Motivation}
 
-TODO
+Martin-Löf Type Theory (MLTT) provides a constructive foundation for mathematics and programming. The essence of type theory is to represent propositions as types and their proofs as programs. Homotopy Type Theory (HoTT), a recent developed variant, extends MLTT with ideas from homotopy theory, interpreting types as spaces and equalities as paths. This richer interpretation enables reasoning about higher-dimensional structures, univalence, and equivalences between types.
+
+Within these settings, we explore and generalize the concepts of containers, which offer a uniform way to represent a range of ``well-behaved'' inductive types. For many data types like trees, list, etc, container provides an alternative way to visualize and reason about their definition and data manipulating. It abstracts a data type into two components: a set of all possible shapes describing the overall form, and within each shape a position telling where data can be stored.
+
+For example, the definition of \AgdaDatatype{List} \AgdaBound{X} can be visualized as a type with countable many shapes \AgdaDatatype{S} and, for each concrete shape \AgdaInductiveConstructor{sᵢ} \AgdaSymbol{:} \AgdaDatatype{S}, there are \AgdaInductiveConstructor{i} many data \AgdaBound{x : X} stored.
+
+\begin{code}%
+\>[0]\AgdaKeyword{data}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaInductiveConstructor{s₀}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaBound{X}\<%
+\\
+%
+\>[2]\AgdaInductiveConstructor{s₁}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaBound{X}\<%
+\\
+%
+\>[2]\AgdaInductiveConstructor{s₂}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaBound{X}\<%
+\\
+%
+\>[2]\AgdaInductiveConstructor{s₃}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaBound{X}\<%
+\\
+%
+\>[2]\AgdaComment{\{-\ ...\ -\}}\<%
+\end{code}
+
+Data transfer can be understood and processed in a similar way. That is to to case analysis on shapes and, for each shape, specifying the target shape and how the target positions are obtained from the source positions. For example the \AgdaFunction{tail} function:
+
+\begin{code}%
+\>[0]\AgdaFunction{tail}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaGeneralizable{X}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{List}\AgdaSpace{}%
+\AgdaGeneralizable{X}\<%
+\\
+\>[0]\AgdaFunction{tail}\AgdaSpace{}%
+\AgdaInductiveConstructor{s₀}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{s₀}\<%
+\\
+\>[0]\AgdaFunction{tail}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{s₁}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{s₀}\<%
+\\
+\>[0]\AgdaFunction{tail}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{s₂}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaBound{y}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{s₁}\AgdaSpace{}%
+\AgdaBound{y}\<%
+\\
+\>[0]\AgdaFunction{tail}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaInductiveConstructor{s₃}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaBound{y}\AgdaSpace{}%
+\AgdaBound{z}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaInductiveConstructor{s₂}\AgdaSpace{}%
+\AgdaBound{y}\AgdaSpace{}%
+\AgdaBound{z}\<%
+\\
+\>[0]\AgdaComment{\{-\ ...\ -\}}\<%
+\end{code}
 
 \section{Aims and Objectives}
 
-TODO
+Containers provide a compositional way to define and manipulate data types, making their semantics explicit and supporting generic programming, categorical analysis, and proofs about programs. In the Conducted Research section, we will present a detailed account of containers, outlining both their capabilities and their limitations. Our work generalize ordinary containers to higher-order containers, capturing and reinterpreting a broader range of concepts and structures in type theory. More specifically, we wish to:
+
+\begin{itemize}
+  \item{analyze higher(-order) data types with categorical methods}
+  \item{define the meaning of higher functoriality}
+  \item{define the syntax category of higher containers}
+  \item{explore the categorical and algebraic properties of higher containers}
+  \item{interpret the syntax to capture higher functoriality}
+  \item{show that higher containers give rise to a simply typed category with families}
+  \item{...}
+\end{itemize}
 
 \section{Progress to Date}
 
-TODO : progress and achievements during this stage, training courses, seminars and presentations.
+Over the first few months, I engaged in a broad exploration of type theory and category theory. I have read fundational textbooks including \textit{Categories for the Lazy Functional Programmer}, \textit{The Tao of Types}, \textit{Homotopy Type Theory - Univalent Foundations of Mathematics}. I deepened related background knowledge and developed Agda programming skills by formalizing and reinterpreting many existing papers. After the training phase, I shifted my focus toward learning and developing my current research area - containers. I met regularly with my supervisor for weekly discussions to track progress, discuss current problems, and plan next steps.
+
+Beside my own research areas, I also learned ongoing research questions and outcomes by actively participating the \textit{Type Theory Cafe} and \textit{Functional Programming Lunch}, which are both internal seminars series within FP Lab. I also gave a talk about my master research - ``Algebraic Effects in Haskell'' on one of the FP Lunch seminars.
+
+I had the opportunity to attend large-scale academic events. I attended \textit{Midland Graduate School 2025} in Sheffield, where I followed the courses on coalgebras, the Curry-Howard correspondence, refinement type in Haskell. As part of MGS25, I also assisted in teaching a course on category theory by answering questions from the exercise sessions and preparing Latex solutions for the lecture notes. Before MGS25, I participated MGS24 in Leicester and MGS Christmas 24 in Sheffield, where I benefited from many courses and talks. Additionally, I also attended the \textit{TYPES 2025} in Glasgow, a five-day international conference covering a wide range of topics in type theory.
+
+In the spring term, I worked as a teaching assistant for several modules. I helped marking exercises and exams, as well as running weekly tutorials for the module \textit{Languages and Computation}. I also acted as a lab tutor for \textit{Programming Paradigms}, where I supported students on Haskell exercises during weekly lab sessions.

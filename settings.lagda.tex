@@ -1,33 +1,13 @@
 \chapter{Notations and Settings}
 
-\begin{code}[hide]%
-\>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
-\AgdaKeyword{OPTIONS}\AgdaSpace{}%
-\AgdaPragma{--cubical}\AgdaSpace{}%
-\AgdaPragma{--guardedness}\AgdaSpace{}%
-\AgdaSymbol{\#-\}}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Cubical.Foundations.Prelude}\<%
-\\
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Cubical.Foundations.HLevels}\<%
-\\
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Cubical.Categories.Category}\<%
-\\
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Cubical.Categories.Functor}\<%
-\\
-\>[0]\AgdaKeyword{open}\AgdaSpace{}%
-\AgdaKeyword{import}\AgdaSpace{}%
-\AgdaModule{Cubical.Categories.Instances.Sets}\<%
+\begin{code}[hide]
+{-# OPTIONS --cubical --guardedness #-}
+
+open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.HLevels
+open import Cubical.Categories.Category
+open import Cubical.Categories.Functor
+open import Cubical.Categories.Instances.Sets
 \end{code}
 
 In this section, we introduce syntax from \textit{agda-std} and \textit{cubical} Agda standard libraries used as notation throughout our formalizations. We assume the reader is familiar with Martin-Löf Type Theory (MLTT) and its variants, particularly Homotopy Type Theory (HoTT) and Cubical Type Theory (CTT). Additionally, we presuppose a basic understanding of category theory and do not formally introduce its foundational concepts.
@@ -106,161 +86,24 @@ To be more specific, h-level definitions and checks are omitted. In this case, w
 
 For example, a normal container and container functor are defined as:
 
-\begin{code}%
-\>[0]\AgdaKeyword{record}\AgdaSpace{}%
-\AgdaRecord{Cont}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type₁}\AgdaSpace{}%
-\AgdaKeyword{where}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{constructor}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{}◃\AgdaUnderscore{}\&\AgdaUnderscore{}\&\AgdaUnderscore{}}}\<%
-\\
-%
-\>[2]\AgdaKeyword{field}\<%
-\\
-\>[2][@{}l@{\AgdaIndent{0}}]%
-\>[4]\AgdaField{S}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Type}\<%
-\\
-%
-\>[4]\AgdaField{P}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{S}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaPrimitive{Type}\<%
-\\
-%
-\>[4]\AgdaField{isSetS}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{isSet}\AgdaSpace{}%
-\AgdaField{S}\<%
-\\
-%
-\>[4]\AgdaField{isSetP}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaField{S}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{isSet}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaField{P}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaOperator{\AgdaFunction{⟦\AgdaUnderscore{}⟧}}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaRecord{Cont}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaRecord{Functor}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{SET}\AgdaSpace{}%
-\AgdaPrimitive{ℓ-zero}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{SET}\AgdaSpace{}%
-\AgdaPrimitive{ℓ-zero}\AgdaSymbol{)}\<%
-\\
-\>[0]\AgdaOperator{\AgdaFunction{⟦}}%
-\>[44I]\AgdaBound{S}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaBound{P}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{\&}}\AgdaSpace{}%
-\AgdaBound{isSetS}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{\&}}\AgdaSpace{}%
-\AgdaBound{isSetP}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{⟧}}\<%
-\\
-\>[.][@{}l@{}]\<[44I]%
-\>[2]\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaKeyword{record}\<%
-\\
-%
-\>[2]\AgdaSymbol{\{}%
-\>[53I]\AgdaField{F-ob}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaSymbol{λ}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{isSetX}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\<%
-\\
-\>[.][@{}l@{}]\<[53I]%
-\>[4]\AgdaSymbol{(}\AgdaFunction{Σ[}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaFunction{∈}\AgdaSpace{}%
-\AgdaBound{S}\AgdaSpace{}%
-\AgdaFunction{]}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{P}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{X}\AgdaSymbol{))}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaFunction{isSetΣ}\AgdaSpace{}%
-\AgdaBound{isSetS}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{isSet→}\AgdaSpace{}%
-\AgdaBound{isSetX}\AgdaSymbol{)}\<%
-\\
-%
-\>[2]\AgdaSymbol{;}\AgdaSpace{}%
-\AgdaField{F-hom}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaSymbol{λ}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{k}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaSymbol{λ}\AgdaSpace{}%
-\AgdaBound{p}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{k}\AgdaSpace{}%
-\AgdaBound{p}\AgdaSymbol{)}\<%
-\\
-%
-\>[2]\AgdaSymbol{;}\AgdaSpace{}%
-\AgdaField{F-id}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaSymbol{λ}\AgdaSpace{}%
-\AgdaBound{i}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{k}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{k}\<%
-\\
-%
-\>[2]\AgdaSymbol{;}\AgdaSpace{}%
-\AgdaField{F-seq}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaSymbol{λ}\AgdaSpace{}%
-\AgdaBound{f}\AgdaSpace{}%
-\AgdaBound{g}\AgdaSpace{}%
-\AgdaBound{i}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{k}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaSymbol{λ}\AgdaSpace{}%
-\AgdaBound{p}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{g}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{k}\AgdaSpace{}%
-\AgdaBound{p}\AgdaSymbol{))}\<%
-\\
-%
-\>[2]\AgdaSymbol{\}}\<%
+\begin{code}
+record Cont : Type₁ where
+  constructor _◃_&_&_
+  field
+    S : Type
+    P : S → Type
+    isSetS : isSet S
+    isSetP : (s : S) → isSet (P s)
+
+⟦_⟧ : Cont → Functor (SET ℓ-zero) (SET ℓ-zero)
+⟦ S ◃ P & isSetS & isSetP ⟧
+  = record
+  { F-ob = λ (X , isSetX) → 
+    (Σ[ s ∈ S ] (P s → X)) , isSetΣ isSetS (λ s → isSet→ isSetX)
+  ; F-hom = λ f (s , k) → s , λ p → f (k p)
+  ; F-id = λ i (s , k) → s , k
+  ; F-seq = λ f g i (s , k) → s , λ p → g (f (k p))
+  }
 \end{code}
 
 We would hide the field of \AgdaField{isSetS} and \AgdaField{isSetP} from \AgdaRecord{Cont}. Meanwhile we focus on the constructions and often leave \AgdaField{F-id} and \AgdaField{F-seq} implicit. \AgdaPrimitive{Set} means h-level set and \AgdaPrimitive{Type} means any type.
