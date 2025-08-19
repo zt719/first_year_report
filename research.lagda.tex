@@ -19,7 +19,7 @@ Type₁ = Set₁
 variable X Y I : Type
 \end{code}
 
-In this section, we begin by reviewing related literature. We then introduce a categorical view of types, containers, W type and M type. To facilitate later definition of higher containers in the research outcomes section, we also present related topics including categories with families, and normalization by hereditary substitutions. Finally, we outline the current challenges in this area.
+In this section, we begin by reviewing related literature. We then introduce a categorical semantics of types, containers, W and M types. To facilitate later definition and result of higher containers in the research outcomes section, we also present related topics including categories with families, and normalization by hereditary substitutions. Finally, we outline the current challenges in this area.
 
 \section{Literature Review}
 TODO
@@ -28,25 +28,34 @@ TODO
 
 \subsection{Inductive Types as Initial Algebras}
 
-We use natural number as our example through this sections. Natural number \texttt{ℕ = \{0, 1, 2, 3, ...\}} can be defined as inductive type:
+\subsubsection*{Natural Number}
+
+Natural number \texttt{ℕ = \{0, 1, 2, 3, ...\}} can be defined inductively:
+
 \begin{code}
 data ℕ : Type where
   zero : ℕ
   suc : ℕ → ℕ
 \end{code}
 
-Given an endofunctor \AgdaBound{F} \AgdaSymbol{:} \AgdaPrimitive{Type} \AgdaFunction{⇒} \AgdaPrimitive{Type}, an algebra is defined as a carrier type \AgdaBound{A} \AgdaSymbol{:} \AgdaFunction{Type} and an evaluation function \AgdaBound{α} \AgdaSymbol{:} \AgdaBound{F} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{A}. The morphisms between algebras \AgdaSymbol{(}\AgdaBound{A} \AgdaInductiveConstructor{,} \AgdaBound{α}\AgdaSymbol{)} and \AgdaSymbol{(}\AgdaBound{B} \AgdaInductiveConstructor{,} \AgdaBound{β}\AgdaSymbol{)} are given by a function \AgdaBound{f} \AgdaSymbol{:} \AgdaBound{A} \AgdaSymbol{→} \AgdaBound{B} such that the following diagram commutes:
+\subsubsection*{Categories of Algebras}
+
+Given an endofunctor \texttt{F : Type → Type}, an algebra is defined as a carrier type \texttt{A : Type} and an evaluation function \texttt{α : F A → A}. The morphisms between algebras \texttt{(A ,  α)} and \texttt{(B , β)} are given by a function \texttt{f : A → B} such that the following diagram commutes:
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=huge]
-  \AgdaBound{F A} \arrow[r, "\AgdaBound{F f}"] \arrow[d, "\AgdaBound{α}"]
-  & \AgdaBound{F B} \arrow[d, "\AgdaBound{β}"] \\
-  \AgdaBound{A} \arrow[r, "\AgdaBound{f}"]
-  & \AgdaBound{B}
+  \texttt{F A} \arrow[r, "\texttt{F f}"] \arrow[d, "\texttt{α}"]
+  & \texttt{F B} \arrow[d, "\texttt{β}"] \\
+  \texttt{A} \arrow[r, "\texttt{f}"]
+  & \texttt{B}
 \end{tikzcd}
 \]
 
-Natural number (with its constructors) is the initial algebra of the \texttt{⊤⊎\_} maybe functor. To prove this, we first its constructors into an equivalent function form:
+Natural number (with its constructors) is the initial algebra of the maybe functor. We write this as
+
+\[ \texttt{ℕ ≅ μ X. ⊤ ⊎ X} \]
+
+To prove this, we first massage its constructors into an equivalent function form:
 
 \begin{code}
 [z,s] : ⊤ ⊎ ℕ → ℕ
@@ -54,7 +63,7 @@ Natural number (with its constructors) is the initial algebra of the \texttt{⊤
 [z,s] (inj₂ n) = suc n
 \end{code}
 
-For the initiality, we show for any algebra there exists a unique morphism form algebra \texttt{ℕ}. That is to first undefine folding:
+For the initiality, we show for any algebra there exists a unique morphism form algebra \texttt{ℕ}. That is to first undefine folding function:
 
 \begin{code}
 fold : (⊤ ⊎ X → X) → ℕ → X
@@ -62,28 +71,22 @@ fold α zero = α (inj₁ tt)
 fold α (suc n) = α (inj₂ (fold α n))
 \end{code}
 
-then construct the mapping morphism part of maybe functor:
-
-\begin{code}[hide]
-⊤⊎₁ : (X → Y) → ⊤ ⊎ X → ⊤ ⊎ Y
-⊤⊎₁ f (inj₁ tt) = inj₁ tt
-⊤⊎₁ f (inj₂ x) = inj₂ (f x)
-\end{code}
-
 such that the following diagram commutes:
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=5.0cm]
-\AgdaDatatype{⊤ ⊎ ℕ} \arrow[r, "\AgdaFunction{⊤⊎₁ } \AgdaSymbol{(}\AgdaFunction{fold }\AgdaBound{α}\AgdaSymbol{)}"] \arrow[d, "\AgdaFunction{[z,s]}"]
-& \AgdaDatatype{⊤ ⊎ }\AgdaBound{X} \arrow[d, "\AgdaBound{α}"] \\
-\AgdaDatatype{ℕ} \arrow[r, "\AgdaFunction{fold }\AgdaBound{α}"]
-& \AgdaBound{X}
+\texttt{⊤ ⊎ ℕ} \arrow[r, "\texttt{⊤ ⊎ (fold α)}"] \arrow[d, "\texttt{[z,s]}"]
+& \texttt{⊤ ⊎ X} \arrow[d, "\texttt{α}"] \\
+\texttt{ℕ} \arrow[r, "\texttt{fold α}"]
+& \texttt{X}
 \end{tikzcd}
 \]
 
 \subsection{Coinductive Types as Terminal Coalgebras}
 
-One of the greatest power of category theory is that the opposite version of a theorem can always be derived for free. Now we inverse all the morphisms in above diagram and therefore dualize all concepts. We define conatural number as coinductive type and unfolding:
+One of the greatest power of category theory is that the opposite version of a theorem can always be derived for free. We dualize above diagram, defining conatural number as coinductive type and the inverse of folding function, the unfolding:
+
+\subsubsection*{Conatural Number}
 
 \begin{code}
 record ℕ∞ : Type where
@@ -102,20 +105,22 @@ such that the following diagram commutes:
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=5.0cm]
-\AgdaBound{X} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
-& \AgdaDatatype{ℕ∞} \arrow[d, "\AgdaField{pred∞}"] \\
-\AgdaDatatype{⊤ ⊎ }\AgdaBound{X} \arrow[r, "\AgdaFunction{⊤⊎₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
-& \AgdaDatatype{⊤ ⊎ ℕ∞}
+\texttt{X} \arrow[r, "\texttt{unfold α⁻}"] \arrow[d, "\texttt{α⁻}"]
+& \texttt{ℕ∞} \arrow[d, "\texttt{pred∞}"] \\
+\texttt{⊤ ⊎ X} \arrow[r, "\texttt{⊤ ⊎ (unfold α⁻)}"]
+& \texttt{⊤ ⊎ ℕ∞}
 \end{tikzcd}
 \]
 
-Therefore we get the result of coinductive types are terminal coalgebras for free.
+Therefore conatural number is the terminal coalgebra of the same signature functor.
+
+\[ \texttt{ℕ∞ ≅ ν X. ⊤ ⊎ X} \]
 
 \section{Containers}
 
 \subsection{Strict Positivity}
 
-Containers are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow. Here is a counterexample:
+Containers\cite{ABBOTT20053} are categorical and type-theoretical abstraction to describe strictly positive datatypes. A strictly positive type is the type where all data constructors do not include itself on the left-side of a function arrow. Here is a counterexample:
 
 \subsubsection*{Weird}
 
@@ -125,19 +130,19 @@ data Weird : Type where
   foo : (Weird → ⊥) → Weird
 \end{code}
 
-\texttt{Weird} is not strictly positive, as itself appears on the left-side of \texttt{→} in \texttt{foo}. Losing strict positivity can cause issues like non-normalizable, non-terminating, inconsistency, etc. In this case, a empty type term can be constructed, which is inconsistent to empty definition:
+The type \texttt{Weird} is not strictly positive, as itself appears on the left-side of \texttt{→} in \texttt{foo}. Violating strict positivity can lead to issues such as non-normalizability, non-termination, inconsistency and so on. In this weird case, it becomes possible to construct a empty type term, which contradicts to the empty definition:
 
 \begin{code}
 ¬weird : Weird → ⊥
 ¬weird (foo x) = x (foo x)
 
-bad : ⊥
-bad = ¬weird (foo ¬weird)
+empty : ⊥
+empty = ¬weird (foo ¬weird)
 \end{code}
 
-\subsection{Syntax}
+\subsection{Syntax and Semantics}
 
-A normal container is given by a shape \texttt{S} and with each shape a position \texttt{P}:
+An unary container is given by a type of shapes \texttt{S} and a type family indexed by \texttt{S},called positions \texttt{P}:
 
 \begin{code}
 record Cont : Type₁ where
@@ -148,23 +153,10 @@ record Cont : Type₁ where
 \end{code}
 
 \begin{code}[hide]
-variable SP TQ : Cont
+variable SP TQ SP' TQ' CV : Cont
 \end{code}
 
-Containers are used to describe generic type (or generic class). For example, a \AgdaDatatype{List} container is \AgdaDatatype{ℕ} \AgdaInductiveConstructor{◃} \AgdaDatatype{Fin}, which suggests a list should have countable many possible shapes, with each shape uniquely represents the length of list (or the number of elements).
-
-\begin{code}
-data Fin : ℕ → Type where
-  zero : Fin (suc zero)
-  suc  : ∀ {n} → Fin n → Fin (suc n)
-
-ListC : Cont
-ListC = ℕ ◃ Fin
-\end{code}
-
-\subsubsection*{Categorical Structures}
-
-Containers and their morphisms form a category. The morphisms are defined as follow:
+The morphisms of unary containers are defined as a function which maps shapes and a family of (backward) functions that map positions indexed by \texttt{S}.
 
 \begin{code}
 record ContHom (SP TQ : Cont) : Type where
@@ -176,61 +168,25 @@ record ContHom (SP TQ : Cont) : Type where
     g : (s : S) → Q (f s) → P s
 \end{code}
 
-such that the identity morphisms and compositions exist.
-
-The intuition behind morphism is the process manipulating and transferring data between data structures. The first component \AgdaField{f} tells how to map shapes and second component \AgdaField{g} defines how to obtain data. Notice that mapping in \AgdaField{g} is backward, because data could be lost or duplicated during the transfer. For example, to define the tail function on list:
-
-\begin{code}
-tailC : ContHom ListC ListC
-tailC = f ◃ g
-  where
-  f : ℕ → ℕ
-  f zero = zero
-  f (suc n) = n
-
-  g : (n : ℕ) → Fin (f n) → Fin n
-  g zero ()
-  g (suc n) x = suc x
-\end{code}
-
-\subsubsection*{Algebraic Structures}
-
-Containers are also known as polynomial functors as they exhibit a semiring structure. Namely, we can define one, zero, multiplication and addition for containers:
-
-\begin{code}
-oneC : Cont
-oneC = ⊤ ◃ const ⊥
-
-zeroC : Cont
-zeroC = ⊥ ◃ ⊥-elim
-
-_×C_ : Cont → Cont → Cont
-(S ◃ P) ×C (T ◃ Q) = (S × T) ◃ λ (s , t) → P s ⊎ Q t
-
-_⊎C_ : Cont → Cont → Cont
-(S ◃ P) ⊎C (T ◃ Q) = (S ⊎ T) ◃ λ{ (inj₁ s) → P s ; (inj₂ t) → Q t }
-\end{code}
-
-such that the semiring laws should hold. In fact, both multiplication and addition are commutative, associative, and each is left- and right-annihilated by its corresponding unit. Moreover, they correspond precisely to the initial object, terminal object, product and coproduct within the category of containers.
-
-Even better, we can generalize the binary product and coproduct to finite product and coproduct in the category of containers.
-
 \begin{code}[hide]
-module _ where
-  open Cont
+variable fg hk : ContHom SP TQ
 \end{code}
+
+such that the identity morphisms \texttt{idContHom} and compositions \texttt{\_∘ContHom\_} exist.
 
 \begin{code}
-  ΠC : (I → Cont) → Cont
-  ΠC {I} SPs = ((i : I) → SPs i .S) ◃ λ f → Σ[ i ∈ I ] SPs i .P (f i)
+idContHom : ContHom SP SP
+idContHom = id ◃ λ s → id
 
-  ΣC : (I → Cont) → Cont
-  ΣC {I} SPs = (Σ[ i ∈ I ] SPs i .S) ◃ λ (i , s) → SPs i .P s
+_∘ContHom_ : ContHom TQ CV → ContHom SP TQ → ContHom SP CV
+(f ◃ g) ∘ContHom (h ◃ k) = (f ∘ h) ◃ λ s → k s ∘ g (h s)
 \end{code}
 
-\subsection{Semantics}
+Therefore, the containers form a category \textbf{Cont}.
 
-A container should give rise to a endofunctor of \texttt{Set}. Again, we explicitly distinguish mapping objects part and mapping morphisms part of a functor:
+\subsubsection*{Extension Functor}
+
+An unary container gives rise to a endofunctor of \texttt{Set} along the container extension functor \texttt{⟦\_⟧}. We explicitly distinguish mapping objects and mapping morphisms part of a functor.
 
 \begin{code}
 record ⟦_⟧ (SP : Cont) (X : Type) : Type where
@@ -244,12 +200,109 @@ record ⟦_⟧ (SP : Cont) (X : Type) : Type where
 ⟦ SP ⟧₁ f (s , k) = s , f ∘ k
 \end{code}
 
-As containers give rise to functors, the morphisms of containers should naturally give rise to the morphisms of functors - the natural transformations:
+As containers give rise to functors, naturally, the morphisms of containers give rise to the morphisms of functors - the natural transformations:
 
 \begin{code}
 ⟦_⟧Hom : ContHom SP TQ → (X : Type) → ⟦ SP ⟧ X → ⟦ TQ ⟧ X
 ⟦ f ◃ g ⟧Hom X (s , k) = f s , k ∘ g s
 \end{code}
+
+We show that the extension functor is fully faithful by constructing a bijection between \texttt{ContHom (S ◃ P) (T ◃ Q)} and \texttt{NatTrans ⟦ S ◃ P ⟧ ⟦ T ◃ Q ⟧}
+
+\begin{align*}
+& S \triangleleft P \rightarrow_{Cont} T \triangleleft Q \\
+&= \sum_{f : S \rightarrow T} \prod_{s : S} Q \; (f \; s) \rightarrow P \; s && \text{definition of $\rightarrow_{Cont}$} \\
+&\cong \prod_{s : S} \sum_{t : T} Q \; t \rightarrow P \; s && \text{type theoretical choice} \\
+&= \prod_{s : S} \llbracket T \triangleleft Q \rrbracket (P \; s) && \text{definition of $\llbracket \_ \rrbracket$} \\
+&\cong \prod_{s : S} \int_{X : Set} ((P \; s \rightarrow X) \rightarrow \llbracket T \triangleleft Q \rrbracket X) && \text{covariant Yoneda lemma} \\
+&\cong \int_{X : Set} \prod_{s : S} ((P \; s \rightarrow X) \rightarrow \llbracket T \triangleleft Q \rrbracket X) && \text{commutative of $\int$ and $\prod$} \\
+&\cong \int_{X : Set} (\sum_{s : S} (P \; s \rightarrow X) \rightarrow \llbracket T \triangleleft Q \rrbracket X) && \text{uncurry} \\
+&= \int_{X : Set} \llbracket S \triangleleft P \rrbracket X \rightarrow \llbracket T \triangleleft Q \rrbracket X && \text{definition of $\llbracket \_ \rrbracket$} \\
+\end{align*}
+
+\subsection{Algebraic Structures}
+
+Containers are also known as polynomial functors as they exhibit a semiring structure. Namely, we can define one, zero, multiplication and addition for containers:
+
+\begin{code}
+⊤C : Cont
+⊤C = ⊤ ◃ const ⊥
+
+⊥C : Cont
+⊥C = ⊥ ◃ ⊥-elim
+
+_×C_ : Cont → Cont → Cont
+(S ◃ P) ×C (T ◃ Q) = (S × T) ◃ λ (s , t) → P s ⊎ Q t
+
+_⊎C_ : Cont → Cont → Cont
+(S ◃ P) ⊎C (T ◃ Q) = (S ⊎ T) ◃ λ{ (inj₁ s) → P s ; (inj₂ t) → Q t }
+\end{code}
+
+such that the semiring laws should hold. Both multiplication and addition are commutative, associative, and each is left- and right-annihilated by its corresponding unit. We use \texttt{⊥}, \texttt{⊤}, \texttt{×} and \texttt{⊎} as they correspond precisely to the initial object, terminal object, product and coproduct within the category of containers. In fact, the category of containers has all finite products and coproducts. We give the definitions and show that they are both preserved by the extension functor.
+
+\subsubsection*{Products}
+
+\begin{code}
+ΠC : (I → Cont) → Cont
+ΠC {I} SPs = ((i : I) → SPs i .Cont.S) ◃ λ f → Σ[ i ∈ I ] SPs i .Cont.P (f i)
+\end{code}
+
+\begin{align*}
+& \prod_{i : I} (\llbracket S_i \triangleleft P_i \rrbracket X) \\
+&= \prod_{i : I} \sum_{s : S_i} (P_i \; s \rightarrow X) && \text{definition of $\llbracket \_ \rrbracket$} \\
+&\cong \sum_{f : \prod_{i : I} S_i} \prod_{i : I} (P_i \; (f \; i) \rightarrow X) && \text{type theoretical choice} \\
+&\cong \sum_{f : \prod_{i : I} S_i} \left( \sum_{i : I} P_i \; (f \; i) \rightarrow X \right) && \text{uncurry} \\
+&= \left\llbracket f : \prod_{i : I} S_i \triangleleft \sum_{i : I} P_i \; (f \; i) \right\rrbracket X && \text{definition of $\llbracket \_ \rrbracket$} \\
+\end{align*}
+
+\subsubsection*{Coproducts}
+
+\begin{code}
+ΣC : (I → Cont) → Cont
+ΣC {I} SPs = (Σ[ i ∈ I ] SPs i .Cont.S) ◃ λ (i , s) → SPs i .Cont.P s
+\end{code}
+
+\begin{align*}
+& \sum_{i : I} (\llbracket S_i \triangleleft P_i \rrbracket X) \\
+&= \sum_{i : I} \sum_{s : S_i} (P_i \; s \rightarrow X) && \text{definition of $\llbracket \_ \rrbracket$} \\
+&\cong \sum_{(i , s_i) : \sum_{i : I} S_i} (P_i \; s_i \rightarrow X) && \text{associative of $\sum$} \\
+&= \left\llbracket (i , s_i) : \sum_{i : I} S_i \triangleleft P_i \; s_i \right\rrbracket X && \text{definition of $\llbracket \_ \rrbracket$} \\
+\end{align*}
+
+\subsubsection*{Composition}
+
+We can also define composition of unary containers. This composition should reflect consecutively applying container functors.
+
+\begin{code}
+_∘C_ : Cont → Cont → Cont
+(S ◃ P) ∘C (T ◃ Q) = (Σ[ s ∈ S ] (P s → T)) ◃ λ (s , f) → Σ[ p ∈ P s ] Q (f p)
+\end{code}
+
+\begin{align*}
+& \llbracket S \triangleleft P \rrbracket (\llbracket T \triangleleft Q \rrbracket X) \\
+&= \sum_{s : S} \left( P \; s \rightarrow \sum_{t : T} (Q \; t \rightarrow X) \right) && \text{ definition of $\llbracket \_ \rrbracket$} \\
+&\cong \sum_{s : S} \sum_{f : P \: s \rightarrow T} \prod_{p : P \: s} (Q \; (f \; p) \rightarrow X) && \text{type theoretical choice} \\
+&\cong \sum_{(s , f) : \sum_{s : S} ( P \: s \rightarrow T )} \prod_{p : P \: s} (Q \; (f \; p) \rightarrow X) && \text{associative of $\sum$} \\
+&\cong \sum_{(s , f) : \sum_{s : S} ( P \: s \rightarrow T )} \left( \sum_{p : P \: s} Q \; (f \; p) \rightarrow X \right) && \text{uncurry} \\
+&= \left\llbracket \sum_{(s , f) : \sum_{s : S} ( P \: s \rightarrow T )} \triangleleft \sum_{p : P \: s} Q \; (f \; p) \right\rrbracket X && \text{definition of $\llbracket \_ \rrbracket$} \\
+\end{align*}
+
+\subsection{2-Categorical Structures}
+
+\textbf{Cont} has 2-categorical structures as the extension functor leads to the functor category. The vertical composition is just \texttt{\_∘ContHom\_}. We define the horizontal compositions (tensor products) of morphisms, which also corresponds to the functoriality of \texttt{\_∘C\_}
+
+\subsubsection*{Horizontal Compositions}
+
+\begin{code}
+_⊗ContHom_ : ContHom SP TQ → ContHom SP' TQ' → ContHom (SP ∘C SP') (TQ ∘C TQ')
+(f ◃ g) ⊗ContHom (f' ◃ g') 
+  = (λ{ (s , k) → f s , f' ∘ k ∘ g s }) 
+  ◃ λ{ (s , k) (q' , h) → g s q' , g' (k (g s q')) h }
+\end{code}
+
+such that the identity and compositions (interchanged law) are preserved. The proof is immediate by checking cases.
+
+TODO : I need a diagram here
 
 \subsection{W and M}
 
@@ -260,14 +313,14 @@ data W (SP : Cont) : Type where
   sup : ⟦ SP ⟧ (W SP) → W SP
 \end{code}
 
-By definition, W is uniquely represented by an algebra specified by a container. In another word, any inductive type can be characterized by a containers. Indeed, we can retrieve an equivalent definition of natural number through the maybe container:
+This definition implies that any inductive type can be characterized by a container algebra. Indeed, we can retrieve an equivalent definition of natural number through the maybe container.
 
 \begin{code}
 ⊤⊎Cont : Cont
 ⊤⊎Cont = (⊤ ⊎ ⊤) ◃ λ{ (inj₁ tt) → ⊥ ; (inj₂ y) → ⊤ }
 
-ℕW : Type
-ℕW = W ⊤⊎Cont
+ℕ' : Type
+ℕ' = W ⊤⊎Cont
 \end{code}
 
 Dually, the general form of coinductive types - M type is just the terminal coalgebra of containers. W and conatural number are defined as follow:
@@ -279,37 +332,35 @@ record M (SP : Cont) : Type where
     inf : ⟦ SP ⟧ (M SP)
 open M
 
-ℕ∞M : Type
-ℕ∞M = M ⊤⊎Cont
+ℕ∞' : Type
+ℕ∞' = M ⊤⊎Cont
 \end{code}
 
 Finally, we obtain the following commutative diagrams for W and M:
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=5.0cm]
-\AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧ }\AgdaSymbol{(}\AgdaDatatype{W }\AgdaBound{SP}\AgdaSymbol{)} \arrow[r, "\AgdaFunction{⟦ }\AgdaBound{SP }\AgdaFunction{⟧₁ }\AgdaSymbol{(}\AgdaFunction{fold }\AgdaBound{α}\AgdaSymbol{)}"] \arrow[d, "\AgdaInductiveConstructor{sup}"]
-& \AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧ }\AgdaBound{X} \arrow[d, "\AgdaBound{α}"] \\
-\AgdaDatatype{W }\AgdaBound{SP} \arrow[r, "\AgdaFunction{fold }\AgdaBound{α}"]
-& \AgdaBound{X}
+\texttt{⟦ SP ⟧ }\texttt{(W SP)} \arrow[r, "\texttt{⟦ SP ⟧ (fold α)}"] \arrow[d, "\texttt{sup}"]
+& \texttt{⟦ SP ⟧ X} \arrow[d, "\texttt{α}"] \\
+\texttt{W SP} \arrow[r, "\texttt{fold α}"]
+& \texttt{X}
 \end{tikzcd}
 \]
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=5.0cm]
-\AgdaBound{X} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
-& \AgdaRecord{M } \AgdaBound{SP}\arrow[d, "\AgdaField{inf}"] \\
-\AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧ }\AgdaBound{X} \arrow[r, "\AgdaFunction{⟦ }\AgdaBound{SP }\AgdaFunction{⟧₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
-& \AgdaRecord{⟦ }\AgdaBound{SP }\AgdaRecord{⟧ }\AgdaSymbol{(}\AgdaRecord{M }\AgdaBound{SP}\AgdaSymbol{)}
+\texttt{X} \arrow[r, "\texttt{unfold α⁻}"] \arrow[d, "\texttt{α⁻}"]
+& \texttt{M SP} \arrow[d, "\texttt{inf}"] \\
+\texttt{⟦ SP ⟧ X} \arrow[r, "\texttt{⟦ SP ⟧ (unfold α⁻)}"]
+& \texttt{⟦ SP ⟧ (M SP)}
 \end{tikzcd}
 \]
-
-We have now showed inductive types are initial algebras and coinductive types are terminal coalgebras.
 
 \input{latex/scwfs}
 
 \section{Normalization by Hereditary Substitutions}
 
-We introduce the hereditary substitutions technique for \lambda-calculus normalization. To build the syntax of \lambda-calculus, we first define types (with a base type and function) and contexts:
+We introduce the hereditary substitutions technique for \lambda-calculus normalization. To build the syntax of \lambda-calculus, we first define a simple syntax of types and contexts. We use \texttt{A B C} to range over types and \texttt{Γ Δ Θ} to range over contexts.
 
 \begin{code}
 data Ty : Type where
@@ -326,7 +377,9 @@ variable A B C : Ty
 variable Γ Δ : Con
 \end{code}
 
-Adopting the De Bruijn indices to represent bound variables without explicit naming.
+\subsubsection*{De Bruijn Indices}
+
+We adopt the De Bruijn indices to capture variables. The idea is to replace the name of variable in context with number, with the innermost (rightmost) variable gets index 0 and outermost (leftmost) variable gets the biggest index. For example \texttt{λx.λy.x} in de bruijn form is \texttt{λ.λ.1}. We use \texttt{x y} to range over variables.
 
 \begin{code}
 data Var : Con → Ty → Type where
@@ -334,7 +387,9 @@ data Var : Con → Ty → Type where
   vs : Var Γ A → Var (Γ ▹ B) A
 \end{code}
 
-The \lambda-terms follows the normal convention:
+\subsubsection*{\lambda-Terms}
+
+The \lambda-terms follows the normal convention, which is either a variable, or a \lambda-abstraction, or a term application.
 
 \begin{code}
 data Tm : Con → Ty → Set where
@@ -347,10 +402,15 @@ data Tm : Con → Ty → Set where
 variable x y : Var Γ A
 \end{code}
 
-We also need to define the syntax of normal forms. A normalized \lambda-terms are defined as either: \lambda-abstractions of normal forms; or neutral terms, where neutral terms are variables applied to lists of normal forms, called the spines.
+\subsubsection*{Normal Forms}
+
+We also need to define the syntax of normal forms. Normalized \lambda-terms are defined as either: \lambda-abstractions of normal forms; or neutral terms, where neutral terms are variables applied to lists of normal forms, called the spines. The \texttt{Nf}, \texttt{Ne} and \texttt{Sp} are mutually defined in Agda:
 
 \begin{code}
 mutual
+\end{code}
+
+\begin{code}
   data Nf : Con → Ty → Type where
     lam : Nf (Γ ▹ A) B → Nf Γ (A ⇒ B)
     ne  : Ne Γ * → Nf Γ *
@@ -402,12 +462,17 @@ appSp ε n = n , ε
 appSp (t , ts) n = t , appSp ts n
 \end{code}
 
-The full normalization process involves defining term weakening, heterogeneous equality of variables, spine extension, and other related constructions. For brevity, we omit large portions of the code and focus only on illustrating the key components.
+In TODO, it builds a canonical normalizer for \lambda-calculi - \texttt{nf : Tm Γ A → Nf Γ A}. We shall not go through the full normalization process in details, but just illustrating the key components for each case.
 
-A variable is normalized by performing \eta-expansion to the fullest extent possible:
+A variable is normalized by performing \eta-expansion to the fullest extent possible, defined by \texttt{nvar}. For example, a variable with type \texttt{(* ⇒ *) ⇒ * ⇒ *}:
+
+\[ \texttt{H} \rightarrow \texttt{λF.H F} \rightarrow \texttt{λX.λF.H F X} \]
+
+\begin{code}[hide]
+mutual
+\end{code}
 
 \begin{code}
-mutual
   nvar : Var Γ A → Nf Γ A
   nvar x = ne2nf (x , ε)
 
@@ -417,7 +482,7 @@ mutual
     lam (ne2nf {A = B} (vs v , appSp (wkSp vz ns) (nvar vz)))
 \end{code}
 
-Term applications are much more involved, where it is the actual hereditary substitutions happening. To do this, we need to define how to substitute variables inside normal forms and spines, and how to fold a spine on a normal form. The normal form application function \texttt{napp} is defined to launch the substitution process:
+The application case is more involved, where it is the actual hereditary substitutions happening. The substitutions under normal forms are recursively defined together with substitutions under neutral terms and spines. Finally, the \texttt{napp} launches the whole process by substitutes the top variable of first term by the second term.
 
 \begin{code}[hide]
 mutual
@@ -441,7 +506,7 @@ mutual
   napp (lam t) u = t [ vz := u ]
 \end{code}
 
-Finally, we have the normalization function from \lambda-terms to normal forms:
+Finally, we obtain the normalization function that \beta-reduces and \eta-expands simply typed terms.
 
 \begin{code}
 nf : Tm Γ A → Nf Γ A
@@ -449,6 +514,8 @@ nf (var x) = nvar x
 nf (lam x) = lam (nf x)
 nf (app t u) = napp (nf t) (nf u)
 \end{code}
+
+In TODO, it shows the completeness and soundness of the normalizer. But we omit the proof for simplicity purpose.
 
 \section{Questions}
 
@@ -463,7 +530,7 @@ record Bush (X : Type) : Type where
 open Bush
 \end{code}
 
-How do we represent \AgdaRecord{Bush­} \AgdaBound{X} as a M type? It turns out that previews scheme is no longer applicable. To address the issue, the key observation is to lift the space from \texttt{Set} to \texttt{Set → Set}. We can show \AgdaRecord{Bush} is the ``higher'' terminal coalgebra of a ``higher'' endofunctor:
+How do we represent \texttt{Bush X} as a M type? It turns out that previews scheme is no longer applicable. To address the issue, the key is to lift the space from \texttt{Set} to \texttt{Set → Set}. We can show \texttt{Bush} is the ``higher'' terminal coalgebra of a ``higher'' endofunctor:
 
 \begin{code}
 H : (Type → Type) → Type → Type
@@ -472,9 +539,9 @@ H F X = X × F (F X)
 
 \[
 \begin{tikzcd}[row sep=huge, column sep=5.0cm]
-\AgdaBound{F} \arrow[r, "\AgdaFunction{unfold }\AgdaBound{α⁻}"] \arrow[d, "\AgdaBound{α⁻}"]
-& \AgdaRecord{Bush} \arrow[d, "\AgdaFunction{< }\AgdaField{head }\AgdaFunction{, }\AgdaField{tail }\AgdaFunction{>}"] \\
-\AgdaFunction{H }\AgdaBound{F} \arrow[r, "\AgdaDatatype{H₁ }\AgdaSymbol{(}\AgdaFunction{unfold }\AgdaBound{α⁻}\AgdaSymbol{)}"]
-& \AgdaFunction{H }\AgdaRecord{Bush}
+\texttt{F} \arrow[r, "\texttt{unfold α⁻}"] \arrow[d, "\texttt{α⁻}"]
+& \texttt{Bush} \arrow[d, "\texttt{< head , tail >}"] \\
+\texttt{H F} \arrow[r, "\texttt{H (unfold α⁻)}"]
+& \texttt{H Bush}
 \end{tikzcd}
 \]

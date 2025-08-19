@@ -9,6 +9,7 @@
 \usepackage{tikz-cd}
 \usepackage{tikz}
 \usepackage{amsmath}
+\usepackage{stmaryrd}
 
 % Mono-Space Font
 \setmonofont{JuliaMono-Regular.ttf}[
@@ -56,7 +57,7 @@
 % Abstract
 \begin{abstract}
 
-Giving a short overview of the work in your project.\cite{ABBOTT20053}
+Containers are semantic and categorical way to talk about strictly positive types. It is shown in previous work that the category of containers is closed under compositions, products, coproducts and exponentials. More extensions and variants, such as indexed containers, generalized containers are studied to capture a boarder class. In this project, we aim to develop the syntax and semantics of the higher-order containers and do formalization in Agda. The idea of higher containers is to provide a semantics for higher strictly positive types, such as monad transformers with kinds \texttt{(Type → Type) → Type → Type}. We define a family of categories of containers indexed by their kinds and explore the properties. We also show that the higher containers give rise to a model of simply typed \lambda-calculus.
 
 \end{abstract}
 
@@ -69,8 +70,7 @@ Giving a short overview of the work in your project.\cite{ABBOTT20053}
 \pagenumbering{arabic}
 
 % Main Body
-\input{latex/introduction}
-% \input{latex/settings}
+% \input{latex/introduction}
 % \input{latex/research}
 \input{latex/outcomes}
 % \input{latex/conclusions}

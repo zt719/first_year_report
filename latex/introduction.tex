@@ -1,38 +1,70 @@
 \chapter{Introduction}
 
 \begin{code}[hide]%
-\>[0]\AgdaKeyword{variable}\AgdaSpace{}%
-\AgdaGeneralizable{X}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set}\<%
+\>[0]\AgdaSymbol{\{-\#}\AgdaSpace{}%
+\AgdaKeyword{OPTIONS}\AgdaSpace{}%
+\AgdaPragma{--cubical}\AgdaSpace{}%
+\AgdaPragma{--guardedness}\AgdaSpace{}%
+\AgdaSymbol{\#-\}}\<%
 \\
 %
 \\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{Type}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaPrimitive{Set₁}\<%
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Foundations.Prelude}\<%
 \\
-\>[0]\AgdaFunction{Type}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaPrimitive{Set}\<%
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Foundations.HLevels}\<%
+\\
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Categories.Category}\<%
+\\
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Categories.Functor}\<%
+\\
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Categories.Instances.Sets}\<%
+\\
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Data.Unit}\AgdaSpace{}%
+\AgdaKeyword{renaming}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaRecord{Unit}\AgdaSpace{}%
+\AgdaSymbol{to}\AgdaSpace{}%
+\AgdaRecord{⊤}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaKeyword{open}\AgdaSpace{}%
+\AgdaKeyword{import}\AgdaSpace{}%
+\AgdaModule{Cubical.Data.Sum}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaKeyword{variable}\AgdaSpace{}%
+\AgdaGeneralizable{X}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Type}\<%
 \end{code}
 
-\section{Background and Motivation}
+\section{Background and Objectives}
 
 Martin-Löf Type Theory (MLTT) provides a constructive foundation for mathematics and programming. The essence of type theory is to represent propositions as types and their proofs as programs. Homotopy Type Theory (HoTT), a recent developed variant, extends MLTT with ideas from homotopy theory, interpreting types as spaces and equalities as paths. This richer interpretation enables reasoning about higher-dimensional structures, univalence, and equivalences between types.
 
-Within these settings, we explore and generalize the concepts of containers, which offer a uniform way to represent a range of ``well-behaved'' inductive types. For many data types like trees, list, etc, container provides an alternative way to visualize and reason about their definition and data manipulating. It abstracts a data type into two components: a set of all possible shapes describing the overall form, and within each shape a position telling where data can be stored.
+Within the language of type theory, we explore the concepts of containers, which offer a uniform way to represent a range of ``well-behaved'' inductive types. For many data types like trees, list, etc, container provides an alternative way to visualize and reason about their definition and data manipulating. It abstracts a data type into two components: a set of shapes describing the overall form, and within each shape a set of positions telling where data can be stored.
 
-For example, the definition of \AgdaDatatype{List} \AgdaBound{X} can be visualized as a type with countable many shapes \AgdaDatatype{S} and, for each concrete shape \AgdaInductiveConstructor{sᵢ} \AgdaSymbol{:} \AgdaDatatype{S}, there are \AgdaInductiveConstructor{i} many data \AgdaBound{x : X} stored.
+For example, the definition of a list can be visualized as a structure with all finite shapes and, for each shape of length \texttt{n}, there are \texttt{n} many data stored.
 
 \begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{List}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaPrimitive{Type}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\AgdaSpace{}%
+\AgdaPrimitive{Type}\AgdaSpace{}%
 \AgdaKeyword{where}\<%
 \\
 \>[0][@{}l@{\AgdaIndent{0}}]%
@@ -75,7 +107,7 @@ For example, the definition of \AgdaDatatype{List} \AgdaBound{X} can be visualiz
 \>[2]\AgdaComment{\{-\ ...\ -\}}\<%
 \end{code}
 
-Data transfer can be understood and processed in a similar way. That is to to case analysis on shapes and, for each shape, specifying the target shape and how the target positions are obtained from the source positions. For example the \AgdaFunction{tail} function:
+Data transfer can be understood and processed in a similar way. That is to componentwisely specify the mapping on shapes and positions. For example the tail function on list:
 
 \begin{code}%
 \>[0]\AgdaFunction{tail}\AgdaSpace{}%
@@ -118,26 +150,214 @@ Data transfer can be understood and processed in a similar way. That is to to ca
 \>[0]\AgdaComment{\{-\ ...\ -\}}\<%
 \end{code}
 
-\section{Aims and Objectives}
+Containers provide a compositional way to define and manipulate data types, making their semantics explicit and supporting generic programming, categorical analysis, and proofs about programs. The unary containers, however, are not capable of capturing data types with higher kinds. For example, the type of the \textit{Maybe} monad transformer is not \texttt{Type → Type} but \texttt{(Type → Type) → Type → Type}.
 
-Containers provide a compositional way to define and manipulate data types, making their semantics explicit and supporting generic programming, categorical analysis, and proofs about programs. In the Conducted Research section, we will present a detailed account of containers, outlining both their capabilities and their limitations. Our work generalize ordinary containers to higher-order containers, capturing and reinterpreting a broader range of concepts and structures in type theory. More specifically, we wish to:
+\begin{code}%
+\>[0]\AgdaFunction{MaybeT}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaPrimitive{Type}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaPrimitive{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaPrimitive{Type}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaPrimitive{Type}\<%
+\\
+\>[0]\AgdaFunction{MaybeT}\AgdaSpace{}%
+\AgdaBound{M}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaBound{M}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaRecord{⊤}\AgdaSpace{}%
+\AgdaOperator{\AgdaDatatype{⊎}}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSymbol{)}\<%
+\end{code}
+
+Despite the higher kinds, from a container point of view, \texttt{MaybeT} could still be viewed as a compound of shapes, positions and applications. Our work therefore aims to generalize the containers to a higher-order sense, to capture and reinterpret a broader range of concepts and structures. More specifically, we wish to:
 
 \begin{itemize}
-  \item{analyze higher(-order) data types with categorical methods}
-  \item{define the meaning of higher functoriality}
-  \item{define the syntax category of higher containers}
+  \item{provide a syntax for higher containers}
   \item{explore the categorical and algebraic properties of higher containers}
-  \item{interpret the syntax to capture higher functoriality}
+  \item{provide a categorical semantics of higher types}
   \item{show that higher containers give rise to a simply typed category with families}
   \item{...}
 \end{itemize}
 
 \section{Progress to Date}
 
-Over the first few months, I engaged in a broad exploration of type theory and category theory. I have read fundational textbooks including \textit{Categories for the Lazy Functional Programmer}, \textit{The Tao of Types}, \textit{Homotopy Type Theory - Univalent Foundations of Mathematics}. I deepened related background knowledge and developed Agda programming skills by formalizing and reinterpreting many existing papers. After the training phase, I shifted my focus toward learning and developing my current research area - containers. I met regularly with my supervisor for weekly discussions to track progress, discuss current problems, and plan next steps.
+Over the first few months, I engaged in a broad exploration of type theory and category theory. I worked on fundational textbooks including \textit{Categories for the Lazy Functional Programmer}, \textit{The Tao of Types}, \textit{Homotopy Type Theory - Univalent Foundations of Mathematics}. I deepened related background knowledge and developed Agda programming skills by formalizing and reinterpreting many existing papers. After the training phase, I shifted my focus toward learning and developing my current research area - containers. I met regularly with my supervisor for weekly discussions to track progress, discuss current problems, and plan next steps.
 
 Beside my own research areas, I also learned ongoing research questions and outcomes by actively participating the \textit{Type Theory Cafe} and \textit{Functional Programming Lunch}, which are both internal seminars series within FP Lab. I also gave a talk about my master research - ``Algebraic Effects in Haskell'' on one of the FP Lunch seminars.
 
 I had the opportunity to attend large-scale academic events. I attended \textit{Midland Graduate School 2025} in Sheffield, where I followed the courses on coalgebras, the Curry-Howard correspondence, refinement type in Haskell. As part of MGS25, I also assisted in teaching a course on category theory by answering questions from the exercise sessions and preparing Latex solutions for the lecture notes. Before MGS25, I participated MGS24 in Leicester and MGS Christmas 24 in Sheffield, where I benefited from many courses and talks. Additionally, I also attended the \textit{TYPES 2025} in Glasgow, a five-day international conference covering a wide range of topics in type theory.
 
 In the spring term, I worked as a teaching assistant for several modules. I helped marking exercises and exams, as well as running weekly tutorials for the module \textit{Languages and Computation}. I also acted as a lab tutor for \textit{Programming Paradigms}, where I supported students on Haskell exercises during weekly lab sessions.
+
+\section{Settings}
+
+We assume the reader is familiar with MLTT and HoTT. Additionally, we presuppose a basic understanding of category theory and do not formally introduce its foundational concepts.
+
+The formalizations are carried out in Agda, which is a dependently typed functional programming language and proof assistant. It enforces features such as strict type checking, termination checking, positivity checking and so on. We also depends on Agda standard library \textit{agda-std} and \textit{cubical} and borrow their notations for this report.
+
+We conduct theoretical research within HoTT, such as interpreting containers as endofunctors on h-level sets. This requires us to explicitly track h-level fields such as \texttt{isSet} in Cubical Agda, which can be quite bureaucratic and tedious in practice. Instead, to focus on mathematical intuition, we choose to do some post-rigorous math since we are already familiar with how to carry out such constructions rigorously. As such, our formalizations are carried out in plain Agda for intuitionistic purposes.
+
+To be more specific, h-level definitions and checks are omitted. In this case, we are essentially working within a wild category setting. We also assume function extensionality and minimize the use of universe levels to improve both simplicity and readability. For example, a container and container extension functor are defined in Cubical Agda as:
+
+\begin{code}%
+\>[0]\AgdaKeyword{record}\AgdaSpace{}%
+\AgdaRecord{Cont}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Type₁}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+\>[0][@{}l@{\AgdaIndent{0}}]%
+\>[2]\AgdaKeyword{constructor}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{}◃\AgdaUnderscore{}\&\AgdaUnderscore{}\&\AgdaUnderscore{}}}\<%
+\\
+%
+\>[2]\AgdaKeyword{field}\<%
+\\
+\>[2][@{}l@{\AgdaIndent{0}}]%
+\>[4]\AgdaField{S}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaPrimitive{Type}\<%
+\\
+%
+\>[4]\AgdaField{P}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaField{S}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaPrimitive{Type}\<%
+\\
+%
+\>[4]\AgdaField{isSetS}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{isSet}\AgdaSpace{}%
+\AgdaField{S}\<%
+\\
+%
+\>[4]\AgdaField{isSetP}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaField{S}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{isSet}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaField{P}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSymbol{)}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaOperator{\AgdaFunction{⟦\AgdaUnderscore{}⟧}}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaRecord{Cont}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaRecord{Functor}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaFunction{SET}\AgdaSpace{}%
+\AgdaPrimitive{ℓ-zero}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaFunction{SET}\AgdaSpace{}%
+\AgdaPrimitive{ℓ-zero}\AgdaSymbol{)}\<%
+\\
+\>[0]\AgdaOperator{\AgdaFunction{⟦}}%
+\>[128I]\AgdaBound{S}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
+\AgdaBound{P}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{\&}}\AgdaSpace{}%
+\AgdaBound{isSetS}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{\&}}\AgdaSpace{}%
+\AgdaBound{isSetP}\AgdaSpace{}%
+\AgdaOperator{\AgdaFunction{⟧}}\<%
+\\
+\>[.][@{}l@{}]\<[128I]%
+\>[2]\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaKeyword{record}\<%
+\\
+%
+\>[2]\AgdaSymbol{\{}%
+\>[137I]\AgdaField{F-ob}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaSymbol{λ}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{X}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaBound{isSetX}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\<%
+\\
+\>[.][@{}l@{}]\<[137I]%
+\>[4]\AgdaSymbol{(}\AgdaFunction{Σ[}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSpace{}%
+\AgdaFunction{∈}\AgdaSpace{}%
+\AgdaBound{S}\AgdaSpace{}%
+\AgdaFunction{]}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{P}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{X}\AgdaSymbol{))}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaFunction{isSetΣ}\AgdaSpace{}%
+\AgdaBound{isSetS}\AgdaSpace{}%
+\AgdaSymbol{(λ}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaFunction{isSet→}\AgdaSpace{}%
+\AgdaBound{isSetX}\AgdaSymbol{)}\<%
+\\
+%
+\>[2]\AgdaSymbol{;}\AgdaSpace{}%
+\AgdaField{F-hom}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaSymbol{λ}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaBound{k}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaSymbol{λ}\AgdaSpace{}%
+\AgdaBound{p}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{k}\AgdaSpace{}%
+\AgdaBound{p}\AgdaSymbol{)}\<%
+\\
+%
+\>[2]\AgdaSymbol{;}\AgdaSpace{}%
+\AgdaField{F-id}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaSymbol{λ}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaBound{k}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaBound{k}\<%
+\\
+%
+\>[2]\AgdaSymbol{;}\AgdaSpace{}%
+\AgdaField{F-seq}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaSymbol{λ}\AgdaSpace{}%
+\AgdaBound{f}\AgdaSpace{}%
+\AgdaBound{g}\AgdaSpace{}%
+\AgdaBound{i}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaBound{k}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{s}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
+\AgdaSymbol{λ}\AgdaSpace{}%
+\AgdaBound{p}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{g}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{k}\AgdaSpace{}%
+\AgdaBound{p}\AgdaSymbol{))}\<%
+\\
+%
+\>[2]\AgdaSymbol{\}}\<%
+\end{code}
+
+We would hide the fields \texttt{isSetS} and \texttt{isSetP}. Meanwhile we focus on the constructions and often leave \texttt{F-id} and \texttt{F-seq} implicit.
