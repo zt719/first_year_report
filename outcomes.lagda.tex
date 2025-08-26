@@ -1,10 +1,13 @@
 \chapter{Research Outcomes}
 
 \begin{code}[hide]
+module outcomes where
+
 open import Data.Empty
 open import Data.Unit
 open import Data.Sum
 open import Data.Product
+open import Function.Base hiding (_$_)
 
 open import Level renaming (zero to lzero; suc to lsuc)
 
@@ -15,51 +18,179 @@ Type₁ : Set₂
 Type₁ = Set₁
 \end{code}
 
+\section{Higher-Order Functors}
+
+\subsection{Higher-Order Functions}
+
+Before directly moving to higher-order functors and containers, we need to first figure out where their semantics reside, which are higher-order functions. Higher-order (or -kinded) functions are just like type constructors in functional programming. We can classify them by their kind signatures.
+
+\begin{itemize}
+  \item{$Set$ : Unit, Bool, Nat, ...} 
+  \item{$Set \to Set$ : Maybe, List, ...}
+  \item{$Set \to Set \to Set$ : Either, Const ...}
+  \item{$(Set \to Set) \to Set$ : Fix, ...}
+  \item{$(Set \to Set) \to Set \to Set$ : MaybeT, Free, ...}
+  \item{arbitrary kinds ...}
+\end{itemize}
+
+\subsection{Higher-Order Functorialities}
+
+These functions are typically required to satisfy certain functoriality properties. Accordingly, we inductively define a type family $isHFunc$, indexed by kinds and higher functions to indicate what kind of functorialities they need to satisfy.
+
+In the base case $Set$, where functions are actually just sets, no additional requirements are imposed.
+
+\[ isHFunc(X) := () \]
+
+In the inductive case, a higher function $H$ with type $A \to B$ has functorialities:
+
+\[ isHFunc(H) := \sum_{H' : \prod_{\{F : A\}} isHFunc(F) \to isHFunc(H(F))} \textbf{HCat(} A \textbf{)} \to \textbf{HCat(} B \textbf{)} \]
+
+It is defined as a sigma type. The first component says for all higher functor $F$ with type $A$, $H'$ sends functorialities of $F$ to functorialities of $H(F)$. The second component says $(H , H')$ together is a functor between higher categories indexed by $A$ and $B$.
+
+We need to define higher categories \textbf{HCat}, again, as a type family over kinds. Given a type $A$, the objects are defined as:
+
+\[ \lvert\textbf{HCat(} A \textbf{)}\rvert := \sum_{F : A} isHFunc(F) \]
+
+Therefore in the base case $Set$, it is equivalent to the category of sets - \textbf{Set}
+
+\begin{align*}
+\lvert\textbf{HCat(} * \textbf{)}\rvert &:= \lvert\textbf{Set}\rvert \\
+\textbf{HCat(} * \textbf{)} (X , Y) &:= X \to Y \\
+\end{align*}
+
+The inductive case $A \to B$ is much more involved. It is necessary to first establish some variable naming conventions for this definition. It is also a summary for higher functors.
+
+\begin{itemize}
+  \item{$H$ is function that sends function $F : A$ to $H(F) : B$}.
+  \item{$H'$ is function that sends $isHFunc(F)$ to $isHFunc(H(F))$}
+  \item{$H''$ is the proof of $(H , H')$ being a functor at current level}
+\end{itemize}
+
+\begin{align*}
+& \lvert\textbf{HCat(} A \to B \textbf{)}\rvert \\
+&:= \sum_{H : A \to B} isHFunc(H) \\
+&:= \sum_{H : A \to B} \sum_{H' : \prod_{\{F : A\}} isHFunc(F) \to isHFunc(H(F))} (\textbf{HCat(} A \textbf{)} \to \textbf{HCat(} B \textbf{)}) \\
+\end{align*}
+
+\begin{align*}
+& \textbf{HCat(} A \to B \textbf{)} ((H , isHFuncH) , (J, isHFuncJ)) \\
+&:= \textbf{HCat(} A \to B \textbf{)} ((H , H' , H'') , (J, J' , J'')) \\
+&:= \int_{(F , isHFuncF) : \lvert\textbf{HCat(} A \textbf{)}\rvert} (H(F) , H'(isHFuncF), H'') \to (J(F) , J'(isHFuncF), J'') \\
+\end{align*}
+
+Finally, the definition of a higher functor is straightforward:
+
+\[ HFunc(A) := \sum_{F : A} isHFunc(F) \]
+
+We can show many types mentioned above are indeed higher-order functors. See example.
+
+\subsubsection*{Functor Categories?}
+
+It is important to emphasize that \textbf{HCat} is not equivalent to the iterated functor categories over \textbf{Set}. By iterated functor categories, we mean the closure of \textbf{Set} under formation of functor categories. We can as well define it as a family of categories over kinds.
+
+\begin{align*}
+\textbf{FuncCat(} *\textbf{)} & := \textbf{Set} \\
+\textbf{FuncCat(} A \to B \textbf{)} & := \textbf{[FuncCat(} A \textbf{),FuncCat(} B \textbf{)]} \\
+\end{align*}
+
+In fact, \textbf{HCat} and \textbf{FuncCat} are equivalent under $Set \to Set$, but when it goes higher, their behavior begins to diverge. For example, we have:
+
+\[ \frac{HFunc((Set \to Set) \to Set \to Set)}{(Set \to Set) \to Set \to Set} \]
+
+by simply taking the first component of the $\Sigma$. However, it is not true in \textbf{FuncCat}. The best we can get is:
+
+\[ \frac{\lvert\textbf{FuncCat(} (Set \to Set) \to Set \to Set \textbf{)}\rvert}
+  {\lvert\textbf{FuncCat(} Set \to Set \textbf{)}\rvert \to Set \to Set}
+\]
+
 \section{Higher-Order Containers}
+
+The idea of higher containers is to provide a semantics of strict positivity for the higher data types. That is, we should be able to specify a higher data types by describing the shapes and positions of arguments, and derive higher functorialities for free. 
+
+The definition of higher containers introduced in this section is strongly influenced by (Keller and Altenkirch)\cite{keller2010normalization}. In that work, the authors developed a normalization function for the simply typed \lambda-calculus base on a ``hereditary substitutions'' technique. They explicitly specify a syntax for \lambda-terms and their normal forms, and prove that the normalization function precisely characterizes \beta\eta-equivalence.
+
+We do not present the results from this work in order to avoid unnecessary duplication. Instead, we directly provide our formalization, as it can be regarded as an extension to the previous work.
 
 \subsection{Syntax}
 
-\begin{code}[hide]
-infixr 20 _⇒_
+To establish a syntax of higher containers, we begin by observing a second-order data type $H$.
+
+\begin{align*}
+& H : (Set \to Set) \to Set \to Set \\
+& H (F) (X) = X \times F (F (X)) \\
+\end{align*}
+
+Comparing to the first-order container, $H$ is also a coproduct of sub-terms, so we need to keep the shape. The difference in the second-order case is that, we now need to keep track of the positions for both input variables $X$ and $F$. Notably, the sub-term $F(F(X))$ is defined as nested term applications. It implies that, we also need to add recursive structures for each occurrence of term that is not fully saturated.
+
+It leads to the syntax for higher containers. They are simply typed \lambda-terms closed under products and coproducts. To facilitate the definition, we first build a syntax for types and contexts:
+
+\subsubsection*{Type and Context}
+
+\begin{code}
 data Ty : Type where
   * : Ty
   _⇒_ : Ty → Ty → Ty
 
-variable A B C : Ty
-
-infixl 5 _▹_
 data Con : Type where
   ∙   : Con
   _▹_ : Con → Ty → Con
+\end{code}
 
+$Ty$ is closed under a base type and function type. We use A, B, etc. to denote a type. $Con$ is a list of $Ty$. We use \Gamma, \Delta, etc. to denote a context.
+
+\begin{code}[hide]
+infixr 20 _⇒_
+variable A B C : Ty
+
+infixl 5 _▹_
 variable Γ Δ Θ : Con
+\end{code}
 
+\subsubsection*{De Bruijn Indices}
+
+The De Bruijn indices are adopted to capture variables. The idea is to replace the name of variable in context with number, with the innermost (rightmost) variable is indexed by 0 and outermost (leftmost) variable is indexed by the biggest number. For example $\lambda x.\lambda y.x$ in de bruijn form is $\lambda.\lambda.1$. We use x, y, etc. to range over variables.
+
+\begin{code}
 data Var : Con → Ty → Type where
   vz : Var (Γ ▹ A) A
   vs : Var Γ A → Var (Γ ▹ B) A
+\end{code}
 
+\begin{code}[hide]
 variable x y : Var Γ A
 \end{code}
 
-To establish the syntax of higher containers, we begin by reviewing the first-order case. 
+\subsubsection*{Terms}
 
-\begin{code}
-List : Type → Type
-List X = ⊤ ⊎ X ⊎ X × X ⊎ X × X × X {- ⊎ ... -}
+As described in previous section, higher containers are simply typed \lambda-terms that closed under arbitrary products and coproducts. Consequently, we can construct a naive syntax $Tm : Con \to Ty \to Set$:
+
+\begin{code}[hide]
+variable I : Type
 \end{code}
 
-For example, list can be viewed as \texttt{ℕ}-nary coproducts of \texttt{Fin n}-nary (for \texttt{n : ℕ}) products of \texttt{X}. The essence of coproducts and products are captured by shapes and positions correspondingly.
-
-Now observe a second-order function \texttt{H}.
-
 \begin{code}
-H : (Type → Type) → Type → Type
-H F X = X ⊎ F (F X)
+data Tm : Con → Ty → Type₁ where
+  var : Var Γ A → Tm Γ A
+  lam : Tm (Γ ▹ A) B → Tm Γ (A ⇒ B)
+  _$_ : Tm Γ (A ⇒ B) → Tm Γ A → Tm Γ B
+  Πtm : (I : Set) → (I → Tm Γ A) → Tm Γ A
+  Σtm : (I : Set) → (I → Tm Γ A) → Tm Γ A
 \end{code}
 
-Similar to a first-order term, \texttt{H} is also a coproduct of some sub-terms, so we need to keep the shape. The difference is that, under each shape we now need to keep track of the positions for both input variables \texttt{X} and \texttt{F}. Notably, the sub-term \texttt{F (F X)} is defined as nested term applications. It implies that, we need to add recursive structures for each occurrence of term that is not fully saturated.
+Then $H$ can be defined as a term, which is a binary product of $X$ and $F$ applied to $F$ applied to $X$. \hyperref[Htm]{\faCog}
 
-It leads to the syntax of higher containers. They are like normalized simply typed \lambda-terms that are closed under products and coproducts. We therefore borrow the syntax of normal forms from previous section.
+While this definition is valid on its own, it has two disadvantages. The first is that the representation of a term is not unique. For example, the following $F$ can have more than one equivalent forms.
+
+\begin{align*}
+& F : Set \to Set \\
+& F (X) = X \times (X + 1) \cong X \times X + X \\
+\end{align*}
+
+The second thing is that it is not ``container'' enough, as there are not shapes, positions, etc.
+
+\subsubsection*{Normal Forms}
+
+We therefore present an alternative syntax for higher containers, which captures the unique form of simply typed \lambda-term after normalization. To define a syntax for normal forms, we also need to mutually define it with neutral terms and spines:
 
 \begin{code}[hide]
 mutual
@@ -83,15 +214,26 @@ mutual
     _,_ : Nf Γ A → Sp Γ B C → Sp Γ (A ⇒ B) C
 \end{code}
 
+A normal form is either:
+
+\begin{itemize}
+  \item{A \lambda-abstraction \AgdaInductiveConstructor{lam}.}
+  \item{A neutral term \AgdaInductiveConstructor{ne}: It is the core container definition, which is a coproduct (specified by shapes \AgdaField{S}) of product (specified by \AgdaField{P}) of variables applied to their spines (specified by \AgdaField{R}). A spine of a variable is a list of normal forms as the arguments applied to that variable, accordingly to its arity.}
+\end{itemize}
+
+We would use t, u, etc. to denote normal forms; spr, tql, etc. to denote neutral terms; and ts, us, etc. to denote the spines.
+
 \begin{code}[hide]
-  variable t u v : Nf Γ A
-  variable spr tql : Ne Γ A
-  variable ts us : Sp Γ A B
+variable t u v : Nf Γ A
+variable spr tql : Ne Γ A
+variable ts us : Sp Γ A B
 \end{code}
 
-In this definition, \texttt{Nf} and \texttt{Sp} stay exact the same. \texttt{Ne} is the core definition of containers, which is defined as a type \texttt{S} represents shapes; a type family \texttt{P} indexed by variables and shape, represents positions; a type family \texttt{R} indexed by variables, shape and positions, represents recursive structures spine.
+We can reconstruct $H$ through this normal form definition. We first obtain the context $\Gamma = \{ \bullet \triangleright F \triangleright A\}$ by \AgdaInductiveConstructor{lam} twice. From the outermost layer, $Hnf$ is a container with two shapes, with the first shape has a position of $X$ and the second shape has a position of $F$. But $F$ is not saturated yet, which requires to construct another normal form $FXnf$ as a singleton spine applied to $F$. $FXnf$ is a container with one shape and one position of $F$, which requires to define another normal form $Xnf$ to apply to it as parameter. Finally, $Xnf$ is a container with one shape and one position of $X$. \hyperref[Hnf]{\faCog}
 
-Finally, higher-order containers are defined as closed (with empty context) normal forms. We would therefore say \texttt{Nf} and \texttt{HCont} interchangeablely for the rest of formalization. 
+\subsubsection{Higher Containers}
+
+We shall define higher containers as closed (with empty context) normal forms. We would therefore use normal forms and higher containers interchangeably for the formalization and the rest of report.
 
 \begin{code}
 HCont : Ty → Type₁
@@ -100,7 +242,7 @@ HCont A = Nf ∙ A
 
 \subsection{Semantics}
 
-We wish to interpret higher containers to higher functors. But before defining the higher functoriality, we first interpret higher containers to functions. We need to first interpret types, contexts and variables:
+We wish to interpret higher containers to higher functors. But we first interpret higher containers to higher functions, which is the first component of higher functors. We define the functional semantics of types, contexts and variables:
 
 \begin{code}
 ⟦_⟧t : Ty → Type₁
@@ -116,7 +258,9 @@ We wish to interpret higher containers to higher functors. But before defining t
 ⟦ vs x ⟧v (as , a) = ⟦ x ⟧v as
 \end{code}
 
-We mutually define the semantics of \texttt{Nf}, \texttt{Ne} and \texttt{Sp}. Again, higher containers are just special cases of normal forms.
+$Ty$ represents the signature of higher functions. $Con$ corresponds to a list of such higher functions. Finally, $Var(\Gamma,A)$ is used to retrieve a higher function of type $A$ from context $\Gamma$.
+
+We mutually defining the functional semantics of normal forms, neutral terms and spines:
 
 \begin{code}[hide]
 mutual
@@ -137,41 +281,134 @@ mutual
   ⟦ t , ts ⟧sp as f = ⟦ ts ⟧sp as (f (⟦ t ⟧nf as))
 \end{code}
 
+Given a normal form $t : Nf(\Gamma,A)$ and a current state of context, it pushes all variables appear on the domain of $A$ into the context until there is only $*$ left in the codomain, which means it is ready to define a neutral term. 
+
+The purpose of a spine $ts : Sp(\Gamma,A,B)$ is to map a higher function of type $A$ to $B$. This process can be defined by recursively applying each normal form from the spine.
+
+Finally, the semantics of a neutral term $spr : Ne(\Gamma,*)$ is the coproduct of products of variables applied to its spine.
+
+Again, higher containers are just closed normal forms.
+
 \begin{code}
-⟦_⟧hcont : HCont A → ⟦ A ⟧t
-⟦ x ⟧hcont = ⟦ x ⟧nf (lift tt)
+⟦_⟧ : HCont A → ⟦ A ⟧t
+⟦ t ⟧ = ⟦ t ⟧nf (lift tt)
 \end{code}
 
-\subsubsection{Normalization}
+\subsection{Categorical Structures}
+
+There is a category \textbf{HCONT(}A\textbf{)} for each type $A$. We define the morphisms between normal forms:
 
 \begin{code}[hide]
+mutual
+\end{code}
+
+\begin{code}
+  data NfHom : Nf Γ A → Nf Γ A → Type₁ where
+    lam : NfHom t u → NfHom (lam t) (lam u)
+    ne  : NeHom spr tql → NfHom (ne spr) (ne tql)
+
+  record NeHom {Γ} {B} (spr tql : Ne Γ B) : Type₁ where
+    constructor _◃_◃_
+    inductive
+    open Ne spr
+    open Ne tql renaming (S to T; P to Q; R to L)
+    field
+      f : S → T
+      g : (x : Var Γ A) (s : S) → Q x (f s) → P x s
+      h : (x : Var Γ A) (s : S) (q : Q x (f s))
+        → SpHom (R x s (g x s q)) (L x (f s) q)
+        
+  data SpHom : Sp Γ A B → Sp Γ A B → Type₁ where
+    ε   : SpHom ts ts
+    _,_ : NfHom t u → SpHom ts us → SpHom (t , ts) (u , us)
+\end{code}
+
+The morphism of normal forms is just to push variables into context until it is ready to define morphism of neutral terms. The morphisms of neutral terms $S \triangleleft P \triangleleft R$ and $T \triangleleft Q \triangleleft L$ is given by:
+
+\begin{itemize}
+  \item{a function that maps the shapes}
+  \item{for each variable and shape, a function that maps the positions in the inverse direction}
+  \item{for each variable, shape and position, a morphism of spines}
+\end{itemize}
+
+The first two components \AgdaField{f} and \AgdaField{g} of the morphisms are the same as morphisms of first-order container. However, for the third component \AgdaField{h}, it remains unclear whether the morphisms of spines are well-defined or even meaningful.
+
+\subsubsection*{Algebraic Structures}
+
+We wish that the categories of higher containers to have many properties as the first-order case, such as it is closed under arbitrary products, coproducts, and compositions.
+
+\begin{code}
 app : Nf Γ (A ⇒ B) → Nf (Γ ▹ A) B
 app (lam t) = t
 
 en : Nf Γ * → Ne Γ *
 en (ne spr) = spr
+\end{code}
 
+\subsubsection*{Products}
+
+\begin{code}
+Πnf : (I : Type) → (I → Nf Γ A) → Nf Γ A
+Πnf {Γ} {A ⇒ B} I t⃗ = lam (Πnf I (app ∘ t⃗))
+Πnf {Γ} {*} I t⃗ = ne (S ◃ P ◃ R)
+  where
+  S : Type
+  S = (i : I) → en (t⃗ i) .Ne.S
+
+  P : Var Γ A → S → Type
+  P x f = Σ[ i ∈ I ] en (t⃗ i) .Ne.P x (f i)
+
+  R : (x : Var Γ A) (s : S) → P x s → Sp Γ A *
+  R x f (i , p) = en (t⃗ i) .Ne.R x (f i) p
+\end{code}
+
+\subsubsection*{Coproducts}
+
+\begin{code}
+Σnf : (I : Type) → (I → Nf Γ A) → Nf Γ A
+Σnf {Γ} {A ⇒ B} I t⃗ = lam (Σnf I (app ∘ t⃗))
+Σnf {Γ} {*} I t⃗ = ne (S ◃ P ◃ R)
+  where
+  S : Type
+  S = Σ[ i ∈ I ] en (t⃗ i) .Ne.S
+
+  P : Var Γ A → S → Type
+  P x (i , s) = en (t⃗ i) .Ne.P x s
+
+  R : (x : Var Γ A) (s : S) → P x s → Sp Γ A *
+  R x (i , s) p = en (t⃗ i) .Ne.R x s p
+\end{code}
+
+\subsection{Normalization}
+
+We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\Gamma,A)$ by applying hereditary substitutions to our definitions. We do case analysis on $Tm$ and we have already obtained the normalizer for \lambda-abstraction \AgdaInductiveConstructor{lam}, products \AgdaInductiveConstructor{Πtm} and \AgdaInductiveConstructor{Σtm}.
+
+\begin{code}[hide]
 _-_ : (Γ : Con) → Var Γ A → Con
 ∙ - ()
 (Γ ▹ A) - vz = Γ
 (Γ ▹ A) - (vs x) = (Γ - x) ▹ A
 
-wkVar : (x : Var Γ A) → Var (Γ - x) B → Var Γ B
-wkVar vz y = vs y
-wkVar (vs x) vz = vz
-wkVar (vs x) (vs y) = vs (wkVar x y)
+wkv : (x : Var Γ A) → Var (Γ - x) B → Var Γ B
+wkv vz y = vs y
+wkv (vs x) vz = vz
+wkv (vs x) (vs y) = vs (wkv x y)
+\end{code}
 
-data EqVar : Var Γ A → Var Γ B → Type where
-  same : EqVar x x
-  diff : (x : Var Γ A) (y : Var (Γ - x) B) → EqVar x (wkVar x y)
+\subsubsection*{Variable Equality}
 
-eq : (x : Var Γ A) (y : Var Γ B) → EqVar x y
+\begin{code}
+data EqV : Var Γ A → Var Γ B → Type where
+  same : EqV x x
+  diff : (x : Var Γ A) (y : Var (Γ - x) B) → EqV x (wkv x y)
+
+eq : (x : Var Γ A) (y : Var Γ B) → EqV x y
 eq vz vz = same
 eq vz (vs y) = diff vz y
 eq (vs x) vz = diff (vs x) vz
 eq (vs x) (vs y) with eq x y
-eq (vs x) (vs .x)            | same = same
-eq (vs x) (vs .(wkVar x y')) | diff .x y' = diff (vs x) (vs y')
+eq (vs x) (vs .x)          | same = same
+eq (vs x) (vs .(wkv x y')) | diff .x y' = diff (vs x) (vs y')
 
 mutual
   wkNf : (x : Var Γ A) → Nf (Γ - x) B → Nf Γ B
@@ -194,10 +431,12 @@ mutual
   wkSp x ε = ε
   wkSp x (t , ts) = wkNf x t , wkSp x ts
 
-appSp : Sp Γ A (B ⇒ C) → Nf Γ B → Sp Γ A C
-appSp ε u = u , ε
-appSp (t , ts) u = t , appSp ts u
+snocSp : Sp Γ A (B ⇒ C) → Nf Γ B → Sp Γ A C
+snocSp ε u = u , ε
+snocSp (t , ts) u = t , snocSp ts u
+\end{code}
 
+\begin{code}
 nvar : Var Γ A → Nf Γ A
 
 ne2nf : Ne Γ A → Nf Γ A
@@ -226,7 +465,7 @@ ne2nf {Γ} {A ⇒ C} (S ◃ P ◃ R) = lam (ne2nf (S ◃ P' ◃ R'))
 
   R' : (x : Var (Γ ▹ A) B) (s : S) → P' x s → Sp (Γ ▹ A) B C
   R' vz s ()
-  R' (vs x) s p = appSp (wkSp vz (R x s p)) (nvar vz)
+  R' (vs x) s p = snocSp (wkSp vz (R x s p)) (nvar vz)
 
 {- Normalization -}
 
@@ -236,10 +475,10 @@ mutual
   ne {Γ} (S ◃ P ◃ R) [ x := u ] = ne (S ◃ P' ◃ R')
     where
     P' : Var (Γ - x) A → S → Type
-    P' y s = P (wkVar x y) s
+    P' y s = P (wkv x y) s
 
     R' : (y : Var (Γ - x) A) (s : S) → P' y s → Sp (Γ - x) A *
-    R' y s p = R (wkVar x y) s p < x := u >
+    R' y s p = R (wkv x y) s p < x := u >
 
   _<_:=_> : Sp Γ B C → (x : Var Γ A) → Nf (Γ - x) A → Sp (Γ - x) B C
   ε < x := u > = ε
@@ -248,80 +487,20 @@ mutual
   _◇_ : Nf Γ A → Sp Γ A B → Nf Γ B
   t ◇ ε = t
   t ◇ (u , us) = napp t u ◇ us
-\end{code}
 
-\begin{code}
   napp : Nf Γ (A ⇒ B) → Nf Γ A → Nf Γ B
   napp (lam t) u = t [ vz := u ]
 \end{code}
 
-TODO
-
-\subsubsection*{Categorical Structures}
-
-For each \texttt{A : Ty}, there is a category of higher containers \texttt{HCONT A}. We define the morphisms between normal forms:
-
-\begin{code}[hide]
-mutual
-\end{code}
+Finally, putting everything together, we obtain our normalizer:
 
 \begin{code}
-  data NfHom : Nf Γ A → Nf Γ A → Type₁ where
-    lam : NfHom t u → NfHom (lam t) (lam u)
-    ne  : NeHom spr tql → NfHom (ne spr) (ne tql)
-
-  record NeHom {Γ} {B} (spr tql : Ne Γ B) : Type₁ where
-    constructor _◃_◃_
-    inductive
-    open Ne spr
-    open Ne tql renaming (S to T; P to Q; R to L)
-    field
-      f : S → T
-      g : (x : Var Γ A) (s : S) → Q x (f s) → P x s
-      h : (x : Var Γ A) (s : S) (q : Q x (f s))
-        → SpHom (R x s (g x s q)) (L x (f s) q)
-        
-  data SpHom : Sp Γ A B → Sp Γ A B → Type₁ where
-    ε   : SpHom ts ts
-    _,_ : NfHom t u → SpHom ts us → SpHom (t , ts) (u , us)
-\end{code}
-
-\subsubsection*{Algebraic Structures}
-
-\begin{code}
-onenf : Nf Γ A
-onenf {Γ} {*} = ne (⊤ ◃ (λ{ x tt → ⊥ }) ◃ λ{ x tt () })
-onenf {Γ} {A ⇒ B} = lam onenf
-
-zeronf : Nf Γ A
-zeronf {Γ} {*} = ne (⊥ ◃ (λ x ()) ◃ (λ x ()))
-zeronf {Γ} {A ⇒ B} = lam zeronf
-
-Πnf : (I : Type) → (I → Nf Γ A) → Nf Γ A
-Πnf {Γ} {A ⇒ B} I ts = lam (Πnf I (λ i → app (ts i)))
-Πnf {Γ} {*} I ts = ne (S ◃ P ◃ R)
-  where
-  S : Type
-  S = (i : I) → en (ts i) .Ne.S
-
-  P : Var Γ A → S → Type
-  P x f = Σ[ i ∈ I ] en (ts i) .Ne.P x (f i)
-
-  R : (x : Var Γ A) (s : S) → P x s → Sp Γ A *
-  R x f (i , p) = en (ts i) .Ne.R x (f i) p
-
-Σnf : (I : Type) → (I → Nf Γ A) → Nf Γ A
-Σnf {Γ} {A ⇒ B} I ts = lam (Σnf I (λ i → app (ts i)))
-Σnf {Γ} {*} I ts = ne (S ◃ P ◃ R)
-  where
-  S : Type
-  S = Σ[ i ∈ I ] en (ts i) .Ne.S
-
-  P : Var Γ A → S → Type
-  P x (i , s) = en (ts i) .Ne.P x s
-
-  R : (x : Var Γ A) (s : S) → P x s → Sp Γ A *
-  R x (i , s) p = en (ts i) .Ne.R x s p
+nf : Tm Γ A → Nf Γ A
+nf (var x) = nvar x
+nf (lam x) = lam (nf x)
+nf (t $ u) = napp (nf t) (nf u)
+nf (Πtm I t⃗) = Πnf I (nf ∘ t⃗)
+nf (Σtm I t⃗) = Σnf I (nf ∘ t⃗)
 \end{code}
 
 \begin{code}[hide]
@@ -332,14 +511,13 @@ syntax Πnf-syntax A (λ x → B) = Πnf[ x ∈ A ] B
 
 infix 2 Σnf-syntax
 Σnf-syntax : (I : Type) → (I → Nf Γ A) → Nf Γ A
-Σnf-syntax = Πnf
+Σnf-syntax = Σnf
 syntax Σnf-syntax A (λ x → B) = Σnf[ x ∈ A ] B
 \end{code}
 
-
 \subsection{Simply Typed Categories with Families}
 
-We show that the higher containers get rise to a SCwF with functions, where \texttt{Ty} is \texttt{Ty}, \texttt{Con} is \texttt{Con}, and \texttt{Tm} is \texttt{Nf}. We need to define the syntax for context substitutions.
+We show that the higher containers is a model of SCwF, where $Ty$ is $Ty$, $Con$ is $Con$, and $Tm$ is $Nf$. We also need to define a structure to represent context substitutions. As $Tms$ is a list of $Tm$, we define the $Nfs : Con \to Con \to Set$ as a list of $Nf$, denoted by \gamma, \delta, etc.
 
 \begin{code}
 data Nfs : Con → Con → Type₁ where
@@ -351,7 +529,7 @@ data Nfs : Con → Con → Type₁ where
 variable γ δ θ : Nfs Δ Γ
 \end{code}
 
-Similar to \texttt{Tms}, the \texttt{Nfs} is a list of normal forms.
+We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\gamma] : Nf(\Gamma,A) \to Nf(\Delta,A)$. But before that, we need to build some auxiliary functions, as well as prove the existence of other constructions.
 
 \begin{code}[hide]
 wkNfs : (x : Var Δ A) → Nfs (Δ - x) Γ → Nfs Δ Γ
@@ -361,31 +539,27 @@ wkNfs x (γ , t) = wkNfs x γ , wkNf x t
 _↑ : Nfs Δ Γ → Nfs (Δ ▹ A) (Γ ▹ A)
 γ ↑ = wkNfs vz γ , nvar vz
 
-id : Nfs Γ Γ
-id {∙} = ε
-id {Γ ▹ A} = id ↑
-
 subVar : Var Γ A → Nfs Δ Γ → Nf Δ A
 subVar vz (γ , t) = t
 subVar (vs x) (γ , t) = subVar x γ
 
-foldSp : Nf Γ A → Sp Γ A B → Nf Γ B
-foldSp t ε = t
-foldSp t (u , us) = foldSp (napp t u) us
+appSp : Nf Γ A → Sp Γ A B → Nf Γ B
+appSp t ε = t
+appSp t (u , us) = appSp (napp t u) us
+\end{code}
+
+\begin{code}[hide]
+mutual
 \end{code}
 
 \begin{code}
-mutual
-  _[_] : Nf Γ A → Nfs Δ Γ → Nf Δ A
-  lam t [ γ ] = lam (t [ γ ↑ ])
-  ne spr [ γ ] = spr [ γ ]ne2nf
-
-  _[_]ne2nf : Ne Γ B → Nfs Δ Γ → Nf Δ B
-  _[_]ne2nf {Γ} {B} {Δ} (S ◃ P ◃ R) γ =
-    Σnf[ s ∈ S ] Πnf[ A ∈ Ty ] Πnf[ x ∈ Var Γ A ] Πnf[ p ∈ P x s ]
-    foldSp {Δ} {A} (subVar x γ) (R x s p [ γ ]sp)
+  _[_]nf : Nf Γ A → Nfs Δ Γ → Nf Δ A
+  lam t [ γ ]nf = lam (t [ γ ↑ ]nf)
+  ne (S ◃ P ◃ R) [ γ ]nf = Σnf[ s ∈ S ]
+    Πnf[ A ∈ Ty ] Πnf[ x ∈ Var _ A ] Πnf[ p ∈ P x s ]
+    appSp (subVar x γ) (R x s p [ γ ]sp)
 
   _[_]sp : Sp Γ A B → Nfs Δ Γ → Sp Δ A B
   ε [ γ ]sp = ε
-  (t , ts) [ γ ]sp = (t [ γ ]) , (ts [ γ ]sp)
+  (t , ts) [ γ ]sp = (t [ γ ]nf) , (ts [ γ ]sp)
 \end{code}

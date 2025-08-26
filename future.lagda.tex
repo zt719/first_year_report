@@ -1,0 +1,82 @@
+\chapter{Future Work Plan}
+
+\begin{code}[hide]
+{-# OPTIONS --allow-unsolved-metas #-}
+module future where
+
+open import Relation.Binary.PropositionalEquality
+open import outcomes
+
+infix 2 Πtm-syntax
+Πtm-syntax : (I : Type) → (I → Tm Γ A) → Tm Γ A
+Πtm-syntax = Πtm
+syntax Πtm-syntax A (λ x → B) = Πtm[ x ∈ A ] B
+
+infix 2 Σtm-syntax
+Σtm-syntax : (I : Type) → (I → Tm Γ A) → Tm Γ A
+Σtm-syntax = Σtm
+syntax Σtm-syntax A (λ x → B) = Σtm[ x ∈ A ] B
+\end{code}
+
+\subsubsection*{Full Formalization}
+
+There are many things left to do in our current research. The primary object at this stage is to finish the constructions and proofs as we promised before. As a summary, we wish to:
+
+\begin{itemize}
+  \item{construct the functorial meaning of higher containers}
+  \item{fully interpret higher containers to higher functors}
+  \item{define the semantics of morphisms of higher containers}
+  \item{finish the proofs of higher containers as a model of simply typed \lambda-calculus}
+\end{itemize}
+
+Moreover, current formalization is carried out in plain Agda. We wish to strictly define and replicate the whole formalization in Cubical Agda.
+
+\subsubsection*{Soundness and Completeness}
+
+Another objective is to prove the completeness and soundness properties of the normalizer $nf$. To do that, we first define an embedding from $Nf(\Gamma,A)$ to $Tm(\Gamma,A)$:
+
+\begin{code}[hide]
+mutual
+\end{code}
+
+\subsubsection*{Embedding}
+
+\begin{code}
+  embNf : Nf Γ A → Tm Γ A
+  embNf (lam t) = lam (embNf t)
+  embNf (ne spr) = embNe spr
+
+  embNe : Ne Γ A → Tm Γ A
+  embNe (S ◃ P ◃ R) = Σtm[ s ∈ S ] 
+    Πtm[ A ∈ Ty ] Πtm[ x ∈ Var _ A ] Πtm[ p ∈ P x s ] 
+    embSp (R x s p) (var x)
+
+  embSp : Sp Γ A B → Tm Γ A → Tm Γ B
+  embSp ε u = u
+  embSp (t , ts) u = embSp ts (u $ embNf t)
+\end{code}
+
+\begin{code}[hide]
+data _βη≡_ : Tm Γ A → Tm Γ A → Type where
+\end{code}
+
+Here, the completeness means the embedding of any normalized term is \beta\eta-equivalent to itself:
+
+\begin{code}
+completeness : (t : Tm Γ A) → embNf (nf t) βη≡ t
+\end{code}
+
+where the \beta\eta-equivalence should be a relation of \lambda-terms which reflects the convertibility under \beta-equivalence and \eta-equivalence. We need to characterize this relation as well.
+
+The soundness says, if two terms are convertible, then they should reduce to the same canonical normal forms:
+
+\begin{code}
+soundness : (t u : Tm Γ A) → t βη≡ u → nf t ≡ nf u
+\end{code}
+
+\begin{code}[hide]
+completeness = {!   !}
+soundness = {!   !}
+\end{code}
+
+Combining two results together, we wish to show that the ``convertibility of terms is decidable''.
