@@ -22,7 +22,7 @@ Type₁ = Set₁
 
 \subsection{Higher-Order Functions}
 
-Before directly moving to higher-order functors and containers, we need to first figure out where their semantics reside, which are higher-order functions. Higher-order (or -kinded) functions are just like type constructors in functional programming. We can classify them by their kind signatures.
+Before directly moving to higher-order functors and containers, we need to first figure out their data type semantics, which are higher-order functions. Higher-order (or -kinded) functions are just like type constructors in functional programming. We can classify them by their kind signatures. In addition, we should constrain $Type$ to $Set$ for the strict definition.
 
 \begin{itemize}
   \item{$Set$ : Unit, Bool, Nat, ...} 
@@ -32,6 +32,8 @@ Before directly moving to higher-order functors and containers, we need to first
   \item{$(Set \to Set) \to Set \to Set$ : MaybeT, Free, ...}
   \item{arbitrary kinds ...}
 \end{itemize}
+
+
 
 \subsection{Higher-Order Functorialities}
 
@@ -164,10 +166,6 @@ variable x y : Var Γ A
 
 As described in previous section, higher containers are simply typed \lambda-terms that closed under arbitrary products and coproducts. Consequently, we can construct a naive syntax $Tm : Con \to Ty \to Set$:
 
-\begin{code}[hide]
-variable I : Type
-\end{code}
-
 \begin{code}
 data Tm : Con → Ty → Type₁ where
   var : Var Γ A → Tm Γ A
@@ -179,7 +177,7 @@ data Tm : Con → Ty → Type₁ where
 
 Then $H$ can be defined as a term, which is a binary product of $X$ and $F$ applied to $F$ applied to $X$. \hyperref[Htm]{\faCog}
 
-While this definition is valid on its own, it has two disadvantages. The first is that the representation of a term is not unique. For example, the following $F$ can have more than one equivalent forms.
+While this $Tm$ definition is valid on its own, it has two disadvantages. The first is that the representation of a term is not unique. For example, the following $F$ can have more than one equivalent forms.
 
 \begin{align*}
 & F : Set \to Set \\
@@ -193,6 +191,8 @@ The second thing is that it is not ``container'' enough, as there are not shapes
 We therefore present an alternative syntax for higher containers, which captures the unique form of simply typed \lambda-term after normalization. To define a syntax for normal forms, we also need to mutually define it with neutral terms and spines:
 
 \begin{code}[hide]
+infix 4 _,_
+
 mutual
 \end{code}
 
@@ -217,19 +217,19 @@ mutual
 A normal form is either:
 
 \begin{itemize}
-  \item{A \lambda-abstraction \AgdaInductiveConstructor{lam}.}
-  \item{A neutral term \AgdaInductiveConstructor{ne}: It is the core container definition, which is a coproduct (specified by shapes \AgdaField{S}) of product (specified by \AgdaField{P}) of variables applied to their spines (specified by \AgdaField{R}). A spine of a variable is a list of normal forms as the arguments applied to that variable, accordingly to its arity.}
+  \item{A \lambda-abstraction $lam$.}
+  \item{A neutral term $ne$: It is the core container definition, which is a coproduct (specified by shapes $S$) of product (specified by $P$) of variables applied to their spines (specified by $R$). A spine of a variable is a list of normal forms as the arguments applied to that variable, according to its arity.}
 \end{itemize}
 
 We would use t, u, etc. to denote normal forms; spr, tql, etc. to denote neutral terms; and ts, us, etc. to denote the spines.
 
 \begin{code}[hide]
-variable t u v : Nf Γ A
+variable t u w : Nf Γ A
 variable spr tql : Ne Γ A
-variable ts us : Sp Γ A B
+variable ts us ws : Sp Γ A B
 \end{code}
 
-We can reconstruct $H$ through this normal form definition. We first obtain the context $\Gamma = \{ \bullet \triangleright F \triangleright A\}$ by \AgdaInductiveConstructor{lam} twice. From the outermost layer, $Hnf$ is a container with two shapes, with the first shape has a position of $X$ and the second shape has a position of $F$. But $F$ is not saturated yet, which requires to construct another normal form $FXnf$ as a singleton spine applied to $F$. $FXnf$ is a container with one shape and one position of $F$, which requires to define another normal form $Xnf$ to apply to it as parameter. Finally, $Xnf$ is a container with one shape and one position of $X$. \hyperref[Hnf]{\faCog}
+We can reconstruct $H$ through this normal form definition. We first obtain the context $\Gamma = \bullet \triangleright F \triangleright A$ by $lam$ twice. From the outermost layer, $Hnf$ is a container with two shapes, with the first shape has a position of $X$ and the second shape has a position of $F$. But $F$ is not saturated yet, which requires to construct another normal form $FXnf$ as a singleton spine applied to $F$. $FXnf$ is a container with one shape and one position of $F$, which requires to define another normal form $Xnf$ to apply to it as parameter. Finally, $Xnf$ is a container with one shape and one position of $X$. \hyperref[Hnf]{\faCog}
 
 \subsubsection{Higher Containers}
 
@@ -258,7 +258,7 @@ We wish to interpret higher containers to higher functors. But we first interpre
 ⟦ vs x ⟧v (as , a) = ⟦ x ⟧v as
 \end{code}
 
-$Ty$ represents the signature of higher functions. $Con$ corresponds to a list of such higher functions. Finally, $Var(\Gamma,A)$ is used to retrieve a higher function of type $A$ from context $\Gamma$.
+$Ty$ represents the signature of higher functions. $Con$ corresponds to a list of such higher functions. $Var(\Gamma,A)$ is used to retrieve a higher function of type $A$ from context $\Gamma$.
 
 We mutually defining the functional semantics of normal forms, neutral terms and spines:
 
@@ -281,11 +281,13 @@ mutual
   ⟦ t , ts ⟧sp as f = ⟦ ts ⟧sp as (f (⟦ t ⟧nf as))
 \end{code}
 
-Given a normal form $t : Nf(\Gamma,A)$ and a current state of context, it pushes all variables appear on the domain of $A$ into the context until there is only $*$ left in the codomain, which means it is ready to define a neutral term. 
+\begin{itemize}
+  \item{Given a normal form $t : Nf(\Gamma,A)$ and a current state of context, it pushes all variables appear on the domain of $A$ into the context until there is only $*$ left in the codomain, which means it is ready to define a neutral term.}
 
-The purpose of a spine $ts : Sp(\Gamma,A,B)$ is to map a higher function of type $A$ to $B$. This process can be defined by recursively applying each normal form from the spine.
+  \item{The purpose of a spine $ts : Sp(\Gamma,A,B)$ is to map a higher function of type $A$ to $B$. This process can be defined by recursively applying each normal form from the spine.}
 
-Finally, the semantics of a neutral term $spr : Ne(\Gamma,*)$ is the coproduct of products of variables applied to its spine.
+  \item{The semantics of a neutral term $spr : Ne(\Gamma,*)$, as we proposed before, is the coproduct of products of variables applied to its spine.}
+\end{itemize}
 
 Again, higher containers are just closed normal forms.
 
@@ -331,11 +333,13 @@ The morphism of normal forms is just to push variables into context until it is 
   \item{for each variable, shape and position, a morphism of spines}
 \end{itemize}
 
-The first two components \AgdaField{f} and \AgdaField{g} of the morphisms are the same as morphisms of first-order container. However, for the third component \AgdaField{h}, it remains unclear whether the morphisms of spines are well-defined or even meaningful.
+The first two components $f$ and $g$ of the morphisms are the same as morphisms of first-order container. However, for the third component $h$, it remains unclear whether the morphisms of spines are well-defined or even meaningful.
+
+But still we can construct some examples. \hyperref[Hom]{\faCog}
 
 \subsubsection*{Algebraic Structures}
 
-We wish that the categories of higher containers to have many properties as the first-order case, such as it is closed under arbitrary products, coproducts, and compositions.
+We wish that the categories of higher containers to have many closure properties as the first-order case. Indeed, they are closed under arbitrary products and coproducts. We need to first build some auxiliary functions.
 
 \begin{code}
 app : Nf Γ (A ⇒ B) → Nf (Γ ▹ A) B
@@ -344,6 +348,8 @@ app (lam t) = t
 en : Nf Γ * → Ne Γ *
 en (ne spr) = spr
 \end{code}
+
+The $app$ is the inverse of $lam$, and $en$ is the inverse of $ne$.
 
 \subsubsection*{Products}
 
@@ -379,16 +385,35 @@ en (ne spr) = spr
   R x (i , s) p = en (t⃗ i) .Ne.R x s p
 \end{code}
 
+\begin{code}[hide]
+infix 2 Πnf-syntax
+Πnf-syntax : (I : Type) → (I → Nf Γ A) → Nf Γ A
+Πnf-syntax = Πnf
+syntax Πnf-syntax A (λ x → B) = Πnf[ x ∈ A ] B
+
+infix 2 Σnf-syntax
+Σnf-syntax : (I : Type) → (I → Nf Γ A) → Nf Γ A
+Σnf-syntax = Σnf
+syntax Σnf-syntax A (λ x → B) = Σnf[ x ∈ A ] B
+\end{code}
+
 \subsection{Normalization}
 
-We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\Gamma,A)$ by applying hereditary substitutions to our definitions. We do case analysis on $Tm$ and we have already obtained the normalizer for \lambda-abstraction \AgdaInductiveConstructor{lam}, products \AgdaInductiveConstructor{Πtm} and \AgdaInductiveConstructor{Σtm}.
+We now construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\Gamma,A)$ by applying hereditary substitutions to our definitions. It turns out that normalizers for \lambda-abstraction, products and coproducts have already been obtained. It is left to construct the normalization function for variables $nvar : Var(\Gamma,A) \to Nf(\Gamma,A)$ and for applications $napp : Nf(\Gamma,A \to B) \to Nf(\Gamma,A) \to Nf(\Gamma,B)$.
+
+\subsubsection*{Weakening}
+
+Weakening is a standard construction in type theory. It represents the process of extending a context with additional variables. To formalize this, we first define how to obtain a new context by removing variables. Although in practice our constructions only require removing the top variable, it is still possible to define a general function that removes an arbitrary index.
 
 \begin{code}[hide]
 _-_ : (Γ : Con) → Var Γ A → Con
-∙ - ()
 (Γ ▹ A) - vz = Γ
 (Γ ▹ A) - (vs x) = (Γ - x) ▹ A
+\end{code}
 
+Then we can weaken a variable by shifting its index:
+
+\begin{code}
 wkv : (x : Var Γ A) → Var (Γ - x) B → Var Γ B
 wkv vz y = vs y
 wkv (vs x) vz = vz
@@ -396,6 +421,8 @@ wkv (vs x) (vs y) = vs (wkv x y)
 \end{code}
 
 \subsubsection*{Variable Equality}
+
+We establish an notion of heterogeneous equality of variables. Two variables are the equal if they are the same variables. Two variables $x, y$ are different if there exist a variable $x'$ such that $x = wkv\;y\;x'$. The $eq$ function decides the equality of variables.
 
 \begin{code}
 data EqV : Var Γ A → Var Γ B → Type where
@@ -409,8 +436,17 @@ eq (vs x) vz = diff (vs x) vz
 eq (vs x) (vs y) with eq x y
 eq (vs x) (vs .x)          | same = same
 eq (vs x) (vs .(wkv x y')) | diff .x y' = diff (vs x) (vs y')
+\end{code}
 
+\subsubsection*{Normal Forms Weakening}
+
+We can also weaken normal forms, which in turn, mutually weaken neutral terms and spines:
+
+\begin{code}[hide]
 mutual
+\end{code}
+
+\begin{code}
   wkNf : (x : Var Γ A) → Nf (Γ - x) B → Nf Γ B
   wkNf x (lam t) = lam (wkNf (vs x) t)
   wkNf x (ne spr) = ne (wkNe x spr)
@@ -430,46 +466,68 @@ mutual
   wkSp : (x : Var Γ A) → Sp (Γ - x) B C → Sp Γ B C
   wkSp x ε = ε
   wkSp x (t , ts) = wkNf x t , wkSp x ts
+\end{code}
 
-snocSp : Sp Γ A (B ⇒ C) → Nf Γ B → Sp Γ A C
-snocSp ε u = u , ε
-snocSp (t , ts) u = t , snocSp ts u
+$wkNf$ and $wkSp$ are defined in a straightforward way, by recursively calling weakening to their respective sub-constructions. The case of $wkNe$ is more interesting: when weakening a neutral term, its shape remains unchanged, the newly added variable should have no position, and therefore no spine is assigned to it.
+
+\subsubsection*{\eta-expansion}
+
+The normalization functions for variables and neutral terms corresponds to \eta-expansion. For instance a variable with type $(Type \to Type) \to Type \to Type$ should be converted to a normal form by fully applying \eta-expansion many times:
+
+\[ H \to_{\eta} \lambda F. H (F) \to_{\eta} \lambda X. \lambda F. H (F) (X) \]
+
+We first build an auxiliary function that append a normal form at the end of spine:
+
+\begin{code}
+appSp : Sp Γ A (B ⇒ C) → Nf Γ B → Sp Γ A C
+appSp ε u = u , ε
+appSp (t , ts) u = t , appSp ts u
+\end{code}
+
+Then, the normalizers for variables and neutral terms are mutually defined:
+
+\begin{code}[hide]
+mutual
 \end{code}
 
 \begin{code}
-nvar : Var Γ A → Nf Γ A
+  nvar : Var Γ A → Nf Γ A
+  nvar {Γ} {B} x = ne2nf (⊤ ◃ P ◃ R)
+    where
+    P : Var Γ A → ⊤ → Type
+    P y  tt with eq x y
+    P .x tt | same = ⊤
+    P y  tt | diff .x y' = ⊥
 
-ne2nf : Ne Γ A → Nf Γ A
+    R : (y : Var Γ A) (s : ⊤) → P y s → Sp Γ A B
+    R y tt p with eq x y
+    R .x tt p | same = ε
+    R y tt () | diff .x y'
 
-nvar {Γ} {B} x = ne2nf (S ◃ P ◃ R)
-  where
-  S : Type
-  S = ⊤
+  ne2nf : Ne Γ A → Nf Γ A
+  ne2nf {Γ} {*} spr = ne spr
+  ne2nf {Γ} {A ⇒ C} (S ◃ P ◃ R) = lam (ne2nf (S ◃ P' ◃ R'))
+    where
+    P' : Var (Γ ▹ A) B → S → Type
+    P' vz s = ⊥
+    P' (vs x) s = P x s
 
-  P : Var Γ A → S → Type
-  P y  tt with eq x y
-  P .x tt | same = ⊤
-  P y  tt | diff .x y' = ⊥
+    R' : (x : Var (Γ ▹ A) B) (s : S) → P' x s → Sp (Γ ▹ A) B C
+    R' vz s ()
+    R' (vs x) s p = appSp (wkSp vz (R x s p)) (nvar vz)
+\end{code}
 
-  R : (y : Var Γ A) (s : S) → P y s → Sp Γ A B
-  R y tt p with eq x y
-  R .x tt p | same = ε
-  R y tt () | diff .x y'
+The function $nvar$ applies an empty spine to variable and then calls $ne2nf$. The function $ne2nf$ repeats \eta-expansion until the type reduces to $*$.
 
-ne2nf {Γ} {*} spr = ne spr
-ne2nf {Γ} {A ⇒ C} (S ◃ P ◃ R) = lam (ne2nf (S ◃ P' ◃ R'))
-  where
-  P' : Var (Γ ▹ A) B → S → Type
-  P' vz s = ⊥
-  P' (vs x) s = P x s
+\subsubsection*{\beta-reduction}
 
-  R' : (x : Var (Γ ▹ A) B) (s : S) → P' x s → Sp (Γ ▹ A) B C
-  R' vz s ()
-  R' (vs x) s p = snocSp (wkSp vz (R x s p)) (nvar vz)
+The normalization function for applications corresponds to the \beta-reduction.
 
-{- Normalization -}
-
+\begin{code}[hide]
 mutual
+\end{code}
+
+\begin{code}
   _[_:=_] : Nf Γ B → (x : Var Γ A) → Nf (Γ - x) A → Nf (Γ - x) B
   lam t [ x := u ] = lam (t [ vs x := wkNf vz u ])
   ne {Γ} (S ◃ P ◃ R) [ x := u ] = ne (S ◃ P' ◃ R')
@@ -492,6 +550,10 @@ mutual
   napp (lam t) u = t [ vz := u ]
 \end{code}
 
+The function $t [ x := u ]$ substitutes variable $x$ with normal form $u$ inside a normal form $t$.The function $t \langle x := u \rangle$ substitutes variable $x$ with normal form $u$ inside a spine $ts$. The function $t \diamond u$ folds a spine $us$ to the variable $t$ by $napp$. Finally, $napp$ launches the \beta-reduction.
+
+\subsubsection*{Normalization Function}
+
 Finally, putting everything together, we obtain our normalizer:
 
 \begin{code}
@@ -501,18 +563,6 @@ nf (lam x) = lam (nf x)
 nf (t $ u) = napp (nf t) (nf u)
 nf (Πtm I t⃗) = Πnf I (nf ∘ t⃗)
 nf (Σtm I t⃗) = Σnf I (nf ∘ t⃗)
-\end{code}
-
-\begin{code}[hide]
-infix 2 Πnf-syntax
-Πnf-syntax : (I : Type) → (I → Nf Γ A) → Nf Γ A
-Πnf-syntax = Πnf
-syntax Πnf-syntax A (λ x → B) = Πnf[ x ∈ A ] B
-
-infix 2 Σnf-syntax
-Σnf-syntax : (I : Type) → (I → Nf Γ A) → Nf Γ A
-Σnf-syntax = Σnf
-syntax Σnf-syntax A (λ x → B) = Σnf[ x ∈ A ] B
 \end{code}
 
 \subsection{Simply Typed Categories with Families}
@@ -525,11 +575,15 @@ data Nfs : Con → Con → Type₁ where
   _,_ : Nfs Δ Γ → Nf Δ A → Nfs Δ (Γ ▹ A)
 \end{code}
 
+Notice that, although both $Nfs$ and $Sp$ are defined as lists of $Nf$, they carry different type signatures and serve distinct purposes.
+
 \begin{code}[hide]
 variable γ δ θ : Nfs Δ Γ
 \end{code}
 
-We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\gamma] : Nf(\Gamma,A) \to Nf(\Delta,A)$. But before that, we need to build some auxiliary functions, as well as prove the existence of other constructions.
+We need to define, for each $\gamma : \Delta \to \Gamma$, a context substitution $\_[\gamma] : Nf(\Gamma,A) \to Nf(\Delta,A)$. But before that, we need to build some auxiliary functions, as well as prove the existence of other constructions.
+
+We perform the same weakening trick for $Nfs$, and therefore obtain a definition of context substitution lifting $\_\uparrow$:
 
 \begin{code}[hide]
 wkNfs : (x : Var Δ A) → Nfs (Δ - x) Γ → Nfs Δ Γ
@@ -538,15 +592,19 @@ wkNfs x (γ , t) = wkNfs x γ , wkNf x t
 
 _↑ : Nfs Δ Γ → Nfs (Δ ▹ A) (Γ ▹ A)
 γ ↑ = wkNfs vz γ , nvar vz
-
-subVar : Var Γ A → Nfs Δ Γ → Nf Δ A
-subVar vz (γ , t) = t
-subVar (vs x) (γ , t) = subVar x γ
-
-appSp : Nf Γ A → Sp Γ A B → Nf Γ B
-appSp t ε = t
-appSp t (u , us) = appSp (napp t u) us
 \end{code}
+
+We also define auxiliary functions $subv$ which retrieve a normal from from the substitutions.
+
+\begin{code}
+subv : Var Γ A → Nfs Δ Γ → Nf Δ A
+subv vz (γ , t) = t
+subv (vs x) (γ , t) = subv x γ
+\end{code}
+
+\subsubsection*{The Context Substitutions}
+
+Finally, we construct the context substitution by mutually define the substitution for normal forms and for spines:
 
 \begin{code}[hide]
 mutual
@@ -555,11 +613,25 @@ mutual
 \begin{code}
   _[_]nf : Nf Γ A → Nfs Δ Γ → Nf Δ A
   lam t [ γ ]nf = lam (t [ γ ↑ ]nf)
-  ne (S ◃ P ◃ R) [ γ ]nf = Σnf[ s ∈ S ]
-    Πnf[ A ∈ Ty ] Πnf[ x ∈ Var _ A ] Πnf[ p ∈ P x s ]
-    appSp (subVar x γ) (R x s p [ γ ]sp)
+  ne {Γ} (S ◃ P ◃ R) [ γ ]nf = Σnf[ s ∈ S ]
+    Πnf[ A ∈ Ty ] Πnf[ x ∈ Var Γ A ] Πnf[ p ∈ P x s ]
+    (subv x γ) ◇ (R x s p [ γ ]sp)
 
   _[_]sp : Sp Γ A B → Nfs Δ Γ → Sp Δ A B
   ε [ γ ]sp = ε
   (t , ts) [ γ ]sp = (t [ γ ]nf) , (ts [ γ ]sp)
 \end{code}
+
+In the definition, the $lam$ case is trivial, which calls itself recursively with a lifted context substitution. The context substitution for a spine is just to call substitutions for each normal forms inside that spine.
+
+However, it is not trivial to define the context substitution for neutral terms. The reason is that there is no context substitution for variables:
+
+\[ \cancel{\_[\_]v : Var (\Gamma, A) \to Nfs(\Delta, \Gamma) \to Var (\Delta, A)} \]
+
+Instead, the best we can achieve is $subv$ as defined before, where the target is a normal form after context substitution:
+
+\[ subv : Var (\Gamma, A) \to Nfs(\Delta, \Gamma) \to Nf (\Delta, A) \]
+
+Therefore, for each occurrence of variable in the neutral term: we first convert it into a normal form by $subv$, then applied its spines (after context substitutions) by $\_\diamond\_$, and finally use the products $\Pi nf$and coproducts $\Sigma nf$of normal forms to glue them into a single normal form.
+
+A partial proof of this result has been formalized. \hyperref[SCwF]{\faCog}

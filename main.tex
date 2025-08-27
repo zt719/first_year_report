@@ -3,7 +3,7 @@
 % Preamble
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{agda}
 \usepackage{fontspec}
 \usepackage{tikz-cd}
@@ -12,6 +12,7 @@
 \usepackage{amsfonts}
 \usepackage{stmaryrd}
 \usepackage{fontawesome5}
+\usepackage{cancel}
 
 % Mono-Space Font
 \setmonofont{JuliaMono-Regular.ttf}[
@@ -59,7 +60,7 @@
 % Abstract
 \begin{abstract}
 
-Containers are semantic and categorical way to talk about strictly positive types. It is shown in previous work that the category of containers is closed under compositions, products, coproducts and exponentials. More extensions and variants, such as indexed containers, generalized containers are studied to capture a boarder class. In this project, we aim to develop the syntax and semantics of the higher-order containers and do formalization in Agda. The idea of higher containers is to provide a semantics for higher strictly positive types, such as monad transformers with kinds $(* \to *) \to * \to *$. We define a family of categories of containers indexed by their kinds and explore the properties. We also show that the higher containers give rise to a model of simply typed \lambda-calculus.
+Containers are semantic and categorical way to talk about strictly positive types. It is shown in previous work that the category of containers is closed under compositions, products, coproducts and exponentials. More extensions and variants, such as indexed containers, generalized containers are studied to capture a boarder class. In this project, we aim to develop the syntax and semantics of the higher-order containers and do formalization in Agda. The idea of higher containers is to provide a semantics for higher strictly positive types, such as monad transformers with kinds $(Type \to Type) \to Type \to Type$. We define a family of categories of containers indexed by their kinds and explore the properties. We also show that the higher containers give rise to a model of simply typed \lambda-calculus.
 
 \end{abstract}
 
@@ -77,7 +78,7 @@ Containers are semantic and categorical way to talk about strictly positive type
 \input{latex/outcomes}
 \input{latex/conclusions}
 \input{latex/future}
-% \input{latex/appendix}
+\input{latex/appendix}
 
 % Bibliography
 \addcontentsline{toc}{chapter}{References}

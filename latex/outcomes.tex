@@ -1,6 +1,12 @@
 \chapter{Research Outcomes}
 
 \begin{code}[hide]%
+\>[0]\AgdaKeyword{module}\AgdaSpace{}%
+\AgdaModule{outcomes}\AgdaSpace{}%
+\AgdaKeyword{where}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaKeyword{open}\AgdaSpace{}%
 \AgdaKeyword{import}\AgdaSpace{}%
 \AgdaModule{Data.Empty}\<%
@@ -61,7 +67,7 @@
 
 \subsection{Higher-Order Functions}
 
-Before directly moving to higher-order functors and containers, we need to first figure out where their semantics reside, which are higher-order functions. Higher-order (or -kinded) functions are just like type constructors in functional programming. We can classify them by their kind signatures.
+Before directly moving to higher-order functors and containers, we need to first figure out their data type semantics, which are higher-order functions. Higher-order (or -kinded) functions are just like type constructors in functional programming. We can classify them by their kind signatures. In addition, we should constrain $Type$ to $Set$ for the strict definition.
 
 \begin{itemize}
   \item{$Set$ : Unit, Bool, Nat, ...} 
@@ -71,6 +77,8 @@ Before directly moving to higher-order functors and containers, we need to first
   \item{$(Set \to Set) \to Set \to Set$ : MaybeT, Free, ...}
   \item{arbitrary kinds ...}
 \end{itemize}
+
+
 
 \subsection{Higher-Order Functorialities}
 
@@ -289,13 +297,6 @@ The De Bruijn indices are adopted to capture variables. The idea is to replace t
 
 As described in previous section, higher containers are simply typed \lambda-terms that closed under arbitrary products and coproducts. Consequently, we can construct a naive syntax $Tm : Con \to Ty \to Set$:
 
-\begin{code}[hide]%
-\>[0]\AgdaKeyword{variable}\AgdaSpace{}%
-\AgdaGeneralizable{I}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\end{code}
-
 \begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
 \AgdaDatatype{Tm}\AgdaSpace{}%
@@ -385,9 +386,9 @@ As described in previous section, higher containers are simply typed \lambda-ter
 \AgdaGeneralizable{A}\<%
 \end{code}
 
-Then $H$ can be defined as a term. \hyperref[htm]{\faCog}
+Then $H$ can be defined as a term, which is a binary product of $X$ and $F$ applied to $F$ applied to $X$. \hyperref[Htm]{\faCog}
 
-While this definition is valid on its own, it has two disadvantages. The first is that the representation of a term is not unique. For example, the following $F$ can have more than one equivalent forms.
+While this $Tm$ definition is valid on its own, it has two disadvantages. The first is that the representation of a term is not unique. For example, the following $F$ can have more than one equivalent forms.
 
 \begin{align*}
 & F : Set \to Set \\
@@ -401,6 +402,12 @@ The second thing is that it is not ``container'' enough, as there are not shapes
 We therefore present an alternative syntax for higher containers, which captures the unique form of simply typed \lambda-term after normalization. To define a syntax for normal forms, we also need to mutually define it with neutral terms and spines:
 
 \begin{code}[hide]%
+\>[0]\AgdaKeyword{infix}\AgdaSpace{}%
+\AgdaNumber{4}\AgdaSpace{}%
+\AgdaOperator{\AgdaInductiveConstructor{\AgdaUnderscore{},\AgdaUnderscore{}}}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
 \>[0]\AgdaKeyword{mutual}\<%
 \end{code}
 
@@ -551,8 +558,8 @@ We therefore present an alternative syntax for higher containers, which captures
 A normal form is either:
 
 \begin{itemize}
-  \item{A \lambda-abstraction \AgdaInductiveConstructor{lam}.}
-  \item{A neutral term \AgdaInductiveConstructor{ne}: It is the core container definition, which is a coproduct (specified by shapes \AgdaField{S}) of product (specified by \AgdaField{P}) of variables applied to their spines (specified by \AgdaField{R}). A spine of a variable is a list of normal forms as the arguments applied to that variable, accordingly to its arity.}
+  \item{A \lambda-abstraction $lam$.}
+  \item{A neutral term $ne$: It is the core container definition, which is a coproduct (specified by shapes $S$) of product (specified by $P$) of variables applied to their spines (specified by $R$). A spine of a variable is a list of normal forms as the arguments applied to that variable, according to its arity.}
 \end{itemize}
 
 We would use t, u, etc. to denote normal forms; spr, tql, etc. to denote neutral terms; and ts, us, etc. to denote the spines.
@@ -561,7 +568,7 @@ We would use t, u, etc. to denote normal forms; spr, tql, etc. to denote neutral
 \>[0]\AgdaKeyword{variable}\AgdaSpace{}%
 \AgdaGeneralizable{t}\AgdaSpace{}%
 \AgdaGeneralizable{u}\AgdaSpace{}%
-\AgdaGeneralizable{v}\AgdaSpace{}%
+\AgdaGeneralizable{w}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Nf}\AgdaSpace{}%
 \AgdaGeneralizable{Γ}\AgdaSpace{}%
@@ -578,6 +585,7 @@ We would use t, u, etc. to denote normal forms; spr, tql, etc. to denote neutral
 \>[0]\AgdaKeyword{variable}\AgdaSpace{}%
 \AgdaGeneralizable{ts}\AgdaSpace{}%
 \AgdaGeneralizable{us}\AgdaSpace{}%
+\AgdaGeneralizable{ws}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Sp}\AgdaSpace{}%
 \AgdaGeneralizable{Γ}\AgdaSpace{}%
@@ -585,366 +593,11 @@ We would use t, u, etc. to denote normal forms; spr, tql, etc. to denote neutral
 \AgdaGeneralizable{B}\<%
 \end{code}
 
-We can reconstruct $H$ by this normal form definition:
-
-\begin{code}%
-\>[0]\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Con}\<%
-\\
-\>[0]\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{∙}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{▹}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{▹}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{Hnf}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaInductiveConstructor{∙}\AgdaSpace{}%
-\AgdaSymbol{((}\AgdaInductiveConstructor{*}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{)}\<%
-\\
-\>[0]\AgdaFunction{Hnf}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{ne}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{S}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaFunction{P}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaFunction{R}\AgdaSymbol{)))}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{where}\<%
-\\
-%
-\>[2]\AgdaFunction{S}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[2]\AgdaFunction{S}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\AgdaSpace{}%
-\AgdaOperator{\AgdaDatatype{⊎}}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{S}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{inj₁}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{inj₂}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{⊥}\<%
-\\
-%
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{inj₁}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{⊥}\<%
-\\
-%
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{inj₂}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[2]\AgdaFunction{R}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{S}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{P}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Sp}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\<%
-\\
-%
-\>[2]\AgdaFunction{R}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{inj₁}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{ε}\<%
-\\
-%
-\>[2]\AgdaFunction{R}%
-\>[375I]\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{inj₂}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{FX}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaInductiveConstructor{ε}\<%
-\end{code}
-
-Where $FX := F(X) $ is the singleton spine applied to the outer $F$. It should be defined as an normal form as well:
-
-\begin{code}[hide]%
-\>[.][@{}l@{}]\<[375I]%
-\>[4]\AgdaKeyword{where}\<%
-\end{code}
-
-\begin{code}%
-%
-\>[4]\AgdaFunction{FX}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\<%
-\\
-%
-\>[4]\AgdaFunction{FX}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{ne}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{FX-S}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaFunction{FX-P}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaFunction{FX-R}\AgdaSymbol{)}\<%
-\\
-\>[4][@{}l@{\AgdaIndent{0}}]%
-\>[6]\AgdaKeyword{where}\<%
-\\
-%
-\>[6]\AgdaFunction{FX-S}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[6]\AgdaFunction{FX-S}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[6]\AgdaFunction{FX-P}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{FX-S}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[6]\AgdaFunction{FX-P}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{⊥}\<%
-\\
-%
-\>[6]\AgdaFunction{FX-P}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[6]\AgdaFunction{FX-R}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{FX-S}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{FX-P}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Sp}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\<%
-\\
-%
-\>[6]\AgdaFunction{FX-R}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{X}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaInductiveConstructor{ε}\<%
-\end{code}
-
-Again $X$ on its own is another singleton spine applied to the inner $F$:
-
-\begin{code}[hide]%
-\>[6][@{}l@{\AgdaIndent{1}}]%
-\>[8]\AgdaKeyword{where}\<%
-\end{code}
-
-\begin{code}%
-%
-\>[8]\AgdaFunction{X}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\<%
-\\
-%
-\>[8]\AgdaFunction{X}%
-\>[446I]\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{ne}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{X-S}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaFunction{X-P}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaFunction{X-R}\AgdaSymbol{)}\<%
-\\
-\>[.][@{}l@{}]\<[446I]%
-\>[10]\AgdaKeyword{where}\<%
-\\
-%
-\>[10]\AgdaFunction{X-S}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[10]\AgdaFunction{X-S}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[10]\AgdaFunction{X-P}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{X-S}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[10]\AgdaFunction{X-P}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\>[10]\AgdaFunction{X-P}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{⊥}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[10]\AgdaFunction{X-R}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{X-S}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{X-P}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaBound{s}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Sp}\AgdaSpace{}%
-\AgdaFunction{Γ₀}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\<%
-\\
-%
-\>[10]\AgdaFunction{X-R}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{ε}\<%
-\\
-%
-\>[10]\AgdaFunction{X-R}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
-\AgdaInductiveConstructor{vz}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{()}\<%
-\end{code}
-
-That finishes our definition of $H$.
+We can reconstruct $H$ through this normal form definition. We first obtain the context $\Gamma = \bullet \triangleright F \triangleright A$ by $lam$ twice. From the outermost layer, $Hnf$ is a container with two shapes, with the first shape has a position of $X$ and the second shape has a position of $F$. But $F$ is not saturated yet, which requires to construct another normal form $FXnf$ as a singleton spine applied to $F$. $FXnf$ is a container with one shape and one position of $F$, which requires to define another normal form $Xnf$ to apply to it as parameter. Finally, $Xnf$ is a container with one shape and one position of $X$. \hyperref[Hnf]{\faCog}
 
 \subsubsection{Higher Containers}
 
-Finally, we shall define higher containers as closed (with empty context) normal forms. We would therefore use normal forms and higher containers interchangeably for the formalization and the rest of report.
+We shall define higher containers as closed (with empty context) normal forms. We would therefore use normal forms and higher containers interchangeably for the formalization and the rest of report.
 
 \begin{code}%
 \>[0]\AgdaFunction{HCont}\AgdaSpace{}%
@@ -959,23 +612,6 @@ Finally, we shall define higher containers as closed (with empty context) normal
 \AgdaDatatype{Nf}\AgdaSpace{}%
 \AgdaInductiveConstructor{∙}\AgdaSpace{}%
 \AgdaBound{A}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{Hhcont}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{HCont}\AgdaSpace{}%
-\AgdaSymbol{((}\AgdaInductiveConstructor{*}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{)}\<%
-\\
-\>[0]\AgdaFunction{Hhcont}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{Hnf}\<%
 \end{code}
 
 \subsection{Semantics}
@@ -1079,9 +715,9 @@ We wish to interpret higher containers to higher functors. But we first interpre
 \AgdaBound{as}\<%
 \end{code}
 
-$Ty$ represents the signature of higher functions. $Con$ corresponds to a list of such higher functions. Finally, $Var(\Gamma,A)$ is used to retrieve a higher function of type $A$ from context $\Gamma$.
+$Ty$ represents the signature of higher functions. $Con$ corresponds to a list of such higher functions. $Var(\Gamma,A)$ is used to retrieve a higher function of type $A$ from context $\Gamma$.
 
-We continue by mutually defining the functional semantics of normal forms, neutral terms and spines:
+We mutually defining the functional semantics of normal forms, neutral terms and spines:
 
 \begin{code}[hide]%
 \>[0]\AgdaKeyword{mutual}\<%
@@ -1241,11 +877,13 @@ We continue by mutually defining the functional semantics of normal forms, neutr
 \AgdaBound{as}\AgdaSymbol{))}\<%
 \end{code}
 
-Given a normal form $t : Nf(\Gamma,A)$ and a current state of context, it pushes all variables appear on the domain of $A$ into the context until there is only $*$ left in the codomain, which means it is ready to define a neutral term. 
+\begin{itemize}
+  \item{Given a normal form $t : Nf(\Gamma,A)$ and a current state of context, it pushes all variables appear on the domain of $A$ into the context until there is only $*$ left in the codomain, which means it is ready to define a neutral term.}
 
-The purpose of a spine $ts : Sp(\Gamma,A,B)$ is to map a higher function of type $A$ to $B$. This process can be defined by recursively applying each normal form from the spine.
+  \item{The purpose of a spine $ts : Sp(\Gamma,A,B)$ is to map a higher function of type $A$ to $B$. This process can be defined by recursively applying each normal form from the spine.}
 
-Finally, the semantics of a neutral term $spr : Ne(\Gamma,*)$ is the coproduct of products of variables applied to its spine.
+  \item{The semantics of a neutral term $spr : Ne(\Gamma,*)$, as we proposed before, is the coproduct of products of variables applied to its spine.}
+\end{itemize}
 
 Again, higher containers are just closed normal forms.
 
@@ -1268,24 +906,6 @@ Again, higher containers are just closed normal forms.
 \AgdaOperator{\AgdaFunction{⟧nf}}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{lift}\AgdaSpace{}%
 \AgdaInductiveConstructor{tt}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{H}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{Type}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{Type}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-\>[0]\AgdaFunction{H}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{⟦}}\AgdaSpace{}%
-\AgdaFunction{Hhcont}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{⟧}}\<%
 \end{code}
 
 \subsection{Categorical Structures}
@@ -1415,7 +1035,7 @@ There is a category \textbf{HCONT(}A\textbf{)} for each type $A$. We define the 
 \\
 %
 \>[6]\AgdaField{h}%
-\>[819I]\AgdaSymbol{:}\AgdaSpace{}%
+\>[583I]\AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
@@ -1431,7 +1051,7 @@ There is a category \textbf{HCONT(}A\textbf{)} for each type $A$. We define the 
 \AgdaSymbol{(}\AgdaField{f}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSymbol{))}\<%
 \\
-\>[.][@{}l@{}]\<[819I]%
+\>[.][@{}l@{}]\<[583I]%
 \>[8]\AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{SpHom}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaFunction{R}\AgdaSpace{}%
@@ -1501,9 +1121,13 @@ The morphism of normal forms is just to push variables into context until it is 
   \item{for each variable, shape and position, a morphism of spines}
 \end{itemize}
 
-The first two components \AgdaField{f} and \AgdaField{g} of the morphisms are the same as morphisms of first-order container. However, for the third component \AgdaField{h}, it remains unclear whether the morphisms of spines are well-defined or even meaningful.
+The first two components $f$ and $g$ of the morphisms are the same as morphisms of first-order container. However, for the third component $h$, it remains unclear whether the morphisms of spines are well-defined or even meaningful.
+
+But still we can construct some examples. \hyperref[Hom]{\faCog}
 
 \subsubsection*{Algebraic Structures}
+
+We wish that the categories of higher containers to have many closure properties as the first-order case. Indeed, they are closed under arbitrary products and coproducts. We need to first build some auxiliary functions.
 
 \begin{code}%
 \>[0]\AgdaFunction{app}\AgdaSpace{}%
@@ -1543,82 +1167,13 @@ The first two components \AgdaField{f} and \AgdaField{g} of the morphisms are th
 \AgdaBound{spr}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaBound{spr}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{⊤nf}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\<%
-\\
-\>[0]\AgdaFunction{⊤nf}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaArgument{A}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{ne}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaRecord{⊤}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaSymbol{(λ\{}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{⊥}\AgdaSpace{}%
-\AgdaSymbol{\})}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaSymbol{λ\{}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaInductiveConstructor{tt}\AgdaSpace{}%
-\AgdaSymbol{()}\AgdaSpace{}%
-\AgdaSymbol{\})}\<%
-\\
-\>[0]\AgdaFunction{⊤nf}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaArgument{A}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{A}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaBound{B}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaFunction{⊤nf}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{⊥nf}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\<%
-\\
-\>[0]\AgdaFunction{⊥nf}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaArgument{A}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{*}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{ne}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{⊥}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{())}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{()))}\<%
-\\
-\>[0]\AgdaFunction{⊥nf}\AgdaSpace{}%
-\AgdaSymbol{\{}\AgdaArgument{A}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{A}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
-\AgdaBound{B}\AgdaSymbol{\}}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaInductiveConstructor{lam}\AgdaSpace{}%
-\AgdaFunction{⊥nf}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+The $app$ is the inverse of $lam$, and $en$ is the inverse of $ne$.
+
+\subsubsection*{Products}
+
+\begin{code}%
 \>[0]\AgdaFunction{Πnf}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
@@ -1753,9 +1308,11 @@ The first two components \AgdaField{f} and \AgdaField{g} of the morphisms are th
 \AgdaSymbol{(}\AgdaBound{f}\AgdaSpace{}%
 \AgdaBound{i}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaBound{p}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+\subsubsection*{Coproducts}
+
+\begin{code}%
 \>[0]\AgdaFunction{Σnf}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
@@ -1888,9 +1445,95 @@ The first two components \AgdaField{f} and \AgdaField{g} of the morphisms are th
 \AgdaBound{p}\<%
 \end{code}
 
+\begin{code}[hide]%
+\>[0]\AgdaKeyword{infix}\AgdaSpace{}%
+\AgdaNumber{2}\AgdaSpace{}%
+\AgdaFunction{Πnf-syntax}\<%
+\\
+\>[0]\AgdaFunction{Πnf-syntax}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Nf}\AgdaSpace{}%
+\AgdaGeneralizable{Γ}\AgdaSpace{}%
+\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Nf}\AgdaSpace{}%
+\AgdaGeneralizable{Γ}\AgdaSpace{}%
+\AgdaGeneralizable{A}\<%
+\\
+\>[0]\AgdaFunction{Πnf-syntax}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{Πnf}\<%
+\\
+\>[0]\AgdaKeyword{syntax}\AgdaSpace{}%
+\AgdaFunction{Πnf-syntax}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{(λ}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{Πnf[}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaFunction{∈}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaFunction{]}\AgdaSpace{}%
+\AgdaBound{B}\<%
+\\
+%
+\\[\AgdaEmptyExtraSkip]%
+\>[0]\AgdaKeyword{infix}\AgdaSpace{}%
+\AgdaNumber{2}\AgdaSpace{}%
+\AgdaFunction{Σnf-syntax}\<%
+\\
+\>[0]\AgdaFunction{Σnf-syntax}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Nf}\AgdaSpace{}%
+\AgdaGeneralizable{Γ}\AgdaSpace{}%
+\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Nf}\AgdaSpace{}%
+\AgdaGeneralizable{Γ}\AgdaSpace{}%
+\AgdaGeneralizable{A}\<%
+\\
+\>[0]\AgdaFunction{Σnf-syntax}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{Σnf}\<%
+\\
+\>[0]\AgdaKeyword{syntax}\AgdaSpace{}%
+\AgdaFunction{Σnf-syntax}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaSymbol{(λ}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaBound{B}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaSymbol{=}\AgdaSpace{}%
+\AgdaFunction{Σnf[}\AgdaSpace{}%
+\AgdaBound{x}\AgdaSpace{}%
+\AgdaFunction{∈}\AgdaSpace{}%
+\AgdaBound{A}\AgdaSpace{}%
+\AgdaFunction{]}\AgdaSpace{}%
+\AgdaBound{B}\<%
+\end{code}
+
 \subsection{Normalization}
 
-We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\Gamma,A)$ by applying hereditary substitutions to our definitions.
+We now construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\Gamma,A)$ by applying hereditary substitutions to our definitions. It turns out that normalizers for \lambda-abstraction, products and coproducts have already been obtained. It is left to construct the normalization function for variables $nvar : Var(\Gamma,A) \to Nf(\Gamma,A)$ and for applications $napp : Nf(\Gamma,A \to B) \to Nf(\Gamma,A) \to Nf(\Gamma,B)$.
+
+\subsubsection*{Weakening}
+
+Weakening is a standard construction in type theory. It represents the process of extending a context with additional variables. To formalize this, we first define how to obtain a new context by removing variables. Although in practice our constructions only require removing the top variable, it is still possible to define a general function that removes an arbitrary index.
 
 \begin{code}[hide]%
 \>[0]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}-\AgdaUnderscore{}}}\AgdaSpace{}%
@@ -1904,10 +1547,6 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaGeneralizable{A}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaDatatype{Con}\<%
-\\
-\>[0]\AgdaInductiveConstructor{∙}\AgdaSpace{}%
-\AgdaOperator{\AgdaFunction{-}}\AgdaSpace{}%
-\AgdaSymbol{()}\<%
 \\
 \>[0]\AgdaSymbol{(}\AgdaBound{Γ}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{▹}}\AgdaSpace{}%
@@ -1929,9 +1568,11 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{▹}}\AgdaSpace{}%
 \AgdaBound{A}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+Then we can weaken a variable by shifting its index:
+
+\begin{code}%
 \>[0]\AgdaFunction{wkv}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
@@ -1977,6 +1618,8 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \end{code}
 
 \subsubsection*{Variable Equality}
+
+We establish an notion of heterogeneous equality of variables. Two variables are the equal if they are the same variables. Two variables $x, y$ are different if there exist a variable $x'$ such that $x = wkv\;y\;x'$. The $eq$ function decides the equality of variables.
 
 \begin{code}%
 \>[0]\AgdaKeyword{data}\AgdaSpace{}%
@@ -2103,12 +1746,18 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
 \AgdaBound{y'}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+\subsubsection*{Normal Forms Weakening}
+
+We can also weaken normal forms, which in turn, mutually weaken neutral terms and spines:
+
+\begin{code}[hide]%
 \>[0]\AgdaKeyword{mutual}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
+\end{code}
+
+\begin{code}%
+\>[0][@{}l@{\AgdaIndent{1}}]%
 \>[2]\AgdaFunction{wkNf}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
@@ -2328,10 +1977,20 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaFunction{wkSp}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{ts}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{snocSp}\AgdaSpace{}%
+\end{code}
+
+$wkNf$ and $wkSp$ are defined in a straightforward way, by recursively calling weakening to their respective sub-constructions. The case of $wkNe$ is more interesting: when weakening a neutral term, its shape remains unchanged, the newly added variable should have no position, and therefore no spine is assigned to it.
+
+\subsubsection*{\eta-expansion}
+
+The normalization functions for variables and neutral terms corresponds to \eta-expansion. For instance a variable with type $(Type \to Type) \to Type \to Type$ should be converted to a normal form by fully applying \eta-expansion many times:
+
+\[ H \to_{\eta} \lambda F. H (F) \to_{\eta} \lambda X. \lambda F. H (F) (X) \]
+
+We first build an auxiliary function that append a normal form at the end of spine:
+
+\begin{code}%
+\>[0]\AgdaFunction{appSp}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Sp}\AgdaSpace{}%
 \AgdaGeneralizable{Γ}\AgdaSpace{}%
@@ -2349,7 +2008,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaGeneralizable{A}\AgdaSpace{}%
 \AgdaGeneralizable{C}\<%
 \\
-\>[0]\AgdaFunction{snocSp}\AgdaSpace{}%
+\>[0]\AgdaFunction{appSp}\AgdaSpace{}%
 \AgdaInductiveConstructor{ε}\AgdaSpace{}%
 \AgdaBound{u}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
@@ -2357,7 +2016,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
 \AgdaInductiveConstructor{ε}\<%
 \\
-\>[0]\AgdaFunction{snocSp}\AgdaSpace{}%
+\>[0]\AgdaFunction{appSp}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{t}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
 \AgdaBound{ts}\AgdaSymbol{)}\AgdaSpace{}%
@@ -2365,13 +2024,20 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaBound{t}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaFunction{snocSp}\AgdaSpace{}%
+\AgdaFunction{appSp}\AgdaSpace{}%
 \AgdaBound{ts}\AgdaSpace{}%
 \AgdaBound{u}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{nvar}\AgdaSpace{}%
+\end{code}
+
+Then, the normalizers for variables and neutral terms are mutually defined:
+
+\begin{code}[hide]%
+\>[0]\AgdaKeyword{mutual}\<%
+\end{code}
+
+\begin{code}%
+\>[0][@{}l@{\AgdaIndent{1}}]%
+\>[2]\AgdaFunction{nvar}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
 \AgdaGeneralizable{Γ}\AgdaSpace{}%
@@ -2382,68 +2048,43 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaGeneralizable{A}\<%
 \\
 %
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{ne2nf}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaRecord{Ne}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{nvar}\AgdaSpace{}%
+\>[2]\AgdaFunction{nvar}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{Γ}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{B}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaFunction{ne2nf}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{S}\AgdaSpace{}%
+\AgdaSymbol{(}\AgdaRecord{⊤}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
 \AgdaFunction{P}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
 \AgdaFunction{R}\AgdaSymbol{)}\<%
 \\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{where}\<%
+\>[2][@{}l@{\AgdaIndent{0}}]%
+\>[4]\AgdaKeyword{where}\<%
 \\
 %
-\>[2]\AgdaFunction{S}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\<%
-\\
-%
-\>[2]\AgdaFunction{S}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaRecord{⊤}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-%
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
+\>[4]\AgdaFunction{P}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
 \AgdaBound{Γ}\AgdaSpace{}%
 \AgdaGeneralizable{A}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
-\AgdaFunction{S}\AgdaSpace{}%
+\AgdaRecord{⊤}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaFunction{Type}\<%
 \\
 %
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
+\>[4]\AgdaFunction{P}\AgdaSpace{}%
 \AgdaBound{y}%
-\>[7]\AgdaInductiveConstructor{tt}\AgdaSpace{}%
+\>[9]\AgdaInductiveConstructor{tt}\AgdaSpace{}%
 \AgdaKeyword{with}\AgdaSpace{}%
 \AgdaFunction{eq}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{y}\<%
 \\
 %
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
+\>[4]\AgdaFunction{P}\AgdaSpace{}%
 \AgdaDottedPattern{\AgdaSymbol{.}}\AgdaDottedPattern{\AgdaBound{x}}\AgdaSpace{}%
 \AgdaInductiveConstructor{tt}\AgdaSpace{}%
 \AgdaSymbol{|}\AgdaSpace{}%
@@ -2452,9 +2093,9 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaRecord{⊤}\<%
 \\
 %
-\>[2]\AgdaFunction{P}\AgdaSpace{}%
+\>[4]\AgdaFunction{P}\AgdaSpace{}%
 \AgdaBound{y}%
-\>[7]\AgdaInductiveConstructor{tt}\AgdaSpace{}%
+\>[9]\AgdaInductiveConstructor{tt}\AgdaSpace{}%
 \AgdaSymbol{|}\AgdaSpace{}%
 \AgdaInductiveConstructor{diff}\AgdaSpace{}%
 \AgdaDottedPattern{\AgdaSymbol{.}}\AgdaDottedPattern{\AgdaBound{x}}\AgdaSpace{}%
@@ -2465,7 +2106,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 %
 \\[\AgdaEmptyExtraSkip]%
 %
-\>[2]\AgdaFunction{R}\AgdaSpace{}%
+\>[4]\AgdaFunction{R}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{y}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
@@ -2474,7 +2115,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{s}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{S}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaRecord{⊤}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{→}\AgdaSpace{}%
 \AgdaFunction{P}\AgdaSpace{}%
 \AgdaBound{y}\AgdaSpace{}%
@@ -2486,7 +2127,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaBound{B}\<%
 \\
 %
-\>[2]\AgdaFunction{R}\AgdaSpace{}%
+\>[4]\AgdaFunction{R}\AgdaSpace{}%
 \AgdaBound{y}\AgdaSpace{}%
 \AgdaInductiveConstructor{tt}\AgdaSpace{}%
 \AgdaBound{p}\AgdaSpace{}%
@@ -2496,7 +2137,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaBound{y}\<%
 \\
 %
-\>[2]\AgdaFunction{R}\AgdaSpace{}%
+\>[4]\AgdaFunction{R}\AgdaSpace{}%
 \AgdaDottedPattern{\AgdaSymbol{.}}\AgdaDottedPattern{\AgdaBound{x}}\AgdaSpace{}%
 \AgdaInductiveConstructor{tt}\AgdaSpace{}%
 \AgdaBound{p}\AgdaSpace{}%
@@ -2506,7 +2147,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaInductiveConstructor{ε}\<%
 \\
 %
-\>[2]\AgdaFunction{R}\AgdaSpace{}%
+\>[4]\AgdaFunction{R}\AgdaSpace{}%
 \AgdaBound{y}\AgdaSpace{}%
 \AgdaInductiveConstructor{tt}\AgdaSpace{}%
 \AgdaSymbol{()}\AgdaSpace{}%
@@ -2517,7 +2158,19 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \\
 %
 \\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{ne2nf}\AgdaSpace{}%
+%
+\>[2]\AgdaFunction{ne2nf}\AgdaSpace{}%
+\AgdaSymbol{:}\AgdaSpace{}%
+\AgdaRecord{Ne}\AgdaSpace{}%
+\AgdaGeneralizable{Γ}\AgdaSpace{}%
+\AgdaGeneralizable{A}\AgdaSpace{}%
+\AgdaSymbol{→}\AgdaSpace{}%
+\AgdaDatatype{Nf}\AgdaSpace{}%
+\AgdaGeneralizable{Γ}\AgdaSpace{}%
+\AgdaGeneralizable{A}\<%
+\\
+%
+\>[2]\AgdaFunction{ne2nf}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{Γ}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaInductiveConstructor{*}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaBound{spr}\AgdaSpace{}%
@@ -2525,7 +2178,8 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaInductiveConstructor{ne}\AgdaSpace{}%
 \AgdaBound{spr}\<%
 \\
-\>[0]\AgdaFunction{ne2nf}\AgdaSpace{}%
+%
+\>[2]\AgdaFunction{ne2nf}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{Γ}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaSymbol{\{}\AgdaBound{A}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{⇒}}\AgdaSpace{}%
@@ -2544,11 +2198,11 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
 \AgdaFunction{R'}\AgdaSymbol{))}\<%
 \\
-\>[0][@{}l@{\AgdaIndent{0}}]%
-\>[2]\AgdaKeyword{where}\<%
+\>[2][@{}l@{\AgdaIndent{0}}]%
+\>[4]\AgdaKeyword{where}\<%
 \\
 %
-\>[2]\AgdaFunction{P'}\AgdaSpace{}%
+\>[4]\AgdaFunction{P'}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{Γ}\AgdaSpace{}%
@@ -2561,14 +2215,14 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaFunction{Type}\<%
 \\
 %
-\>[2]\AgdaFunction{P'}\AgdaSpace{}%
+\>[4]\AgdaFunction{P'}\AgdaSpace{}%
 \AgdaInductiveConstructor{vz}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaFunction{⊥}\<%
 \\
 %
-\>[2]\AgdaFunction{P'}\AgdaSpace{}%
+\>[4]\AgdaFunction{P'}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSpace{}%
@@ -2580,7 +2234,7 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 %
 \\[\AgdaEmptyExtraSkip]%
 %
-\>[2]\AgdaFunction{R'}\AgdaSpace{}%
+\>[4]\AgdaFunction{R'}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{x}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
@@ -2605,19 +2259,19 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaBound{C}\<%
 \\
 %
-\>[2]\AgdaFunction{R'}\AgdaSpace{}%
+\>[4]\AgdaFunction{R'}\AgdaSpace{}%
 \AgdaInductiveConstructor{vz}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSpace{}%
 \AgdaSymbol{()}\<%
 \\
 %
-\>[2]\AgdaFunction{R'}\AgdaSpace{}%
+\>[4]\AgdaFunction{R'}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSpace{}%
 \AgdaBound{p}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{snocSp}\AgdaSpace{}%
+\AgdaFunction{appSp}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaFunction{wkSp}\AgdaSpace{}%
 \AgdaInductiveConstructor{vz}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{R}\AgdaSpace{}%
@@ -2626,16 +2280,20 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaBound{p}\AgdaSymbol{))}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaFunction{nvar}\AgdaSpace{}%
 \AgdaInductiveConstructor{vz}\AgdaSymbol{)}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaComment{\{-\ Normalization\ -\}}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
+\end{code}
+
+The function $nvar$ applies an empty spine to variable and then calls $ne2nf$. The function $ne2nf$ repeats \eta-expansion until the type reduces to $*$.
+
+\subsubsection*{\beta-reduction}
+
+The normalization function for applications corresponds to the \beta-reduction.
+
+\begin{code}[hide]%
 \>[0]\AgdaKeyword{mutual}\<%
-\\
-\>[0][@{}l@{\AgdaIndent{0}}]%
+\end{code}
+
+\begin{code}%
+\>[0][@{}l@{\AgdaIndent{1}}]%
 \>[2]\AgdaOperator{\AgdaFunction{\AgdaUnderscore{}[\AgdaUnderscore{}:=\AgdaUnderscore{}]}}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Nf}\AgdaSpace{}%
@@ -2907,6 +2565,10 @@ We would like to construct a normalization function $nf : Tm(\Gamma,A) \to Nf(\G
 \AgdaOperator{\AgdaFunction{]}}\<%
 \end{code}
 
+The function $t [ x := u ]$ substitutes variable $x$ with normal form $u$ inside a normal form $t$.The function $t \langle x := u \rangle$ substitutes variable $x$ with normal form $u$ inside a spine $ts$. The function $t \diamond u$ folds a spine $us$ to the variable $t$ by $napp$. Finally, $napp$ launches the \beta-reduction.
+
+\subsubsection*{Normalization Function}
+
 Finally, putting everything together, we obtain our normalizer:
 
 \begin{code}%
@@ -2969,88 +2631,6 @@ Finally, putting everything together, we obtain our normalizer:
 \AgdaBound{t⃗}\AgdaSymbol{)}\<%
 \end{code}
 
-\begin{code}[hide]%
-\>[0]\AgdaKeyword{infix}\AgdaSpace{}%
-\AgdaNumber{2}\AgdaSpace{}%
-\AgdaFunction{Πnf-syntax}\<%
-\\
-\>[0]\AgdaFunction{Πnf-syntax}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\<%
-\\
-\>[0]\AgdaFunction{Πnf-syntax}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{Πnf}\<%
-\\
-\>[0]\AgdaKeyword{syntax}\AgdaSpace{}%
-\AgdaFunction{Πnf-syntax}\AgdaSpace{}%
-\AgdaBound{A}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{B}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{Πnf[}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaFunction{∈}\AgdaSpace{}%
-\AgdaBound{A}\AgdaSpace{}%
-\AgdaFunction{]}\AgdaSpace{}%
-\AgdaBound{B}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaKeyword{infix}\AgdaSpace{}%
-\AgdaNumber{2}\AgdaSpace{}%
-\AgdaFunction{Σnf-syntax}\<%
-\\
-\>[0]\AgdaFunction{Σnf-syntax}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaFunction{Type}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{I}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\<%
-\\
-\>[0]\AgdaFunction{Σnf-syntax}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{Πnf}\<%
-\\
-\>[0]\AgdaKeyword{syntax}\AgdaSpace{}%
-\AgdaFunction{Σnf-syntax}\AgdaSpace{}%
-\AgdaBound{A}\AgdaSpace{}%
-\AgdaSymbol{(λ}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaBound{B}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{Σnf[}\AgdaSpace{}%
-\AgdaBound{x}\AgdaSpace{}%
-\AgdaFunction{∈}\AgdaSpace{}%
-\AgdaBound{A}\AgdaSpace{}%
-\AgdaFunction{]}\AgdaSpace{}%
-\AgdaBound{B}\<%
-\end{code}
-
 \subsection{Simply Typed Categories with Families}
 
 We show that the higher containers is a model of SCwF, where $Ty$ is $Ty$, $Con$ is $Con$, and $Tm$ is $Nf$. We also need to define a structure to represent context substitutions. As $Tms$ is a list of $Tm$, we define the $Nfs : Con \to Con \to Set$ as a list of $Nf$, denoted by \gamma, \delta, etc.
@@ -3091,6 +2671,8 @@ We show that the higher containers is a model of SCwF, where $Ty$ is $Ty$, $Con$
 \AgdaGeneralizable{A}\AgdaSymbol{)}\<%
 \end{code}
 
+Notice that, although both $Nfs$ and $Sp$ are defined as lists of $Nf$, they carry different type signatures and serve distinct purposes.
+
 \begin{code}[hide]%
 \>[0]\AgdaKeyword{variable}\AgdaSpace{}%
 \AgdaGeneralizable{γ}\AgdaSpace{}%
@@ -3102,7 +2684,9 @@ We show that the higher containers is a model of SCwF, where $Ty$ is $Ty$, $Con$
 \AgdaGeneralizable{Γ}\<%
 \end{code}
 
-We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\gamma] : Nf(\Gamma,A) \to Nf(\Delta,A)$. But before that, we need to build some auxiliary functions, as well as prove the existence of other constructions:
+We need to define, for each $\gamma : \Delta \to \Gamma$, a context substitution $\_[\gamma] : Nf(\Gamma,A) \to Nf(\Delta,A)$. But before that, we need to build some auxiliary functions, as well as prove the existence of other constructions.
+
+We perform the same weakening trick for $Nfs$, and therefore obtain a definition of context substitution lifting $\_\uparrow$:
 
 \begin{code}[hide]%
 \>[0]\AgdaFunction{wkNfs}\AgdaSpace{}%
@@ -3168,10 +2752,12 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
 \AgdaFunction{nvar}\AgdaSpace{}%
 \AgdaInductiveConstructor{vz}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{subVar}\AgdaSpace{}%
+\end{code}
+
+We also define auxiliary functions $subv$ which retrieve a normal from from the substitutions.
+
+\begin{code}%
+\>[0]\AgdaFunction{subv}\AgdaSpace{}%
 \AgdaSymbol{:}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
 \AgdaGeneralizable{Γ}\AgdaSpace{}%
@@ -3185,7 +2771,7 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \AgdaGeneralizable{Δ}\AgdaSpace{}%
 \AgdaGeneralizable{A}\<%
 \\
-\>[0]\AgdaFunction{subVar}\AgdaSpace{}%
+\>[0]\AgdaFunction{subv}\AgdaSpace{}%
 \AgdaInductiveConstructor{vz}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{γ}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
@@ -3193,52 +2779,21 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \AgdaSymbol{=}\AgdaSpace{}%
 \AgdaBound{t}\<%
 \\
-\>[0]\AgdaFunction{subVar}\AgdaSpace{}%
+\>[0]\AgdaFunction{subv}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaInductiveConstructor{vs}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{γ}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
 \AgdaBound{t}\AgdaSymbol{)}\AgdaSpace{}%
 \AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{subVar}\AgdaSpace{}%
+\AgdaFunction{subv}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{γ}\<%
-\\
-%
-\\[\AgdaEmptyExtraSkip]%
-\>[0]\AgdaFunction{appSp}\AgdaSpace{}%
-\AgdaSymbol{:}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Sp}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{A}\AgdaSpace{}%
-\AgdaGeneralizable{B}\AgdaSpace{}%
-\AgdaSymbol{→}\AgdaSpace{}%
-\AgdaDatatype{Nf}\AgdaSpace{}%
-\AgdaGeneralizable{Γ}\AgdaSpace{}%
-\AgdaGeneralizable{B}\<%
-\\
-\>[0]\AgdaFunction{appSp}\AgdaSpace{}%
-\AgdaBound{t}\AgdaSpace{}%
-\AgdaInductiveConstructor{ε}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaBound{t}\<%
-\\
-\>[0]\AgdaFunction{appSp}\AgdaSpace{}%
-\AgdaBound{t}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaBound{u}\AgdaSpace{}%
-\AgdaOperator{\AgdaInductiveConstructor{,}}\AgdaSpace{}%
-\AgdaBound{us}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaSymbol{=}\AgdaSpace{}%
-\AgdaFunction{appSp}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{napp}\AgdaSpace{}%
-\AgdaBound{t}\AgdaSpace{}%
-\AgdaBound{u}\AgdaSymbol{)}\AgdaSpace{}%
-\AgdaBound{us}\<%
 \end{code}
+
+\subsubsection*{The Context Substitutions}
+
+Finally, we construct the context substitution by mutually define the substitution for normal forms and for spines:
 
 \begin{code}[hide]%
 \>[0]\AgdaKeyword{mutual}\<%
@@ -3276,6 +2831,7 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \\
 %
 \>[2]\AgdaInductiveConstructor{ne}\AgdaSpace{}%
+\AgdaSymbol{\{}\AgdaBound{Γ}\AgdaSymbol{\}}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{S}\AgdaSpace{}%
 \AgdaOperator{\AgdaInductiveConstructor{◃}}\AgdaSpace{}%
 \AgdaBound{P}\AgdaSpace{}%
@@ -3301,7 +2857,7 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaFunction{∈}\AgdaSpace{}%
 \AgdaDatatype{Var}\AgdaSpace{}%
-\AgdaSymbol{\AgdaUnderscore{}}\AgdaSpace{}%
+\AgdaBound{Γ}\AgdaSpace{}%
 \AgdaBound{A}\AgdaSpace{}%
 \AgdaFunction{]}\AgdaSpace{}%
 \AgdaFunction{Πnf[}\AgdaSpace{}%
@@ -3313,10 +2869,10 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \AgdaFunction{]}\<%
 \\
 %
-\>[4]\AgdaFunction{appSp}\AgdaSpace{}%
-\AgdaSymbol{(}\AgdaFunction{subVar}\AgdaSpace{}%
+\>[4]\AgdaSymbol{(}\AgdaFunction{subv}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{γ}\AgdaSymbol{)}\AgdaSpace{}%
+\AgdaOperator{\AgdaFunction{◇}}\AgdaSpace{}%
 \AgdaSymbol{(}\AgdaBound{R}\AgdaSpace{}%
 \AgdaBound{x}\AgdaSpace{}%
 \AgdaBound{s}\AgdaSpace{}%
@@ -3370,3 +2926,17 @@ We need to define, for each $\gamma : \Delta \to \Gamma$, a substitution $\_[\ga
 \AgdaBound{γ}\AgdaSpace{}%
 \AgdaOperator{\AgdaFunction{]sp}}\AgdaSymbol{)}\<%
 \end{code}
+
+In the definition, the $lam$ case is trivial, which calls itself recursively with a lifted context substitution. The context substitution for a spine is just to call substitutions for each normal forms inside that spine.
+
+However, it is not trivial to define the context substitution for neutral terms. The reason is that there is no context substitution for variables:
+
+\[ \cancel{\_[\_]v : Var (\Gamma, A) \to Nfs(\Delta, \Gamma) \to Var (\Delta, A)} \]
+
+Instead, the best we can achieve is $subv$ as defined before, where the target is a normal form after context substitution:
+
+\[ subv : Var (\Gamma, A) \to Nfs(\Delta, \Gamma) \to Nf (\Delta, A) \]
+
+Therefore, for each occurrence of variable in the neutral term: we first convert it into a normal form by $subv$, then applied its spines (after context substitutions) by $\_\diamond\_$, and finally use the products $\Pi nf$and coproducts $\Sigma nf$of normal forms to glue them into a single normal form.
+
+A partial proof of this result has been formalized. \hyperref[SCwF]{\faCog}

@@ -10,6 +10,8 @@ agda:
 	agda --latex introduction.lagda.tex 
 	agda --latex research.lagda.tex
 	agda --latex outcomes.lagda.tex
+	agda --latex conclusions.lagda.tex
+	agda --latex future.lagda.tex
 	agda --latex appendix.lagda.tex
 
 clean:

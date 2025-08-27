@@ -150,7 +150,7 @@ Data transfer can be understood and processed in a similar way. That is to speci
 \>[0]\AgdaComment{\{-\ ...\ -\}}\<%
 \end{code}
 
-Containers provide a compositional way to define and manipulate data types, making their semantics explicit and supporting generic programming, categorical analysis, and proofs about programs. The unary containers, however, are not capable of capturing data types with higher kinds. For example, the type of the monad transformers\cite{liang1995monad} are not \texttt{(* → *)} but \texttt{((* → *) → * → *)}.
+Containers provide a compositional way to define and manipulate data types, making their semantics explicit and supporting generic programming, categorical analysis, and proofs about programs. The unary containers, however, are not capable of capturing data types with higher kinds. For example, the type of the monad transformers\cite{liang1995monad} are not $(Type \to Type)$ but $((Type \to Type) \to Type \to Type)$.
 
 \begin{code}%
 \>[0]\AgdaFunction{MaybeT}\AgdaSpace{}%
@@ -173,7 +173,7 @@ Containers provide a compositional way to define and manipulate data types, maki
 \AgdaBound{X}\AgdaSymbol{)}\<%
 \end{code}
 
-Despite the higher kinds, \AgdaDatatype{MaybeT} could still be viewed as type which is specified by shapes and positions of input parameters. Accordingly, our work aims to generalize the containers to a higher-order sense, to provide the semantics for arbitrary higher-order inductive types. More specifically, we wish to:
+Despite the higher kinds, $MaybeT$ could still be viewed as type which is specified by shapes and positions of input parameters. Accordingly, our work aims to generalize the containers to a higher-order sense, to provide the semantics for arbitrary higher-order inductive types. More specifically, we wish to:
 
 \begin{itemize}
   \item{define higher functorialities for higher data types}
@@ -361,4 +361,4 @@ To be more specific, h-level definitions and checks are omitted. In this case, w
 \>[2]\AgdaSymbol{\}}\<%
 \end{code}
 
-In the plain Agda definition, there would be no fields \AgdaField{isSetS} and \AgdaField{isSetP}. We simply use \AgdaPrimitive{Type} to represent types but not \AgdaPrimitive{Set} to avoid confusion. We also assume function extensionality and minimize the use of universe levels.
+In the plain Agda definition, there would be no fields \AgdaField{isSetS} and \AgdaField{isSetP}. Tto avoid confusion, the primitive Agda \AgdaPrimitive{Set} is renamed to \AgdaPrimitive{Type} to represent small types. Accordingly, bigger types are simply \AgdaPrimitive{Type₁}, \AgdaPrimitive{Type₂}, etc. We also assume function extensionality and minimize the use of universe levels.
